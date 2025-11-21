@@ -1,98 +1,113 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import React from 'react';
+import { StatusBar } from 'react-native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { MaterialIcons } from '../../components/icon';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+// Import screens
+import Welcome from '../presentation/screens/Auth/WelcomeScreen';
+import Login from '../presentation/screens/Auth/LoginScreen';
+import Register from '../presentation/screens/Auth/RegisterScreen';
+import Home from '../presentation/screens/Home/HomeScreen';
+import TransactionList from '../presentation/screens/Statistics/StatisticsScreen';
+import Report from '../presentation/screens/Report/ReportScreen';
+import Profile from '../presentation/screens/Profile/ProfileScreen';
+import GoalList from '../presentation/screens/Goals/SavingGoalsScreen';
+import GoalDetail from '../presentation/screens/Goals/GoalDetail';
+import AddGoal from '../presentation/screens/Goals/AddGoals';
+import AddTransaction from '../presentation/screens/Home/AddTransactionScreen';
+import AddCategory from '../presentation/screens/Report/AddCategory';
+import CategoryDetail from '../presentation/screens/Report/CategoryDetail';
+import UpdateProfile from '../presentation/screens/Profile/UpdateProfile';
+import NotificationScreen from '../presentation/screens/Notification/NotificationScreen';
 
-export default function HomeScreen() {
+// Dùng native stack
+const Stack = createNativeStackNavigator();
+const Tab = createBottomTabNavigator();
+
+function MainTabs() {
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+    <Tab.Navigator
+      screenOptions={({ route }) => ({
+        headerShown: false,
+        tabBarIcon: ({ color }) => {
+          let iconName: string = 'home';
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+          if (route.name === 'Home') iconName = 'home';
+          else if (route.name === 'Transactions') iconName = 'receipt-long';
+          else if (route.name === 'Report') iconName = 'bar-chart';
+          else if (route.name === 'Profile') iconName = 'person';
+
+          return <MaterialIcons name={iconName} size={28} color={color} />;
+        },
+        tabBarActiveTintColor: '#3c83f6',
+        tabBarInactiveTintColor: '#94a3b8',
+        tabBarStyle: {
+          height: 65,
+          paddingBottom: 10,
+          paddingTop: 10,
+          backgroundColor: '#ffffff',
+          borderTopWidth: 1,
+          borderTopColor: '#e2e8f0',
+        },
+        tabBarLabelStyle: {
+          fontSize: 12,
+          fontWeight: '500',
+          marginTop: -5,
+        },
+      })}
+    >
+      <Tab.Screen
+        name="Home"
+        component={Home}
+        options={{ title: 'Trang chủ' }}
+      />
+      <Tab.Screen
+        name="Transactions"
+        component={TransactionList}
+        options={{ title: 'Giao dịch' }}
+      />
+      <Tab.Screen
+        name="Report"
+        component={Report}
+        options={{ title: 'Báo cáo' }}
+      />
+      <Tab.Screen
+        name="Profile"
+        component={Profile}
+        options={{ title: 'Hồ sơ' }}
+      />
+    </Tab.Navigator>
   );
 }
 
-const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
-});
+export default function RootNavigator() {
+  return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaProvider>
+        <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
+        {/* KHÔNG dùng NavigationContainer ở đây nữa, expo-router đã bọc sẵn */}
+        <Stack.Navigator
+          screenOptions={{ headerShown: false }}
+          initialRouteName="Welcome"
+        >
+          <Stack.Screen name="Welcome" component={Welcome} />
+          <Stack.Screen name="Login" component={Login} />
+          <Stack.Screen name="Register" component={Register} />
+          <Stack.Screen name="App" component={MainTabs} />
+
+          <Stack.Screen name="GoalList" component={GoalList} />
+          <Stack.Screen name="GoalDetail" component={GoalDetail} />
+          <Stack.Screen name="AddGoal" component={AddGoal} />
+          <Stack.Screen name="AddTransaction" component={AddTransaction} />
+          <Stack.Screen name="AddCategory" component={AddCategory} />
+          <Stack.Screen name="CategoryDetail" component={CategoryDetail} />
+          <Stack.Screen name="UpdateProfile" component={UpdateProfile} />
+          <Stack.Screen name="Notifications" component={NotificationScreen} />
+        </Stack.Navigator>
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
+  );
+}
