@@ -2,69 +2,71 @@ import React from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialIcons } from '../../../../components/icon';
+import { useTheme } from '../../../context/ThemeContext';
 
 const AddGoal: React.FC = () => {
   const navigation = useNavigation();
+  const { theme } = useTheme();
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
+      <View style={[styles.header, { backgroundColor: theme.headerBackground, borderBottomColor: theme.border }]}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.iconButton}>
-          <MaterialIcons name="arrow-back" size={24} color="#111418" />
+          <MaterialIcons name="arrow-back" size={24} color={theme.textPrimary} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Tạo mục tiêu mới</Text>
+        <Text style={[styles.headerTitle, { color: theme.textPrimary }]}>Tạo mục tiêu mới</Text>
         <View style={{ width: 40 }} />
       </View>
 
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.form}>
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Tên mục tiêu</Text>
+            <Text style={[styles.label, { color: theme.textSecondary }]}>Tên mục tiêu</Text>
             <TextInput 
-              style={styles.input}
+              style={[styles.input, { backgroundColor: theme.cardBackground, borderColor: theme.border, color: theme.textPrimary }]}
               placeholder="Ví dụ: Mua xe máy"
-              placeholderTextColor="#9ca3af"
+              placeholderTextColor={theme.textSecondary}
             />
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Số tiền mục tiêu</Text>
-            <View style={styles.currencyInputWrapper}>
+            <Text style={[styles.label, { color: theme.textSecondary }]}>Số tiền mục tiêu</Text>
+            <View style={[styles.currencyInputWrapper, { backgroundColor: theme.cardBackground, borderColor: theme.border }]}>
               <TextInput 
-                style={styles.currencyInput}
+                style={[styles.currencyInput, { color: theme.textPrimary }]}
                 placeholder="Nhập số tiền"
-                placeholderTextColor="#9ca3af"
+                placeholderTextColor={theme.textSecondary}
                 keyboardType="numeric"
               />
-              <Text style={styles.currencySymbol}>₫</Text>
+              <Text style={[styles.currencySymbol, { color: theme.textSecondary }]}>₫</Text>
             </View>
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Số tiền đã có</Text>
-            <View style={styles.currencyInputWrapper}>
+            <Text style={[styles.label, { color: theme.textSecondary }]}>Số tiền đã có</Text>
+            <View style={[styles.currencyInputWrapper, { backgroundColor: theme.cardBackground, borderColor: theme.border }]}>
               <TextInput 
-                style={styles.currencyInput}
+                style={[styles.currencyInput, { color: theme.textPrimary }]}
                 placeholder="0"
-                placeholderTextColor="#9ca3af"
+                placeholderTextColor={theme.textSecondary}
                 keyboardType="numeric"
                 defaultValue="0"
               />
-              <Text style={styles.currencySymbol}>₫</Text>
+              <Text style={[styles.currencySymbol, { color: theme.textSecondary }]}>₫</Text>
             </View>
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Thời hạn</Text>
-            <TouchableOpacity style={styles.dateInputWrapper}>
-              <Text style={styles.datePlaceholder}>Chọn ngày</Text>
-              <MaterialIcons name="calendar-today" size={20} color="#9ca3af" />
+            <Text style={[styles.label, { color: theme.textSecondary }]}>Thời hạn</Text>
+            <TouchableOpacity style={[styles.dateInputWrapper, { backgroundColor: theme.cardBackground, borderColor: theme.border }]}>
+              <Text style={[styles.datePlaceholder, { color: theme.textSecondary }]}>Chọn ngày</Text>
+              <MaterialIcons name="calendar-today" size={20} color={theme.textSecondary} />
             </TouchableOpacity>
           </View>
         </View>
       </ScrollView>
 
-      <View style={styles.footer}>
+      <View style={[styles.footer, { backgroundColor: theme.cardBackground, borderTopColor: theme.border }]}>
         <TouchableOpacity style={styles.saveButton} onPress={() => navigation.goBack()}>
           <Text style={styles.saveButtonText}>Lưu mục tiêu</Text>
         </TouchableOpacity>

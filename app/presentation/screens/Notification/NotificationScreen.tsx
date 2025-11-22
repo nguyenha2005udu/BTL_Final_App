@@ -2,55 +2,57 @@ import React from 'react';
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialIcons } from '../../../../components/icon';
+import { useTheme } from '../../../context/ThemeContext';
 
 const NotificationsScreen: React.FC = () => {
   const navigation = useNavigation();
+  const { theme, isDarkMode } = useTheme();
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
+      <View style={[styles.header, { backgroundColor: theme.headerBackground, borderBottomColor: theme.border }]}>
         <View style={styles.headerTop}>
           <TouchableOpacity onPress={() => navigation.goBack()} style={styles.iconButton}>
-            <MaterialIcons name="arrow-back" size={24} color="#111418" />
+            <MaterialIcons name="arrow-back" size={24} color={theme.textPrimary} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Thông báo</Text>
+          <Text style={[styles.headerTitle, { color: theme.textPrimary }]}>Thông báo</Text>
           <TouchableOpacity style={styles.iconButton}>
-            <MaterialIcons name="mark-chat-read" size={24} color="#111418" />
+            <MaterialIcons name="mark-chat-read" size={24} color={theme.textPrimary} />
           </TouchableOpacity>
         </View>
         <View style={styles.filterRow}>
           <TouchableOpacity style={[styles.filterButton, styles.filterButtonActive]}>
             <Text style={styles.filterTextActive}>Tất cả</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.filterButton}>
-            <Text style={styles.filterText}>Chưa đọc</Text>
+          <TouchableOpacity style={[styles.filterButton, { backgroundColor: theme.cardBackground, borderColor: theme.border }]}>
+            <Text style={[styles.filterText, { color: theme.textSecondary }]}>Chưa đọc</Text>
           </TouchableOpacity>
         </View>
       </View>
 
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Hôm nay</Text>
+          <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>Hôm nay</Text>
           <View style={styles.cardList}>
-            <View style={[styles.notificationCard, styles.unreadCard]}>
-              <View style={[styles.iconBox, { backgroundColor: '#FEE2E2' }]}>
+            <View style={[styles.notificationCard, { backgroundColor: isDarkMode ? '#1e3a5f' : '#eff6ff' }]}>
+              <View style={[styles.iconBox, { backgroundColor: isDarkMode ? '#4a1d1d' : '#FEE2E2' }]}>
                 <MaterialIcons name="payments" size={24} color="#EF4444" />
               </View>
               <View style={styles.notifContent}>
-                <Text style={styles.notifTitle}>Giao dịch mới</Text>
-                <Text style={styles.notifBody}>Bạn đã chi tiêu 250.000₫ cho ăn uống.</Text>
+                <Text style={[styles.notifTitle, { color: theme.textPrimary }]}>Giao dịch mới</Text>
+                <Text style={[styles.notifBody, { color: theme.textSecondary }]}>Bạn đã chi tiêu 250.000₫ cho ăn uống.</Text>
                 <Text style={styles.notifTime}>5 phút trước</Text>
               </View>
               <View style={styles.dot} />
             </View>
             
-            <View style={[styles.notificationCard, styles.unreadCard]}>
-              <View style={[styles.iconBox, { backgroundColor: '#DCFCE7' }]}>
+            <View style={[styles.notificationCard, { backgroundColor: isDarkMode ? '#1e3a5f' : '#eff6ff' }]}>
+              <View style={[styles.iconBox, { backgroundColor: isDarkMode ? '#1e3d2e' : '#DCFCE7' }]}>
                 <MaterialIcons name="emoji-events" size={24} color="#22C55E" />
               </View>
               <View style={styles.notifContent}>
-                <Text style={styles.notifTitle}>Mục tiêu hoàn thành</Text>
-                <Text style={styles.notifBody}>Bạn đã đạt được mục tiêu Mua laptop mới!</Text>
+                <Text style={[styles.notifTitle, { color: theme.textPrimary }]}>Mục tiêu hoàn thành</Text>
+                <Text style={[styles.notifBody, { color: theme.textSecondary }]}>Bạn đã đạt được mục tiêu Mua laptop mới!</Text>
                 <Text style={styles.notifTime}>1 giờ trước</Text>
               </View>
               <View style={styles.dot} />
@@ -59,27 +61,27 @@ const NotificationsScreen: React.FC = () => {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Tuần trước</Text>
+          <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>Tuần trước</Text>
           <View style={styles.cardList}>
-            <View style={styles.notificationCard}>
-              <View style={[styles.iconBox, { backgroundColor: '#DBEAFE' }]}>
+            <View style={[styles.notificationCard, { backgroundColor: theme.cardBackground }]}>
+              <View style={[styles.iconBox, { backgroundColor: isDarkMode ? '#1e3a5f' : '#DBEAFE' }]}>
                 <MaterialIcons name="notifications-active" size={24} color="#3c83f6" />
               </View>
               <View style={styles.notifContent}>
-                <Text style={styles.notifTitle}>Nhắc nhở ngân sách</Text>
-                <Text style={styles.notifBody}>Bạn sắp đạt đến giới hạn ngân sách Ăn uống.</Text>
-                <Text style={[styles.notifTime, { color: '#6b7280' }]}>2 ngày trước</Text>
+                <Text style={[styles.notifTitle, { color: theme.textPrimary }]}>Nhắc nhở ngân sách</Text>
+                <Text style={[styles.notifBody, { color: theme.textSecondary }]}>Bạn sắp đạt đến giới hạn ngân sách Ăn uống.</Text>
+                <Text style={[styles.notifTime, { color: theme.textSecondary }]}>2 ngày trước</Text>
               </View>
             </View>
 
-            <View style={styles.notificationCard}>
-              <View style={[styles.iconBox, { backgroundColor: '#DCFCE7' }]}>
+            <View style={[styles.notificationCard, { backgroundColor: theme.cardBackground }]}>
+              <View style={[styles.iconBox, { backgroundColor: isDarkMode ? '#1e3d2e' : '#DCFCE7' }]}>
                 <MaterialIcons name="savings" size={24} color="#22C55E" />
               </View>
               <View style={styles.notifContent}>
-                <Text style={styles.notifTitle}>Thêm vào mục tiêu</Text>
-                <Text style={styles.notifBody}>Bạn đã thêm 2.000.000₫ vào mục tiêu Du lịch Nhật Bản.</Text>
-                <Text style={[styles.notifTime, { color: '#6b7280' }]}>5 ngày trước</Text>
+                <Text style={[styles.notifTitle, { color: theme.textPrimary }]}>Thêm vào mục tiêu</Text>
+                <Text style={[styles.notifBody, { color: theme.textSecondary }]}>Bạn đã thêm 2.000.000₫ vào mục tiêu Du lịch Nhật Bản.</Text>
+                <Text style={[styles.notifTime, { color: theme.textSecondary }]}>5 ngày trước</Text>
               </View>
             </View>
           </View>
