@@ -1,4 +1,3 @@
-// LoginScreen.styles.ts
 import { StyleSheet } from 'react-native';
 
 const PRIMARY = '#2563EB';
@@ -6,7 +5,7 @@ const PRIMARY = '#2563EB';
 export const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#F3F4F6', // bg-background-light
+    backgroundColor: '#F3F4F6',
   },
   container: {
     flex: 1,
@@ -50,6 +49,7 @@ export const styles = StyleSheet.create({
     marginTop: 8,
     color: '#6B7280',
   },
+
   field: {
     marginBottom: 16,
   },
@@ -59,31 +59,38 @@ export const styles = StyleSheet.create({
     fontWeight: '500',
     color: '#374151',
   },
+
+  // 🔧 SỬA Ở ĐÂY
   inputWrapper: {
     position: 'relative',
     justifyContent: 'center',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#D1D5DB',
+    backgroundColor: '#FFFFFF',
   },
+
   inputIcon: {
     position: 'absolute',
     left: 12,
     top: 12,
   },
+
+  // 🔧 BỎ border + background khỏi input
   input: {
     paddingLeft: 40,
     paddingRight: 40,
     paddingVertical: 12,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#D1D5DB',
-    backgroundColor: '#FFFFFF',
     fontSize: 16,
     color: '#111827',
   },
+
   passwordToggle: {
     position: 'absolute',
     right: 12,
     top: 10,
   },
+
   forgotButton: {
     alignSelf: 'flex-end',
     marginBottom: 8,
