@@ -1,187 +1,224 @@
-import React from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+// app/presentation/Auth/RegisterScreen.tsx
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  ScrollView,
+  ActivityIndicator,
+  Alert,
+} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { MaterialIcons } from '../../../../components/icon';
+import { MaterialIcons } from '@expo/vector-icons';
+import styles from './Register.styles';
+
+// 👉 chỉnh path cho đúng với cây thư mục của bạn
+import { registerWithEmail } from '../../../services/auth.service';
 
 const Register: React.FC = () => {
   const navigation = useNavigation<any>();
 
+  const [fullName, setFullName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [passwordVisible, setPasswordVisible] = useState(false);
+  const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const handleRegister = async () => {
+    if (!fullName || !email || !password || !confirmPassword) {
+      Alert.alert('Lỗi', 'Vui lòng điền đầy đủ thông tin');
+      return;
+    }
+
+    if (password.length < 8) {
+      Alert.alert('Lỗi', 'Mật khẩu phải có ít nhất 8 ký tự');
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      Alert.alert('Lỗi', 'Mật khẩu xác nhận không khớp');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const user = await registerWithEmail({
+        fullName,
+        email: email.trim(),
+        password,
+      });
+
+      console.log('Registered user: ', user.uid);
+
+      Alert.alert(
+        'Đăng ký thành công',
+        'Chúng tôi đã gửi email xác nhận. Vui lòng kiểm tra hộp thư và xác thực tài khoản trước khi đăng nhập.',
+      );
+
+      navigation.goBack(); // quay về màn Login
+    } catch (error: any) {
+      console.log(error);
+      Alert.alert('Đăng ký thất bại', error?.message || 'Có lỗi xảy ra');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <View style={styles.container}>
+      {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={styles.backButton}
+        >
           <MaterialIcons name="arrow-back" size={24} color="#1f2937" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Đăng ký</Text>
         <View style={{ width: 40 }} />
       </View>
 
+      {/* Content */}
       <ScrollView contentContainerStyle={styles.content}>
         <Text style={styles.title}>Tạo tài khoản mới</Text>
-        <Text style={styles.subtitle}>Vui lòng nhập thông tin của bạn để đăng ký.</Text>
+        <Text style={styles.subtitle}>
+          Vui lòng nhập thông tin của bạn để đăng ký.
+        </Text>
 
+        {/* Form */}
         <View style={styles.form}>
-          <View style={styles.inputGroup}>
+          {/* Họ và Tên */}
+          <View style={styles.field}>
             <Text style={styles.label}>Họ và Tên</Text>
-            <TextInput 
-              style={styles.input}
-              placeholder="Nhập họ và tên của bạn"
-              placeholderTextColor="#9ca3af"
-            />
+            <View style={styles.inputWrapper}>
+              <TextInput
+                style={styles.input}
+                placeholder="Nhập họ và tên của bạn"
+                placeholderTextColor="#9CA3AF"
+                value={fullName}
+                onChangeText={setFullName}
+              />
+            </View>
           </View>
 
-          <View style={styles.inputGroup}>
+          {/* Email */}
+          <View style={styles.field}>
             <Text style={styles.label}>Email</Text>
             <View style={styles.inputWrapper}>
-              <TextInput 
+              <MaterialIcons
+                name="mail-outline"
+                size={20}
+                color="#9CA3AF"
+                style={styles.inputIcon}
+              />
+              <TextInput
                 style={styles.input}
                 placeholder="Nhập địa chỉ email"
-                placeholderTextColor="#9ca3af"
+                placeholderTextColor="#9CA3AF"
                 keyboardType="email-address"
+                autoCapitalize="none"
+                value={email}
+                onChangeText={setEmail}
               />
-              <MaterialIcons name="mail" size={20} color="#9ca3af" />
             </View>
           </View>
 
-          <View style={styles.inputGroup}>
+          {/* Mật khẩu */}
+          <View style={styles.field}>
             <Text style={styles.label}>Mật khẩu</Text>
             <View style={styles.inputWrapper}>
-              <TextInput 
+              <MaterialIcons
+                name="lock-outline"
+                size={20}
+                color="#9CA3AF"
+                style={styles.inputIcon}
+              />
+              <TextInput
                 style={styles.input}
                 placeholder="Nhập mật khẩu"
-                placeholderTextColor="#9ca3af"
-                secureTextEntry
+                placeholderTextColor="#9CA3AF"
+                secureTextEntry={!passwordVisible}
+                value={password}
+                onChangeText={setPassword}
               />
-              <TouchableOpacity>
-                <MaterialIcons name="visibility-off" size={20} color="#9ca3af" />
+              <TouchableOpacity
+                style={styles.passwordToggle}
+                onPress={() => setPasswordVisible(prev => !prev)}
+                activeOpacity={0.7}
+              >
+                <MaterialIcons
+                  name={passwordVisible ? 'visibility' : 'visibility-off'}
+                  size={20}
+                  color="#6B7280"
+                />
               </TouchableOpacity>
             </View>
-            <Text style={styles.helperText}>Mật khẩu phải có ít nhất 8 ký tự</Text>
+            <Text style={styles.helperText}>
+              Mật khẩu phải có ít nhất 8 ký tự
+            </Text>
           </View>
 
-          <View style={styles.inputGroup}>
+          {/* Xác nhận mật khẩu */}
+          <View style={styles.field}>
             <Text style={styles.label}>Xác nhận Mật khẩu</Text>
             <View style={styles.inputWrapper}>
-              <TextInput 
+              <MaterialIcons
+                name="lock-outline"
+                size={20}
+                color="#9CA3AF"
+                style={styles.inputIcon}
+              />
+              <TextInput
                 style={styles.input}
                 placeholder="Nhập lại mật khẩu"
-                placeholderTextColor="#9ca3af"
-                secureTextEntry
+                placeholderTextColor="#9CA3AF"
+                secureTextEntry={!confirmPasswordVisible}
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
               />
+              <TouchableOpacity
+                style={styles.passwordToggle}
+                onPress={() => setConfirmPasswordVisible(prev => !prev)}
+                activeOpacity={0.7}
+              >
+                <MaterialIcons
+                  name={confirmPasswordVisible ? 'visibility' : 'visibility-off'}
+                  size={20}
+                  color="#6B7280"
+                />
+              </TouchableOpacity>
             </View>
           </View>
         </View>
       </ScrollView>
 
+      {/* Footer */}
       <View style={styles.footer}>
         <Text style={styles.termsText}>
-          Bằng cách đăng ký, bạn đồng ý với <Text style={styles.linkText}>Điều khoản & Chính sách bảo mật</Text>.
+          Bằng cách đăng ký, bạn đồng ý với{' '}
+          <Text style={styles.linkText}>
+            Điều khoản &amp; Chính sách bảo mật
+          </Text>
+          .
         </Text>
-        <TouchableOpacity style={styles.submitButton} onPress={() => navigation.navigate('App')}>
-          <Text style={styles.submitButtonText}>Đăng ký</Text>
+
+        <TouchableOpacity
+          style={styles.submitButton}
+          onPress={handleRegister}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.submitButtonText}>Đăng ký</Text>
+          )}
         </TouchableOpacity>
       </View>
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f7f8',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: 16,
-  },
-  backButton: {
-    width: 40,
-    height: 40,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 20,
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#1f2937',
-  },
-  content: {
-    padding: 24,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#1f2937',
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#6b7280',
-    marginBottom: 24,
-  },
-  form: {
-    gap: 20,
-  },
-  inputGroup: {
-    gap: 8,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#1f2937',
-  },
-  input: {
-    backgroundColor: 'white',
-    borderWidth: 1,
-    borderColor: '#d1d5db',
-    borderRadius: 8,
-    height: 56,
-    paddingHorizontal: 16,
-    fontSize: 16,
-    color: '#1f2937',
-  },
-  inputWrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'white',
-    borderWidth: 1,
-    borderColor: '#d1d5db',
-    borderRadius: 8,
-    height: 56,
-    paddingHorizontal: 16,
-  },
-  helperText: {
-    fontSize: 12,
-    color: '#6b7280',
-  },
-  footer: {
-    padding: 24,
-    gap: 16,
-  },
-  termsText: {
-    fontSize: 12,
-    color: '#6b7280',
-    textAlign: 'center',
-  },
-  linkText: {
-    fontWeight: '600',
-    color: '#3c83f6',
-  },
-  submitButton: {
-    backgroundColor: '#3c83f6',
-    height: 56,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  submitButtonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-});
 
 export default Register;
