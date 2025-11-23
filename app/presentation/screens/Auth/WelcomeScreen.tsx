@@ -1,21 +1,21 @@
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React from 'react';
 import {
-  View,
-  Text,
   Image,
   Pressable,
   SafeAreaView,
   ScrollView,
+  Text,
+  View,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import styles from './WelcomeScreen.styles';
 
 // Tùy project của bạn, khai báo cho khớp với RootStack
 type RootStackParamList = {
   Welcome: undefined;
   Login: undefined;
-  MainApp: undefined;
+  App: undefined;
 };
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -28,7 +28,7 @@ const WelcomeScreen: React.FC = () => {
   };
 
   const handleContinueWithoutLogin = () => {
-    navigation.navigate('MainApp');
+    navigation.navigate('App');
   };
 
   const handleLoginWithGoogle = () => {
