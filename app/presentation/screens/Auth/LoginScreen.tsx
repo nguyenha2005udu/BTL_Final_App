@@ -1,4 +1,4 @@
-// LoginScreen.tsx
+// app/presentation/Auth/LoginScreen.tsx
 import React, { useState } from 'react';
 import {
   SafeAreaView,
@@ -8,21 +8,68 @@ import {
   TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
+  ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { styles } from './LoginScreen.styles';
+
+// 👉 đường dẫn này tuỳ theo cấu trúc của bạn, với screenshot trước thì:
+import { loginWithEmail } from '../../../services/auth.service';
 
 const LoginScreen: React.FC = () => {
   const navigation = useNavigation<any>();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [passwordVisible, setPasswordVisible] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = () => {
-    // TODO: Validate / gọi API đăng nhập
-    navigation.navigate('App'); // Đổi "App" thành tên screen sau đăng nhập của bạn
+  const handleSubmit = async () => {
+    if (!email || !password) {
+      Alert.alert('Lỗi', 'Vui lòng nhập email và mật khẩu');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const user = await loginWithEmail(email.trim(), password);
+      console.log('Logged in user: ', user.uid);
+
+      if (!user.emailVerified) {
+        Alert.alert(
+          'Chưa xác thực email',
+          'Email của bạn chưa được xác thực. Vui lòng kiểm tra hộp thư (kể cả Spam/Quảng cáo) và bấm vào link xác nhận trước khi đăng nhập.'
+        );
+        return;
+      }
+
+      navigation.navigate('App');
+    } catch (error: any) {
+      console.log(error);
+
+      let message = 'Đăng nhập thất bại. Vui lòng thử lại.';
+      const code = error?.code;
+
+      if (
+        code === 'auth/invalid-credential' ||
+        code === 'auth/wrong-password' ||
+        code === 'auth/user-not-found'
+      ) {
+        message = 'Email hoặc mật khẩu không chính xác.';
+      } else if (code === 'auth/invalid-email') {
+        message = 'Định dạng email không hợp lệ.';
+      } else if (code === 'auth/too-many-requests') {
+        message =
+          'Bạn đã thử đăng nhập quá nhiều lần. Vui lòng thử lại sau ít phút hoặc đặt lại mật khẩu.';
+      }
+
+      Alert.alert('Đăng nhập thất bại', message);
+    } finally {
+      setLoading(false);
+    }
   };
+
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -40,7 +87,6 @@ const LoginScreen: React.FC = () => {
             <MaterialIcons name="arrow-back" size={24} color="#111827" />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Đăng nhập</Text>
-          {/* Dummy view để giữ tiêu đề ở giữa */}
           <View style={{ width: 40 }} />
         </View>
 
@@ -113,20 +159,24 @@ const LoginScreen: React.FC = () => {
             <TouchableOpacity
               style={styles.forgotButton}
               activeOpacity={0.7}
-              onPress={() => {
-                // navigation.navigate('ForgotPassword');
-              }}
+              onPress={() => navigation.navigate('ForgotPassword')}
             >
               <Text style={styles.forgotText}>Quên mật khẩu?</Text>
             </TouchableOpacity>
+
 
             {/* Đăng nhập */}
             <TouchableOpacity
               style={styles.submitButton}
               activeOpacity={0.8}
               onPress={handleSubmit}
+              disabled={loading}
             >
-              <Text style={styles.submitText}>Đăng nhập</Text>
+              {loading ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text style={styles.submitText}>Đăng nhập</Text>
+              )}
             </TouchableOpacity>
           </View>
         </View>
