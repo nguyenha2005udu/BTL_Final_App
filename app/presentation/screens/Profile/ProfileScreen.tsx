@@ -1,21 +1,17 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { View, Text, TouchableOpacity, Image, ScrollView, Switch, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialIcons } from '../../../../components/icon';
+import { useTheme } from '../../../context/ThemeContext'; // Import hook
 
 const ProfileScreen: React.FC = () => {
   const navigation = useNavigation<any>();
-  const [isDarkMode, setIsDarkMode] = useState(false);
-
-  const toggleDarkMode = () => {
-    setIsDarkMode(!isDarkMode);
-    // Actual theme switching logic would go here
-  };
+  const { isDarkMode, theme, toggleDarkMode } = useTheme(); // Sử dụng theme từ context
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Hồ sơ</Text>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
+      <View style={[styles.header, { backgroundColor: theme.headerBackground, borderBottomColor: theme.border }]}>
+        <Text style={[styles.headerTitle, { color: theme.textPrimary }]}>Hồ sơ</Text>
       </View>
 
       <ScrollView contentContainerStyle={styles.content}>
@@ -26,23 +22,25 @@ const ProfileScreen: React.FC = () => {
             style={styles.avatar}
           />
           <View style={styles.profileInfo}>
-            <Text style={styles.profileName}>Nguyễn Thị A</Text>
-            <Text style={styles.profileEmail}>nguyenthi.a@email.com</Text>
+            <Text style={[styles.profileName, { color: theme.textPrimary }]}>Nguyễn Thị A</Text>
+            <Text style={[styles.profileEmail, { color: theme.textSecondary }]}>nguyenthi.a@email.com</Text>
           </View>
         </View>
 
         {/* Appearance Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Giao diện</Text>
-          <View style={styles.card}>
+          <Text style={[styles.sectionTitle, { color: theme.textSecondary }]}>Giao diện</Text>
+          <View style={[styles.card, { backgroundColor: theme.cardBackground }]}>
             <View style={styles.rowItem}>
               <View style={styles.rowLeft}>
-                <View style={[styles.iconBox, { backgroundColor: '#f3f4f6' }]}>
-                  <MaterialIcons name="dark-mode" size={24} color="#4b5563" />
+                <View style={[styles.iconBox, { backgroundColor: theme.iconBoxBg }]}>
+                  <MaterialIcons name="dark-mode" size={24} color={isDarkMode ? '#fbbf24' : '#4b5563'} />
                 </View>
                 <View>
-                  <Text style={styles.rowTitle}>Màn tối</Text>
-                  <Text style={styles.rowSubtitle}>Đổi sang màn tối</Text>
+                  <Text style={[styles.rowTitle, { color: theme.textPrimary }]}>Chế độ tối</Text>
+                  <Text style={[styles.rowSubtitle, { color: theme.textSecondary }]}>
+                    {isDarkMode ? 'Đang bật' : 'Đang tắt'}
+                  </Text>
                 </View>
               </View>
               <Switch 
@@ -57,95 +55,91 @@ const ProfileScreen: React.FC = () => {
 
         {/* Account Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Tài khoản</Text>
-          <View style={styles.card}>
-            <TouchableOpacity 
-              style={styles.rowItem} 
-              onPress={() => navigation.navigate('UpdateProfile')}
-            >
+          <Text style={[styles.sectionTitle, { color: theme.textSecondary }]}>Tài khoản</Text>
+          <View style={[styles.card, { backgroundColor: theme.cardBackground }]}>
+            <TouchableOpacity style={styles.rowItem} onPress={() => navigation.navigate('UpdateProfile')}>
               <View style={styles.rowLeft}>
-                <View style={[styles.iconBox, { backgroundColor: '#E8F0FE' }]}>
+                <View style={[styles.iconBox, { backgroundColor: isDarkMode ? '#1e3a5f' : '#E8F0FE' }]}>
                   <MaterialIcons name="person" size={24} color="#1A73E8" />
                 </View>
-                <Text style={styles.rowTitle}>Cập nhật thông tin cá nhân</Text>
+                <Text style={[styles.rowTitle, { color: theme.textPrimary }]}>Cập nhật thông tin cá nhân</Text>
               </View>
-              <MaterialIcons name="chevron-right" size={24} color="#9ca3af" />
+              <MaterialIcons name="chevron-right" size={24} color={theme.textSecondary} />
             </TouchableOpacity>
             
-            <View style={styles.divider} />
+            <View style={[styles.divider, { backgroundColor: theme.divider }]} />
             
             <TouchableOpacity style={styles.rowItem}>
               <View style={styles.rowLeft}>
-                <View style={[styles.iconBox, { backgroundColor: '#E6F4EA' }]}>
+                <View style={[styles.iconBox, { backgroundColor: isDarkMode ? '#1e3d2e' : '#E6F4EA' }]}>
                   <MaterialIcons name="lock" size={24} color="#1E8E3E" />
                 </View>
-                <Text style={styles.rowTitle}>Đổi mật khẩu</Text>
+                <Text style={[styles.rowTitle, { color: theme.textPrimary }]}>Đổi mật khẩu</Text>
               </View>
-              <MaterialIcons name="chevron-right" size={24} color="#9ca3af" />
+              <MaterialIcons name="chevron-right" size={24} color={theme.textSecondary} />
             </TouchableOpacity>
 
-            <View style={styles.divider} />
+            <View style={[styles.divider, { backgroundColor: theme.divider }]} />
 
             <TouchableOpacity style={styles.rowItem}>
               <View style={styles.rowLeft}>
-                <View style={[styles.iconBox, { backgroundColor: '#FCE8E6' }]}>
+                <View style={[styles.iconBox, { backgroundColor: isDarkMode ? '#4a1d1d' : '#FCE8E6' }]}>
                   <MaterialIcons name="security" size={24} color="#D93025" />
                 </View>
-                <Text style={styles.rowTitle}>Bảo mật và chính sách</Text>
+                <Text style={[styles.rowTitle, { color: theme.textPrimary }]}>Bảo mật và chính sách</Text>
               </View>
-              <MaterialIcons name="chevron-right" size={24} color="#9ca3af" />
+              <MaterialIcons name="chevron-right" size={24} color={theme.textSecondary} />
             </TouchableOpacity>
           </View>
         </View>
 
         {/* Support Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Hỗ trợ</Text>
-          <View style={styles.card}>
+          <Text style={[styles.sectionTitle, { color: theme.textSecondary }]}>Hỗ trợ</Text>
+          <View style={[styles.card, { backgroundColor: theme.cardBackground }]}>
             <TouchableOpacity style={styles.rowItem}>
               <View style={styles.rowLeft}>
-                <View style={[styles.iconBox, { backgroundColor: '#E8F0FE' }]}>
+                <View style={[styles.iconBox, { backgroundColor: isDarkMode ? '#1e3a5f' : '#E8F0FE' }]}>
                   <MaterialIcons name="help-outline" size={24} color="#1A73E8" />
                 </View>
-                <Text style={styles.rowTitle}>Trung tâm trợ giúp</Text>
+                <Text style={[styles.rowTitle, { color: theme.textPrimary }]}>Trung tâm trợ giúp</Text>
               </View>
-              <MaterialIcons name="chevron-right" size={24} color="#9ca3af" />
+              <MaterialIcons name="chevron-right" size={24} color={theme.textSecondary} />
             </TouchableOpacity>
             
-            <View style={styles.divider} />
+            <View style={[styles.divider, { backgroundColor: theme.divider }]} />
             
             <TouchableOpacity style={styles.rowItem}>
               <View style={styles.rowLeft}>
-                <View style={[styles.iconBox, { backgroundColor: '#E0F7FA' }]}>
+                <View style={[styles.iconBox, { backgroundColor: isDarkMode ? '#0d3d3d' : '#E0F7FA' }]}>
                   <MaterialIcons name="headset-mic" size={24} color="#007B83" />
                 </View>
-                <Text style={styles.rowTitle}>Liên hệ để được hỗ trợ</Text>
+                <Text style={[styles.rowTitle, { color: theme.textPrimary }]}>Liên hệ để được hỗ trợ</Text>
               </View>
-              <MaterialIcons name="chevron-right" size={24} color="#9ca3af" />
+              <MaterialIcons name="chevron-right" size={24} color={theme.textSecondary} />
             </TouchableOpacity>
 
-            <View style={styles.divider} />
+            <View style={[styles.divider, { backgroundColor: theme.divider }]} />
 
             <TouchableOpacity style={styles.rowItem}>
               <View style={styles.rowLeft}>
-                <View style={[styles.iconBox, { backgroundColor: '#FEF7E0' }]}>
+                <View style={[styles.iconBox, { backgroundColor: isDarkMode ? '#4a3d1d' : '#FEF7E0' }]}>
                   <MaterialIcons name="star" size={24} color="#F9AB00" />
                 </View>
-                <Text style={styles.rowTitle}>Đánh giá ứng dụng</Text>
+                <Text style={[styles.rowTitle, { color: theme.textPrimary }]}>Đánh giá ứng dụng</Text>
               </View>
-              <MaterialIcons name="chevron-right" size={24} color="#9ca3af" />
+              <MaterialIcons name="chevron-right" size={24} color={theme.textSecondary} />
             </TouchableOpacity>
           </View>
         </View>
 
         <TouchableOpacity 
-          style={styles.logoutButton}
+          style={[styles.logoutButton, { backgroundColor: isDarkMode ? '#4a1d1d' : '#FEF2F2' }]}
           onPress={() => navigation.navigate('Welcome')}
         >
           <MaterialIcons name="logout" size={24} color="#EF4444" />
           <Text style={styles.logoutText}>Đăng xuất</Text>
         </TouchableOpacity>
-
       </ScrollView>
     </View>
   );

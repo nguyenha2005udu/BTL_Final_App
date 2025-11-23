@@ -3,9 +3,11 @@ import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet } from 
 import { useNavigation } from '@react-navigation/native';
 import { MaterialIcons } from '../../../../components/icon';
 import { MOCK_TRANSACTIONS } from '../../../../constants/constants';
+import { useTheme } from '../../../context/ThemeContext';
 
 const StatisticsScreen: React.FC = () => {
   const navigation = useNavigation<any>();
+  const { theme, isDarkMode } = useTheme();
   const [filter, setFilter] = useState<'7days' | '3days' | 'custom'>('custom');
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -14,32 +16,28 @@ const StatisticsScreen: React.FC = () => {
   const filteredTransactions = MOCK_TRANSACTIONS.filter((tx) => {
     const matchesSearch = tx.title.toLowerCase().includes(searchTerm.toLowerCase());
     if (!matchesSearch) return false;
-
     if (filter === 'custom') return true;
-
     const txDate = new Date(tx.date);
     const diffTime = Math.abs(MOCK_TODAY.getTime() - txDate.getTime());
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
     if (filter === '7days') return diffDays <= 7;
     if (filter === '3days') return diffDays <= 3;
-
     return true;
   });
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Giao dịch</Text>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
+      <View style={[styles.header, { backgroundColor: theme.headerBackground }]}>
+        <Text style={[styles.headerTitle, { color: theme.textPrimary }]}>Giao dịch</Text>
       </View>
 
       <View style={styles.searchContainer}>
-        <View style={styles.searchBar}>
-          <MaterialIcons name="search" size={24} color="#9ca3af" style={styles.searchIcon} />
+        <View style={[styles.searchBar, { backgroundColor: theme.cardBackground, borderColor: theme.border }]}>
+          <MaterialIcons name="search" size={24} color={theme.textSecondary} style={styles.searchIcon} />
           <TextInput 
-            style={styles.searchInput}
+            style={[styles.searchInput, { color: theme.textPrimary }]}
             placeholder="Tìm theo mô tả..."
-            placeholderTextColor="#9ca3af"
+            placeholderTextColor={theme.textSecondary}
             value={searchTerm}
             onChangeText={setSearchTerm}
           />
@@ -49,36 +47,36 @@ const StatisticsScreen: React.FC = () => {
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterRow}>
         <TouchableOpacity
           onPress={() => setFilter('7days')}
-          style={[styles.filterChip, filter === '7days' && styles.filterChipActive]}
+          style={[styles.filterChip, { backgroundColor: isDarkMode ? '#374151' : '#e5e7eb' }, filter === '7days' && styles.filterChipActive]}
         >
-          <Text style={[styles.filterText, filter === '7days' && styles.filterTextActive]}>7 ngày gần nhất</Text>
+          <Text style={[styles.filterText, { color: theme.textPrimary }, filter === '7days' && styles.filterTextActive]}>7 ngày gần nhất</Text>
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => setFilter('3days')}
-          style={[styles.filterChip, filter === '3days' && styles.filterChipActive]}
+          style={[styles.filterChip, { backgroundColor: isDarkMode ? '#374151' : '#e5e7eb' }, filter === '3days' && styles.filterChipActive]}
         >
-          <Text style={[styles.filterText, filter === '3days' && styles.filterTextActive]}>3 ngày gần nhất</Text>
+          <Text style={[styles.filterText, { color: theme.textPrimary }, filter === '3days' && styles.filterTextActive]}>3 ngày gần nhất</Text>
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => setFilter('custom')}
-          style={[styles.filterChip, filter === 'custom' && styles.filterChipActive]}
+          style={[styles.filterChip, { backgroundColor: isDarkMode ? '#374151' : '#e5e7eb' }, filter === 'custom' && styles.filterChipActive]}
         >
-          <Text style={[styles.filterText, filter === 'custom' && styles.filterTextActive]}>Tùy chọn</Text>
+          <Text style={[styles.filterText, { color: theme.textPrimary }, filter === 'custom' && styles.filterTextActive]}>Tùy chọn</Text>
         </TouchableOpacity>
       </ScrollView>
 
       {filter === 'custom' && (
         <View style={styles.dateRange}>
           <View style={styles.dateInputGroup}>
-            <Text style={styles.dateLabel}>Từ ngày</Text>
-            <View style={styles.dateInput}>
-                <Text style={{color: '#111418'}}>dd/mm/yyyy</Text>
+            <Text style={[styles.dateLabel, { color: theme.textSecondary }]}>Từ ngày</Text>
+            <View style={[styles.dateInput, { backgroundColor: theme.cardBackground, borderColor: theme.border }]}>
+              <Text style={{ color: theme.textPrimary }}>dd/mm/yyyy</Text>
             </View>
           </View>
           <View style={styles.dateInputGroup}>
-            <Text style={styles.dateLabel}>Đến ngày</Text>
-            <View style={styles.dateInput}>
-                <Text style={{color: '#111418'}}>dd/mm/yyyy</Text>
+            <Text style={[styles.dateLabel, { color: theme.textSecondary }]}>Đến ngày</Text>
+            <View style={[styles.dateInput, { backgroundColor: theme.cardBackground, borderColor: theme.border }]}>
+              <Text style={{ color: theme.textPrimary }}>dd/mm/yyyy</Text>
             </View>
           </View>
         </View>
@@ -87,35 +85,39 @@ const StatisticsScreen: React.FC = () => {
       <ScrollView contentContainerStyle={styles.listContent}>
         {filteredTransactions.length > 0 ? (
           <>
-             <Text style={styles.listTitle}>Danh sách giao dịch</Text>
-             {filteredTransactions.map((tx) => (
-              <View key={tx.id} style={styles.transactionCard}>
+            <Text style={[styles.listTitle, { color: theme.textPrimary }]}>Danh sách giao dịch</Text>
+            {filteredTransactions.map((tx) => (
+              <View key={tx.id} style={[styles.transactionCard, { backgroundColor: theme.cardBackground }]}>
                 <View style={[styles.iconBox, { 
-                    backgroundColor: tx.type === 'income' ? 'rgba(34, 197, 94, 0.1)' : (tx.icon === 'coffee' ? '#f3f4f6' : 'rgba(60, 131, 246, 0.1)')
+                  backgroundColor: tx.type === 'income' 
+                    ? (isDarkMode ? 'rgba(34, 197, 94, 0.2)' : 'rgba(34, 197, 94, 0.1)') 
+                    : (tx.icon === 'coffee' 
+                      ? theme.iconBoxBg 
+                      : (isDarkMode ? 'rgba(60, 131, 246, 0.2)' : 'rgba(60, 131, 246, 0.1)'))
                 }]}>
                   <MaterialIcons 
                     name={tx.icon as any} 
                     size={24} 
-                    color={tx.type === 'income' ? '#22C55E' : (tx.icon === 'coffee' ? '#374151' : '#3c83f6')} 
+                    color={tx.type === 'income' ? '#22C55E' : (tx.icon === 'coffee' ? theme.textSecondary : '#3c83f6')} 
                   />
                 </View>
                 <View style={styles.txInfo}>
-                  <Text style={styles.txTitle}>{tx.title}</Text>
-                  <Text style={styles.txSubtitle}>{tx.subtitle}</Text>
+                  <Text style={[styles.txTitle, { color: theme.textPrimary }]}>{tx.title}</Text>
+                  <Text style={[styles.txSubtitle, { color: theme.textSecondary }]}>{tx.subtitle}</Text>
                 </View>
                 <View style={styles.txAmountContainer}>
                   <Text style={[styles.txAmount, { color: tx.type === 'income' ? '#22C55E' : '#EF4444' }]}>
                     {tx.type === 'income' ? '+' : ''}{tx.amount.toLocaleString()}₫
                   </Text>
-                  <Text style={styles.txType}>{tx.type === 'income' ? 'Thu' : 'Chi'}</Text>
+                  <Text style={[styles.txType, { color: theme.textSecondary }]}>{tx.type === 'income' ? 'Thu' : 'Chi'}</Text>
                 </View>
               </View>
             ))}
           </>
         ) : (
           <View style={styles.emptyState}>
-            <MaterialIcons name="receipt-long" size={48} color="#9ca3af" />
-            <Text style={styles.emptyText}>Không tìm thấy giao dịch nào</Text>
+            <MaterialIcons name="receipt-long" size={48} color={theme.textSecondary} />
+            <Text style={[styles.emptyText, { color: theme.textSecondary }]}>Không tìm thấy giao dịch nào</Text>
           </View>
         )}
       </ScrollView>

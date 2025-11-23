@@ -3,69 +3,71 @@ import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from 'react-nati
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { MaterialIcons } from '../../../../components/icon';
 import { MOCK_GOALS } from '../../../../constants/constants';
+import { useTheme } from '../../../context/ThemeContext';
 
 const GoalDetail: React.FC = () => {
   const navigation = useNavigation();
   const route = useRoute<any>();
+  const { theme, isDarkMode } = useTheme();
   const { id } = route.params || {};
   const goal = MOCK_GOALS.find(g => g.id === id) || MOCK_GOALS[0];
   const progress = Math.round((goal.savedAmount / goal.targetAmount) * 100);
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { backgroundColor: theme.background, borderBottomColor: theme.border }]}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.iconButton}>
-          <MaterialIcons name="arrow-back" size={24} color="#111418" />
+          <MaterialIcons name="arrow-back" size={24} color={theme.textPrimary} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>{goal.title}</Text>
+        <Text style={[styles.headerTitle, { color: theme.textPrimary }]}>{goal.title}</Text>
         <TouchableOpacity style={styles.iconButton}>
-          <MaterialIcons name="more-vert" size={24} color="#111418" />
+          <MaterialIcons name="more-vert" size={24} color={theme.textPrimary} />
         </TouchableOpacity>
       </View>
 
       <ScrollView contentContainerStyle={styles.content}>
         {/* Main Card */}
-        <View style={styles.card}>
-          <Text style={styles.goalTitleLarge}>{goal.title}</Text>
+        <View style={[styles.card, { backgroundColor: theme.cardBackground }]}>
+          <Text style={[styles.goalTitleLarge, { color: theme.textPrimary }]}>{goal.title}</Text>
           <View style={styles.amountRow}>
             <Text style={styles.savedAmountLarge}>{goal.savedAmount.toLocaleString()}₫</Text>
-            <Text style={styles.targetAmountLarge}> / {goal.targetAmount.toLocaleString()}₫</Text>
+            <Text style={[styles.targetAmountLarge, { color: theme.textSecondary }]}> / {goal.targetAmount.toLocaleString()}₫</Text>
           </View>
           
           <View style={styles.progressContainer}>
             <View style={styles.progressHeader}>
-              <Text style={styles.progressLabel}>Đã hoàn thành</Text>
-              <Text style={styles.progressValue}>{progress}%</Text>
+              <Text style={[styles.progressLabel, { color: theme.textSecondary }]}>Đã hoàn thành</Text>
+              <Text style={[styles.progressValue, { color: theme.textPrimary }]}>{progress}%</Text>
             </View>
-            <View style={styles.progressBarBg}>
+            <View style={[styles.progressBarBg, { backgroundColor: theme.divider }]}>
               <View style={[styles.progressBarFill, { width: `${progress}%` }]} />
             </View>
           </View>
 
           <View style={styles.metaRow}>
-            <View style={styles.statusChip}>
-              <Text style={styles.statusChipText}>Đang thực hiện</Text>
+            <View style={[styles.statusChip, { backgroundColor: isDarkMode ? '#1e3d2e' : '#dcfce7' }]}>
+              <Text style={[styles.statusChipText, { color: isDarkMode ? '#4ade80' : '#166534' }]}>Đang thực hiện</Text>
             </View>
             <View style={styles.deadlineInfo}>
-              <MaterialIcons name="calendar-today" size={16} color="#6b7280" />
-              <Text style={styles.deadlineText}>Hoàn thành trước: {goal.deadline || 'N/A'}</Text>
+              <MaterialIcons name="calendar-today" size={16} color={theme.textSecondary} />
+              <Text style={[styles.deadlineText, { color: theme.textSecondary }]}>Hoàn thành trước: {goal.deadline || 'N/A'}</Text>
             </View>
           </View>
         </View>
 
         {/* History Card */}
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Lịch sử nạp/rút</Text>
+        <View style={[styles.card, { backgroundColor: theme.cardBackground }]}>
+          <Text style={[styles.cardTitle, { color: theme.textPrimary }]}>Lịch sử nạp/rút</Text>
           <View style={styles.historyList}>
             <View style={styles.historyItem}>
               <View style={styles.historyLeft}>
-                <View style={[styles.historyIcon, { backgroundColor: '#DCFCE7' }]}>
+                <View style={[styles.historyIcon, { backgroundColor: isDarkMode ? '#1e3d2e' : '#DCFCE7' }]}>
                   <MaterialIcons name="arrow-upward" size={20} color="#16A34A" />
                 </View>
                 <View>
-                  <Text style={styles.historyType}>Nạp tiền</Text>
-                  <Text style={styles.historyDate}>Hôm nay</Text>
+                  <Text style={[styles.historyType, { color: theme.textPrimary }]}>Nạp tiền</Text>
+                  <Text style={[styles.historyDate, { color: theme.textSecondary }]}>Hôm nay</Text>
                 </View>
               </View>
               <Text style={[styles.historyAmount, { color: '#16A34A' }]}>+1,000,000₫</Text>
@@ -73,25 +75,25 @@ const GoalDetail: React.FC = () => {
             
             <View style={styles.historyItem}>
               <View style={styles.historyLeft}>
-                <View style={[styles.historyIcon, { backgroundColor: '#DCFCE7' }]}>
+                <View style={[styles.historyIcon, { backgroundColor: isDarkMode ? '#1e3d2e' : '#DCFCE7' }]}>
                   <MaterialIcons name="arrow-upward" size={20} color="#16A34A" />
                 </View>
                 <View>
-                  <Text style={styles.historyType}>Nạp tiền</Text>
-                  <Text style={styles.historyDate}>15 Jun, 2024</Text>
+                  <Text style={[styles.historyType, { color: theme.textPrimary }]}>Nạp tiền</Text>
+                  <Text style={[styles.historyDate, { color: theme.textSecondary }]}>15 Jun, 2024</Text>
                 </View>
               </View>
               <Text style={[styles.historyAmount, { color: '#16A34A' }]}>+2,000,000₫</Text>
             </View>
 
-             <View style={styles.historyItem}>
+            <View style={styles.historyItem}>
               <View style={styles.historyLeft}>
-                <View style={[styles.historyIcon, { backgroundColor: '#FEE2E2' }]}>
+                <View style={[styles.historyIcon, { backgroundColor: isDarkMode ? '#4a1d1d' : '#FEE2E2' }]}>
                   <MaterialIcons name="arrow-downward" size={20} color="#DC2626" />
                 </View>
                 <View>
-                  <Text style={styles.historyType}>Rút tiền</Text>
-                  <Text style={styles.historyDate}>01 Jun, 2024</Text>
+                  <Text style={[styles.historyType, { color: theme.textPrimary }]}>Rút tiền</Text>
+                  <Text style={[styles.historyDate, { color: theme.textSecondary }]}>01 Jun, 2024</Text>
                 </View>
               </View>
               <Text style={[styles.historyAmount, { color: '#DC2626' }]}>-500,000₫</Text>
@@ -101,8 +103,8 @@ const GoalDetail: React.FC = () => {
       </ScrollView>
 
       {/* Bottom Actions */}
-      <View style={styles.bottomActions}>
-        <TouchableOpacity style={[styles.actionButton, styles.withdrawButton]}>
+      <View style={[styles.bottomActions, { backgroundColor: theme.cardBackground, borderTopColor: theme.border }]}>
+        <TouchableOpacity style={[styles.actionButton, styles.withdrawButton, { backgroundColor: isDarkMode ? '#1e3a5f' : 'rgba(60, 131, 246, 0.1)' }]}>
           <Text style={styles.withdrawText}>Rút tiền</Text>
         </TouchableOpacity>
         <TouchableOpacity style={[styles.actionButton, styles.depositButton]}>

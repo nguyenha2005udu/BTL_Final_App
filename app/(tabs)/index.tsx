@@ -7,6 +7,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 // Import screens
+import { ThemeProvider, useTheme } from '../context/ThemeContext';
 import Welcome from '../presentation/screens/Auth/WelcomeScreen';
 import Login from '../presentation/screens/Auth/LoginScreen';
 import Register from '../presentation/screens/Auth/RegisterScreen';
@@ -23,34 +24,34 @@ import CategoryDetail from '../presentation/screens/Report/CategoryDetail';
 import UpdateProfile from '../presentation/screens/Profile/UpdateProfile';
 import NotificationScreen from '../presentation/screens/Notification/NotificationScreen';
 
-// Dùng native stack
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
+// Tách MainTabs ra để có thể sử dụng useTheme
 function MainTabs() {
+  const { theme, isDarkMode } = useTheme();
+
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
         tabBarIcon: ({ color }) => {
           let iconName: string = 'home';
-
           if (route.name === 'Home') iconName = 'home';
           else if (route.name === 'Transactions') iconName = 'receipt-long';
           else if (route.name === 'Report') iconName = 'bar-chart';
           else if (route.name === 'Profile') iconName = 'person';
-
           return <MaterialIcons name={iconName} size={28} color={color} />;
         },
         tabBarActiveTintColor: '#3c83f6',
-        tabBarInactiveTintColor: '#94a3b8',
+        tabBarInactiveTintColor: theme.textSecondary,
         tabBarStyle: {
           height: 65,
           paddingBottom: 10,
           paddingTop: 10,
-          backgroundColor: '#ffffff',
+          backgroundColor: theme.cardBackground,
           borderTopWidth: 1,
-          borderTopColor: '#e2e8f0',
+          borderTopColor: theme.border,
         },
         tabBarLabelStyle: {
           fontSize: 12,
@@ -59,27 +60,46 @@ function MainTabs() {
         },
       })}
     >
-      <Tab.Screen
-        name="Home"
-        component={Home}
-        options={{ title: 'Trang chủ' }}
-      />
-      <Tab.Screen
-        name="Transactions"
-        component={TransactionList}
-        options={{ title: 'Giao dịch' }}
-      />
-      <Tab.Screen
-        name="Report"
-        component={Report}
-        options={{ title: 'Báo cáo' }}
-      />
-      <Tab.Screen
-        name="Profile"
-        component={Profile}
-        options={{ title: 'Hồ sơ' }}
-      />
+      <Tab.Screen name="Home" component={Home} options={{ title: 'Trang chủ' }} />
+      <Tab.Screen name="Transactions" component={TransactionList} options={{ title: 'Giao dịch' }} />
+      <Tab.Screen name="Report" component={Report} options={{ title: 'Báo cáo' }} />
+      <Tab.Screen name="Profile" component={Profile} options={{ title: 'Hồ sơ' }} />
     </Tab.Navigator>
+  );
+}
+
+// Component chứa Navigator với theme
+function AppNavigator() {
+  const { theme, isDarkMode } = useTheme();
+
+  return (
+    <>
+      <StatusBar 
+        barStyle={isDarkMode ? 'light-content' : 'dark-content'} 
+        backgroundColor={theme.background} 
+      />
+      <Stack.Navigator
+        screenOptions={{ 
+          headerShown: false,
+          contentStyle: { backgroundColor: theme.background },
+          animation: 'slide_from_right',
+        }}
+        initialRouteName="Welcome"
+      >
+        <Stack.Screen name="Welcome" component={Welcome} />
+        <Stack.Screen name="Login" component={Login} />
+        <Stack.Screen name="Register" component={Register} />
+        <Stack.Screen name="App" component={MainTabs} />
+        <Stack.Screen name="GoalList" component={GoalList} />
+        <Stack.Screen name="GoalDetail" component={GoalDetail} />
+        <Stack.Screen name="AddGoal" component={AddGoal} />
+        <Stack.Screen name="AddTransaction" component={AddTransaction} />
+        <Stack.Screen name="AddCategory" component={AddCategory} />
+        <Stack.Screen name="CategoryDetail" component={CategoryDetail} />
+        <Stack.Screen name="UpdateProfile" component={UpdateProfile} />
+        <Stack.Screen name="Notifications" component={NotificationScreen} />
+      </Stack.Navigator>
+    </>
   );
 }
 
@@ -87,26 +107,9 @@ export default function RootNavigator() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
-        <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
-        {/* KHÔNG dùng NavigationContainer ở đây nữa, expo-router đã bọc sẵn */}
-        <Stack.Navigator
-          screenOptions={{ headerShown: false }}
-          initialRouteName="Welcome"
-        >
-          <Stack.Screen name="Welcome" component={Welcome} />
-          <Stack.Screen name="Login" component={Login} />
-          <Stack.Screen name="Register" component={Register} />
-          <Stack.Screen name="App" component={MainTabs} />
-
-          <Stack.Screen name="GoalList" component={GoalList} />
-          <Stack.Screen name="GoalDetail" component={GoalDetail} />
-          <Stack.Screen name="AddGoal" component={AddGoal} />
-          <Stack.Screen name="AddTransaction" component={AddTransaction} />
-          <Stack.Screen name="AddCategory" component={AddCategory} />
-          <Stack.Screen name="CategoryDetail" component={CategoryDetail} />
-          <Stack.Screen name="UpdateProfile" component={UpdateProfile} />
-          <Stack.Screen name="Notifications" component={NotificationScreen} />
-        </Stack.Navigator>
+        <ThemeProvider>
+          <AppNavigator />
+        </ThemeProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );

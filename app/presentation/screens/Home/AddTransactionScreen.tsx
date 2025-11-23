@@ -2,76 +2,78 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialIcons } from '../../../../components/icon';
+import { useTheme } from '../../../context/ThemeContext';
 
 const AddTransactionScreen: React.FC = () => {
   const navigation = useNavigation();
+  const { theme, isDarkMode } = useTheme();
   const [type, setType] = useState<'expense' | 'income'>('expense');
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
+      <View style={[styles.header, { backgroundColor: theme.headerBackground, borderBottomColor: theme.border }]}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.iconButton}>
-          <MaterialIcons name="arrow-back" size={24} color="#111418" />
+          <MaterialIcons name="arrow-back" size={24} color={theme.textPrimary} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Thêm giao dịch</Text>
+        <Text style={[styles.headerTitle, { color: theme.textPrimary }]}>Thêm giao dịch</Text>
         <View style={{ width: 40 }} />
       </View>
 
       <ScrollView contentContainerStyle={styles.content}>
         {/* Type Toggle */}
-        <View style={styles.toggleContainer}>
+        <View style={[styles.toggleContainer, { backgroundColor: isDarkMode ? '#374151' : '#e5e7eb' }]}>
           <TouchableOpacity 
-            style={[styles.toggleButton, type === 'expense' && styles.toggleActive]}
+            style={[styles.toggleButton, type === 'expense' && [styles.toggleActive, { backgroundColor: theme.cardBackground }]]}
             onPress={() => setType('expense')}
           >
-            <Text style={[styles.toggleText, type === 'expense' && styles.toggleTextActive]}>Chi tiêu</Text>
+            <Text style={[styles.toggleText, { color: theme.textSecondary }, type === 'expense' && styles.toggleTextActive]}>Chi tiêu</Text>
           </TouchableOpacity>
           <TouchableOpacity 
-            style={[styles.toggleButton, type === 'income' && styles.toggleActive]}
+            style={[styles.toggleButton, type === 'income' && [styles.toggleActive, { backgroundColor: theme.cardBackground }]]}
             onPress={() => setType('income')}
           >
-            <Text style={[styles.toggleText, type === 'income' && styles.toggleTextActive]}>Thu nhập</Text>
+            <Text style={[styles.toggleText, { color: theme.textSecondary }, type === 'income' && styles.toggleTextActive]}>Thu nhập</Text>
           </TouchableOpacity>
         </View>
 
         <View style={styles.form}>
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Số tiền</Text>
+            <Text style={[styles.label, { color: theme.textSecondary }]}>Số tiền</Text>
             <TextInput 
-              style={styles.input}
+              style={[styles.input, { backgroundColor: theme.cardBackground, borderColor: theme.border, color: theme.textPrimary }]}
               placeholder="Nhập số tiền"
-              placeholderTextColor="#9ca3af"
+              placeholderTextColor={theme.textSecondary}
               keyboardType="numeric"
             />
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Danh mục</Text>
-            <TouchableOpacity style={styles.selectInput}>
+            <Text style={[styles.label, { color: theme.textSecondary }]}>Danh mục</Text>
+            <TouchableOpacity style={[styles.selectInput, { backgroundColor: theme.cardBackground, borderColor: theme.border }]}>
               <View style={styles.selectContent}>
-                <MaterialIcons name="restaurant" size={20} color="#6b7280" style={styles.inputIcon} />
-                <Text style={styles.selectText}>Ăn uống</Text>
+                <MaterialIcons name="restaurant" size={20} color={theme.textSecondary} style={styles.inputIcon} />
+                <Text style={[styles.selectText, { color: theme.textPrimary }]}>Ăn uống</Text>
               </View>
-              <MaterialIcons name="expand-more" size={24} color="#9ca3af" />
+              <MaterialIcons name="expand-more" size={24} color={theme.textSecondary} />
             </TouchableOpacity>
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Ngày</Text>
-            <TouchableOpacity style={styles.selectInput}>
+            <Text style={[styles.label, { color: theme.textSecondary }]}>Ngày</Text>
+            <TouchableOpacity style={[styles.selectInput, { backgroundColor: theme.cardBackground, borderColor: theme.border }]}>
               <View style={styles.selectContent}>
-                <MaterialIcons name="calendar-today" size={20} color="#6b7280" style={styles.inputIcon} />
-                <Text style={styles.selectText}>2024-07-23</Text>
+                <MaterialIcons name="calendar-today" size={20} color={theme.textSecondary} style={styles.inputIcon} />
+                <Text style={[styles.selectText, { color: theme.textPrimary }]}>2024-07-23</Text>
               </View>
             </TouchableOpacity>
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Ghi chú</Text>
+            <Text style={[styles.label, { color: theme.textSecondary }]}>Ghi chú</Text>
             <TextInput 
-              style={[styles.input, styles.textArea]}
+              style={[styles.input, styles.textArea, { backgroundColor: theme.cardBackground, borderColor: theme.border, color: theme.textPrimary }]}
               placeholder="Nhập ghi chú (không bắt buộc)"
-              placeholderTextColor="#9ca3af"
+              placeholderTextColor={theme.textSecondary}
               multiline
               numberOfLines={3}
               textAlignVertical="top"
@@ -80,7 +82,7 @@ const AddTransactionScreen: React.FC = () => {
         </View>
       </ScrollView>
 
-      <View style={styles.footer}>
+      <View style={[styles.footer, { backgroundColor: theme.cardBackground, borderTopColor: theme.border }]}>
         <TouchableOpacity style={styles.saveButton} onPress={() => navigation.goBack()}>
           <Text style={styles.saveButtonText}>Lưu</Text>
         </TouchableOpacity>

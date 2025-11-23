@@ -2,9 +2,11 @@ import React from 'react';
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialIcons } from '../../../../components/icon';
+import { useTheme } from '../../../context/ThemeContext';
 
 const ReportScreen: React.FC = () => {
   const navigation = useNavigation<any>();
+  const { theme, isDarkMode } = useTheme();
 
   const data = [
     { name: 'Ăn uống', value: 2500000, color: '#60A5FA', percentage: 45 }, 
@@ -16,56 +18,55 @@ const ReportScreen: React.FC = () => {
   const totalExpense = 5550000;
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Báo cáo</Text>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
+      <View style={[styles.header, { backgroundColor: theme.headerBackground, borderBottomColor: theme.border }]}>
+        <Text style={[styles.headerTitle, { color: theme.textPrimary }]}>Báo cáo</Text>
       </View>
 
       <ScrollView contentContainerStyle={styles.content}>
         {/* Period Selector */}
-        <View style={styles.periodSelector}>
+        <View style={[styles.periodSelector, { backgroundColor: isDarkMode ? '#374151' : '#e5e7eb' }]}>
           <TouchableOpacity style={styles.periodButton}>
-            <Text style={styles.periodText}>Tuần này</Text>
+            <Text style={[styles.periodText, { color: theme.textSecondary }]}>Tuần này</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.periodButton, styles.periodButtonActive]}>
+          <TouchableOpacity style={[styles.periodButton, styles.periodButtonActive, { backgroundColor: theme.cardBackground }]}>
             <Text style={styles.periodTextActive}>Tháng này</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.periodButton}>
-            <Text style={styles.periodText}>Tùy chọn</Text>
+            <Text style={[styles.periodText, { color: theme.textSecondary }]}>Tùy chọn</Text>
           </TouchableOpacity>
         </View>
 
         {/* Summary Card */}
-        <View style={styles.card}>
+        <View style={[styles.card, { backgroundColor: theme.cardBackground }]}>
           <View style={styles.summaryRow}>
             <View style={styles.summaryItem}>
-              <Text style={styles.summaryLabel}>Tổng thu</Text>
+              <Text style={[styles.summaryLabel, { color: theme.textSecondary }]}>Tổng thu</Text>
               <Text style={[styles.summaryValue, { color: '#22C55E' }]}>15.000.000₫</Text>
             </View>
             <View style={styles.summaryItem}>
-              <Text style={styles.summaryLabel}>Tổng chi</Text>
+              <Text style={[styles.summaryLabel, { color: theme.textSecondary }]}>Tổng chi</Text>
               <Text style={[styles.summaryValue, { color: '#EF4444' }]}>5.550.000₫</Text>
             </View>
           </View>
-          <View style={styles.divider} />
+          <View style={[styles.divider, { backgroundColor: theme.divider }]} />
           <View style={styles.balanceItem}>
-            <Text style={styles.summaryLabel}>Chênh lệch</Text>
+            <Text style={[styles.summaryLabel, { color: theme.textSecondary }]}>Chênh lệch</Text>
             <Text style={[styles.summaryValue, { color: '#3c83f6', fontSize: 24 }]}>9.450.000₫</Text>
           </View>
         </View>
 
         {/* Detail Card */}
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Chi tiêu theo danh mục</Text>
+        <View style={[styles.card, { backgroundColor: theme.cardBackground }]}>
+          <Text style={[styles.cardTitle, { color: theme.textPrimary }]}>Chi tiêu theo danh mục</Text>
           
-          {/* Mock Pie Chart Visualization (Simple Bars) */}
+          {/* Mock Pie Chart Visualization */}
           <View style={styles.chartArea}>
-            <View style={styles.piePlaceholder}>
+            <View style={[styles.piePlaceholder, { backgroundColor: isDarkMode ? '#374151' : '#f9fafb' }]}>
                <View style={styles.pieInnerCircle}>
-                  <Text style={styles.pieLabel}>Tổng chi</Text>
-                  <Text style={styles.pieValue}>5.5tr</Text>
+                  <Text style={[styles.pieLabel, { color: theme.textSecondary }]}>Tổng chi</Text>
+                  <Text style={[styles.pieValue, { color: theme.textPrimary }]}>5.5tr</Text>
                </View>
-               {/* Visual representation only - slices would be complex */}
                <View style={[styles.slice, { backgroundColor: '#60A5FA', transform: [{ rotate: '0deg' }] }]} />
                <View style={[styles.slice, { backgroundColor: '#F87171', transform: [{ rotate: '90deg' }] }]} />
                <View style={[styles.slice, { backgroundColor: '#FBBF24', transform: [{ rotate: '180deg' }] }]} />
@@ -77,21 +78,21 @@ const ReportScreen: React.FC = () => {
               <View key={item.name} style={styles.legendItem}>
                 <View style={[styles.legendColor, { backgroundColor: item.color }]} />
                 <View style={styles.legendInfo}>
-                  <Text style={styles.legendName}>{item.name}</Text>
+                  <Text style={[styles.legendName, { color: theme.textPrimary }]}>{item.name}</Text>
                 </View>
                 <View style={styles.legendValues}>
-                  <Text style={styles.legendAmount}>{item.value.toLocaleString()}₫</Text>
-                  <Text style={styles.legendPercent}>{item.percentage}%</Text>
+                  <Text style={[styles.legendAmount, { color: theme.textPrimary }]}>{item.value.toLocaleString()}₫</Text>
+                  <Text style={[styles.legendPercent, { color: theme.textSecondary }]}>{item.percentage}%</Text>
                 </View>
               </View>
             ))}
 
             <TouchableOpacity 
-              style={styles.addCategoryButton}
+              style={[styles.addCategoryButton, { borderTopColor: theme.divider }]}
               onPress={() => navigation.navigate('AddCategory')}
             >
-              <View style={styles.addIcon}>
-                <MaterialIcons name="add" size={20} color="#6b7280" />
+              <View style={[styles.addIcon, { backgroundColor: theme.iconBoxBg }]}>
+                <MaterialIcons name="add" size={20} color={theme.textSecondary} />
               </View>
               <Text style={styles.addText}>Thêm danh mục</Text>
             </TouchableOpacity>
@@ -99,13 +100,13 @@ const ReportScreen: React.FC = () => {
         </View>
 
         <View style={styles.actionButtons}>
-          <TouchableOpacity style={styles.outlineButton}>
-            <MaterialIcons name="download" size={20} color="#111418" />
-            <Text style={styles.outlineButtonText}>Xuất CSV</Text>
+          <TouchableOpacity style={[styles.outlineButton, { backgroundColor: theme.cardBackground, borderColor: theme.border }]}>
+            <MaterialIcons name="download" size={20} color={theme.textPrimary} />
+            <Text style={[styles.outlineButtonText, { color: theme.textPrimary }]}>Xuất CSV</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.outlineButton}>
-            <MaterialIcons name="description" size={20} color="#111418" />
-            <Text style={styles.outlineButtonText}>Xuất PDF</Text>
+          <TouchableOpacity style={[styles.outlineButton, { backgroundColor: theme.cardBackground, borderColor: theme.border }]}>
+            <MaterialIcons name="description" size={20} color={theme.textPrimary} />
+            <Text style={[styles.outlineButtonText, { color: theme.textPrimary }]}>Xuất PDF</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>

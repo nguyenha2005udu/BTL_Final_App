@@ -2,17 +2,19 @@ import React from 'react';
 import { View, Text, TextInput, TouchableOpacity, Image, ScrollView, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialIcons } from '../../../../components/icon';
+import { useTheme } from '../../../context/ThemeContext';
 
 const UpdateProfile: React.FC = () => {
   const navigation = useNavigation();
+  const { theme, isDarkMode } = useTheme();
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
+      <View style={[styles.header, { backgroundColor: theme.headerBackground, borderBottomColor: theme.border }]}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.iconButton}>
-          <MaterialIcons name="arrow-back" size={24} color="#111418" />
+          <MaterialIcons name="arrow-back" size={24} color={theme.textPrimary} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Cập nhật thông tin</Text>
+        <Text style={[styles.headerTitle, { color: theme.textPrimary }]}>Cập nhật thông tin</Text>
         <View style={{ width: 40 }} />
       </View>
 
@@ -21,7 +23,7 @@ const UpdateProfile: React.FC = () => {
           <View style={styles.avatarWrapper}>
             <Image 
               source={{ uri: "https://lh3.googleusercontent.com/aida-public/AB6AXuA_vMSFQARLvGWesaN0bPwdT0TwBkCjQuK-p1dyFrGdqF-NhAqX3D22UFhPgycZkrUA24cKIcSZEPLOfhmUcNZTvYIXtJBvgXlaRUnPVCaQ5zWzrC0n45kOlTptHz4fEKjcJrTwoasD3u6BnAo6DO1bJ2oe7sNZMz4X8J4ZExMW6HBrFk1JAZloRwzDfjdw4WOSE8HcBg82M53Zk1lZ9igZ6sqHdz0lO3Cvw1h6_YE38kL45oHN1DtJsD26XLF9ECZDyI3c-2ms-qO0" }}
-              style={styles.avatar}
+              style={[styles.avatar, { borderColor: theme.cardBackground }]}
             />
             <TouchableOpacity style={styles.editIcon}>
               <MaterialIcons name="edit" size={16} color="white" />
@@ -31,51 +33,51 @@ const UpdateProfile: React.FC = () => {
 
         <View style={styles.form}>
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Họ và Tên</Text>
+            <Text style={[styles.label, { color: theme.textSecondary }]}>Họ và Tên</Text>
             <TextInput 
-              style={styles.input}
+              style={[styles.input, { backgroundColor: theme.cardBackground, borderColor: theme.border, color: theme.textPrimary }]}
               defaultValue="Nguyễn Văn A"
               placeholder="Nhập họ và tên"
-              placeholderTextColor="#9ca3af"
+              placeholderTextColor={theme.textSecondary}
             />
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Email</Text>
+            <Text style={[styles.label, { color: theme.textSecondary }]}>Email</Text>
             <TextInput 
-              style={[styles.input, styles.disabledInput]}
+              style={[styles.input, { backgroundColor: isDarkMode ? '#374151' : '#f3f4f6', borderColor: theme.border, color: theme.textSecondary }]}
               defaultValue="nguyenvana@email.com"
               editable={false}
             />
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Số điện thoại</Text>
+            <Text style={[styles.label, { color: theme.textSecondary }]}>Số điện thoại</Text>
             <TextInput 
-              style={styles.input}
+              style={[styles.input, { backgroundColor: theme.cardBackground, borderColor: theme.border, color: theme.textPrimary }]}
               defaultValue="0901234567"
               keyboardType="phone-pad"
               placeholder="Nhập số điện thoại"
-              placeholderTextColor="#9ca3af"
+              placeholderTextColor={theme.textSecondary}
             />
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Ngày sinh</Text>
-            <View style={styles.dateInputWrapper}>
+            <Text style={[styles.label, { color: theme.textSecondary }]}>Ngày sinh</Text>
+            <View style={[styles.dateInputWrapper, { backgroundColor: theme.cardBackground, borderColor: theme.border }]}>
               <TextInput 
-                style={styles.dateInput}
+                style={[styles.dateInput, { color: theme.textPrimary }]}
                 defaultValue="15/08/1998"
                 placeholder="DD/MM/YYYY"
-                placeholderTextColor="#9ca3af"
+                placeholderTextColor={theme.textSecondary}
               />
-              <MaterialIcons name="calendar-today" size={20} color="#9ca3af" />
+              <MaterialIcons name="calendar-today" size={20} color={theme.textSecondary} />
             </View>
           </View>
         </View>
       </ScrollView>
 
-      <View style={styles.footer}>
+      <View style={[styles.footer, { backgroundColor: theme.cardBackground, borderTopColor: theme.border }]}>
         <TouchableOpacity style={styles.saveButton} onPress={() => navigation.goBack()}>
           <Text style={styles.saveButtonText}>Lưu thay đổi</Text>
         </TouchableOpacity>
