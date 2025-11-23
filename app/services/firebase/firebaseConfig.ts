@@ -1,7 +1,9 @@
-import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+// services/firebase/firebaseConfig.ts
+import { initializeApp } from 'firebase/app';
+import { getAuth } from 'firebase/auth';
+import { getFirestore } from 'firebase/firestore';
 
+// 👉 chính là đoạn bạn copy từ console
 const firebaseConfig = {
   apiKey: "AIzaSyBZq8chnGtikag5h2jef8WS36TChotRc2Y",
   authDomain: "expense-tracker-93b08.firebaseapp.com",
