@@ -21,7 +21,7 @@ const LoginScreen: React.FC = () => {
 
   const handleSubmit = () => {
     // TODO: Validate / gọi API đăng nhập
-    navigation.navigate('App'); // Đổi "App" thành tên screen sau đăng nhập của bạn
+    navigation.navigate('App'); 
   };
 
   return (
