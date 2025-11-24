@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -11,10 +11,77 @@ import { useNavigation } from "@react-navigation/native";
 import { MaterialIcons } from "../../../../components/icon";
 import { MOCK_TRANSACTIONS, MOCK_GOALS } from "../../../../constants/constants";
 import { useTheme } from "../../../context/ThemeContext";
+import { getCurrentUserProfile } from "../../../services/auth.service";
+import { auth } from "../../../services/firebase/firebaseConfig";
+import { getCurrentUserSummary } from '../../../services/transaction.service';
+
+const DEFAULT_AVATAR =
+  "https://lh3.googleusercontent.com/aida-public/AB6AXuA_vMSFQARLvGWesaN0bPwdT0TwBkCjQuK-p1dyFrGdqF-NhAqX3D22UFhPgycZkrUA24cKIcSZEPLOfhmUcNZTvYIXtJBvgXlaRUnPVCaQ5zWzrC0n45kOlTptHz4fEKjcJrTwoasD3u6BnAo6DO1bJ2oe7sNZMz4X8J4ZExMW6HBrFk1JAZloRwzDfjdw4WOSE8HcBg82M53Zk1lZ9igZ6sqHdz0lO3Cvw1h6_YE38kL45oHN1DtJsD26XLF9ECZDyI3c-2ms-qO0";
 
 const HomeScreen: React.FC = () => {
   const navigation = useNavigation<any>();
   const { theme, isDarkMode } = useTheme();
+  const [displayName, setDisplayName] = useState<string>("");
+  const [amount, setAmount] = useState<number | null>(null);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [totalIncome, setTotalIncome] = useState<number>(0);
+  const [totalExpense, setTotalExpense] = useState<number>(0);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // ---- PROFILE (tên + amount lưu trong user, nếu có) ----
+        const profile = await getCurrentUserProfile();
+
+        console.log('PROFILE >>>', profile);
+        console.log('AUTH USER >>>', auth.currentUser);
+
+        // TÊN NGƯỜI DÙNG
+        if (profile?.fullName) {
+          setDisplayName(profile.fullName);
+        } else if (auth.currentUser?.email) {
+          const nameFromEmail = auth.currentUser.email.split('@')[0];
+          setDisplayName(nameFromEmail);
+        } else {
+          setDisplayName('Người dùng');
+        }
+
+          // --- AVATAR ---
+        if (profile?.photoUrl && profile.photoUrl.trim() !== '') {
+          setAvatarUrl(profile.photoUrl);
+        } else if (auth.currentUser?.photoURL) {
+          // fallback: ảnh từ Firebase Auth nếu có
+          setAvatarUrl(auth.currentUser.photoURL);
+        } else {
+          setAvatarUrl(null); // sẽ dùng ảnh mặc định
+        }
+
+        // AMOUNT TRONG BẢNG users (nếu bạn vẫn dùng)
+        if (profile && typeof profile.amount === 'number') {
+          setAmount(profile.amount);
+        } else {
+          setAmount(0);
+        }
+
+        // ---- TỔNG THU/CHI TỪ BẢNG transactions (mount) ----
+        const summary = await getCurrentUserSummary();
+        setTotalIncome(summary.totalIncome);
+        setTotalExpense(summary.totalExpense);
+
+        // Nếu muốn số dư = thu - chi thì dùng balance từ summary
+        setAmount(summary.balance);
+      } catch (error) {
+        console.log('LOAD PROFILE/TRANSACTIONS ERROR >>>', error);
+        setDisplayName('Người dùng');
+        setAmount(0);
+        setTotalIncome(0);
+        setTotalExpense(0);
+      }
+    };
+
+    fetchData();
+  }, []);
+
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
@@ -22,10 +89,10 @@ const HomeScreen: React.FC = () => {
         {/* Header */}
         <View style={styles.header}>
           <View style={styles.userInfo}>
-            <TouchableOpacity onPress={() => navigation.navigate("Profile")}>
+            <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
               <Image
                 source={{
-                  uri: "https://lh3.googleusercontent.com/aida-public/AB6AXuA_vMSFQARLvGWesaN0bPwdT0TwBkCjQuK-p1dyFrGdqF-NhAqX3D22UFhPgycZkrUA24cKIcSZEPLOfhmUcNZTvYIXtJBvgXlaRUnPVCaQ5zWzrC0n45kOlTptHz4fEKjcJrTwoasD3u6BnAo6DO1bJ2oe7sNZMz4X8J4ZExMW6HBrFk1JAZloRwzDfjdw4WOSE8HcBg82M53Zk1lZ9igZ6sqHdz0lO3Cvw1h6_YE38kL45oHN1DtJsD26XLF9ECZDyI3c-2ms-qO0",
+                  uri: avatarUrl || DEFAULT_AVATAR, // 👈 ưu tiên từ user, thiếu thì dùng ảnh cũ
                 }}
                 style={styles.avatar}
               />
@@ -35,8 +102,9 @@ const HomeScreen: React.FC = () => {
                 Xin chào,
               </Text>
               <Text style={[styles.username, { color: theme.textPrimary }]}>
-                Nguyễn Văn A
+                {displayName || "Người dùng"}
               </Text>
+
             </View>
           </View>
           <TouchableOpacity
@@ -57,22 +125,23 @@ const HomeScreen: React.FC = () => {
             Tổng số dư
           </Text>
           <Text style={[styles.balanceAmount, { color: "#3c83f6" }]}>
-            25.680.000₫
+            {amount !== null ? `${amount.toLocaleString('vi-VN')}₫` : '—'}
           </Text>
         </View>
+
 
         {/* Income/Expense Grid */}
         <View style={styles.statsGrid}>
           <View style={[styles.statCard, { backgroundColor: theme.cardBackground }]}>
             <Text style={[styles.statLabel, { color: theme.textSecondary }]}>Tổng thu</Text>
-            <Text style={[styles.statValue, { color: "#22C55E" }]}>
-              +15.000.000₫
+            <Text style={[styles.statValue, { color: '#22C55E' }]}>
+              +{totalIncome.toLocaleString('vi-VN')}₫
             </Text>
           </View>
           <View style={[styles.statCard, { backgroundColor: theme.cardBackground }]}>
             <Text style={[styles.statLabel, { color: theme.textSecondary }]}>Tổng chi</Text>
-            <Text style={[styles.statValue, { color: "#EF4444" }]}>
-              -8.530.000₫
+            <Text style={[styles.statValue, { color: '#EF4444' }]}>
+              -{totalExpense.toLocaleString('vi-VN')}₫
             </Text>
           </View>
         </View>

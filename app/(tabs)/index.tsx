@@ -23,6 +23,7 @@ import AddCategory from '../presentation/screens/Report/AddCategory';
 import CategoryDetail from '../presentation/screens/Report/CategoryDetail';
 import UpdateProfile from '../presentation/screens/Profile/UpdateProfile';
 import NotificationScreen from '../presentation/screens/Notification/NotificationScreen';
+import ForgotPasswordScreen from '../presentation/screens/Auth/ForgotPasswordScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -98,6 +99,7 @@ function AppNavigator() {
         <Stack.Screen name="CategoryDetail" component={CategoryDetail} />
         <Stack.Screen name="UpdateProfile" component={UpdateProfile} />
         <Stack.Screen name="Notifications" component={NotificationScreen} />
+        <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
       </Stack.Navigator>
     </>
   );
