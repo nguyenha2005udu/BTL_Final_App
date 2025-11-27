@@ -123,4 +123,80 @@ const LoginScreen: React.FC = () => {
                   onChangeText={setEmail}
                 />
               </View>
-            </V
+            </View>
+
+            {/* Password */}
+            <View style={styles.field}>
+              <Text style={styles.label}>Mật khẩu</Text>
+              <View style={styles.inputWrapper}>
+                <MaterialIcons
+                  name="lock-outline"
+                  size={20}
+                  color="#9CA3AF"
+                  style={styles.inputIcon}
+                />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Nhập mật khẩu"
+                  placeholderTextColor="#9CA3AF"
+                  secureTextEntry={!passwordVisible}
+                  value={password}
+                  onChangeText={setPassword}
+                />
+                <TouchableOpacity
+                  style={styles.passwordToggle}
+                  onPress={() => setPasswordVisible(prev => !prev)}
+                  activeOpacity={0.7}
+                >
+                  <MaterialIcons
+                    name={passwordVisible ? 'visibility' : 'visibility-off'}
+                    size={20}
+                    color="#6B7280"
+                  />
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            {/* Quên mật khẩu */}
+            <TouchableOpacity
+              style={styles.forgotButton}
+              activeOpacity={0.7}
+              onPress={() => navigation.navigate('ForgotPassword')}
+            >
+              <Text style={styles.forgotText}>Quên mật khẩu?</Text>
+            </TouchableOpacity>
+
+            {/* Đăng nhập */}
+            <TouchableOpacity
+              style={styles.submitButton}
+              activeOpacity={0.8}
+              onPress={handleSubmit}
+              disabled={loading}
+            >
+              {loading ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text style={styles.submitText}>Đăng nhập</Text>
+              )}
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Footer */}
+        <View style={styles.footer}>
+          <Text style={styles.footerText}>
+            Chưa có tài khoản?{' '}
+            <Text
+              style={styles.footerLink}
+              onPress={() => navigation.navigate('Register')}
+            >
+              Đăng ký
+            </Text>
+          </Text>
+        </View>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
+  );
+};
+
+export default LoginScreen;

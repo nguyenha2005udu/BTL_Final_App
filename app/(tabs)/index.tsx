@@ -2,7 +2,7 @@ import React from 'react';
 import { StatusBar } from 'react-native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { MaterialIcons } from '../../components/icon';
+import { MaterialIcons } from '@expo/vector-icons';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
@@ -24,6 +24,11 @@ import CategoryDetail from '../presentation/screens/Report/CategoryDetail';
 import UpdateProfile from '../presentation/screens/Profile/UpdateProfile';
 import NotificationScreen from '../presentation/screens/Notification/NotificationScreen';
 import ForgotPasswordScreen from '../presentation/screens/Auth/ForgotPasswordScreen';
+import ChangePasswordScreen from '../presentation/screens/Profile/ChangePasswordScreen';
+import SecurityPolicyScreen from '../presentation/screens/Profile/SecurityPolicyScreen';
+import HelpCenterScreen from '../presentation/screens/Profile/HelpCenterScreen';
+import ContactSupportScreen from '../presentation/screens/Profile/ContactSupportScreen';
+import RateAppScreen from '../presentation/screens/Profile/RateAppScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -100,6 +105,11 @@ function AppNavigator() {
         <Stack.Screen name="UpdateProfile" component={UpdateProfile} />
         <Stack.Screen name="Notifications" component={NotificationScreen} />
         <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+        <Stack.Screen name="ChangePassword" component={ChangePasswordScreen} />
+        <Stack.Screen name="SecurityPolicy" component={SecurityPolicyScreen} />
+        <Stack.Screen name="HelpCenter" component={HelpCenterScreen} />
+        <Stack.Screen name="ContactSupport" component={ContactSupportScreen} />
+        <Stack.Screen name="RateApp" component={RateAppScreen} />
       </Stack.Navigator>
     </>
   );

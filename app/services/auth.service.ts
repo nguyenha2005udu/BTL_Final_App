@@ -4,6 +4,7 @@ import { auth, db } from './firebase/firebaseConfig';
 import {
   doc,
   setDoc,
+  updateDoc,
   serverTimestamp,
   getDoc,
 } from 'firebase/firestore';
@@ -24,6 +25,8 @@ export interface UserProfile {
   id: string;
   email: string;
   fullName?: string;
+  phone?: string;
+  birthDate?: string;
   amount?: number;
   emailVerified?: boolean;
   photoUrl?: string; // 👈 thêm
@@ -48,6 +51,8 @@ export const registerWithEmail = async (
     createdAt: serverTimestamp(),
     emailVerified: user.emailVerified ?? false,
     amount: 0,
+    phone: '',
+    birthDate: null,
   });
 
   // 3. Gửi email xác thực
@@ -93,4 +98,23 @@ export const getCurrentUserProfile = async (): Promise<UserProfile | null> => {
     id: snap.id,
     ...data,
   };
+};
+
+// 👇 Cập nhật profile user
+export interface UpdateUserProfilePayload {
+  fullName?: string;
+  phone?: string;
+  birthDate?: string | null;
+  photoUrl?: string;
+}
+
+export const updateUserProfile = async (payload: UpdateUserProfilePayload): Promise<void> => {
+  const user = auth.currentUser;
+  if (!user) throw new Error('No logged-in user');
+
+  const userRef = doc(db, 'users', user.uid);
+
+  await updateDoc(userRef, {
+    ...payload,
+  });
 };

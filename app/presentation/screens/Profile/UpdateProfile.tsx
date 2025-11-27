@@ -1,12 +1,146 @@
-import React from 'react';
-import { View, Text, TextInput, TouchableOpacity, Image, ScrollView, StyleSheet } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { MaterialIcons } from '../../../../components/icon';
-import { useTheme } from '../../../context/ThemeContext';
+import React, { useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Alert,
+  Platform,
+} from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import { MaterialIcons } from "../../../../components/icon";
+import { useTheme } from "../../../context/ThemeContext";
+import {
+  getCurrentUserProfile,
+  updateUserProfile,
+} from "../../../services/auth.service";
+import { auth, storage } from "../../../services/firebase/firebaseConfig";
+import * as ImagePicker from "expo-image-picker";
+import DateTimePicker from "@react-native-community/datetimepicker";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 const UpdateProfile: React.FC = () => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
   const { theme, isDarkMode } = useTheme();
+
+  const [fullName, setFullName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [birthDate, setBirthDate] = useState<Date | null>(null);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const userEmail = auth.currentUser?.email || "";
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const profile = await getCurrentUserProfile();
+        if (profile) {
+          setFullName(profile.fullName || "");
+          setPhone(profile.phone || "");
+          setBirthDate(profile.birthDate ? new Date(profile.birthDate) : null);
+          setAvatarUrl(profile.photoUrl || auth.currentUser?.photoURL || null);
+        }
+      } catch (error) {
+        console.log("LOAD PROFILE ERROR >>>", error);
+      }
+    };
+    fetchProfile();
+  }, []);
+
+  const handleChangeAvatar = async () => {
+    const { status: cameraStatus } = await ImagePicker.requestCameraPermissionsAsync();
+    const { status: mediaStatus } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (cameraStatus !== "granted" || mediaStatus !== "granted") {
+      Alert.alert("Cần quyền truy cập Camera và Thư viện ảnh");
+      return;
+    }
+
+    Alert.alert("Chọn ảnh", "Chọn nguồn ảnh", [
+      {
+        text: "Camera",
+        onPress: async () => {
+          const result = await ImagePicker.launchCameraAsync({
+            mediaTypes: ['images'],
+            quality: 0.7,
+            allowsEditing: true,
+            aspect: [1, 1],
+          });
+          
+          if (!result.canceled && result.assets && result.assets[0]) {
+            await uploadAvatar(result.assets[0].uri);
+          }
+        },
+      },
+      {
+        text: "Thư viện",
+        onPress: async () => {
+          const result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ['images'],
+            quality: 0.7,
+            allowsEditing: true,
+            aspect: [1, 1],
+          });
+          
+          if (!result.canceled && result.assets && result.assets[0]) {
+            await uploadAvatar(result.assets[0].uri);
+          }
+        },
+      },
+      { text: "Huỷ", style: "cancel" },
+    ]);
+  };
+
+  const uploadAvatar = async (uri: string) => {
+    setLoading(true);
+    try {
+      console.log("Starting upload for URI:", uri);
+      
+      const response = await fetch(uri);
+      const blob = await response.blob();
+
+      const fileRef = ref(storage, `avatars/${auth.currentUser?.uid}_${Date.now()}.jpg`);
+      await uploadBytes(fileRef, blob);
+      const downloadUrl = await getDownloadURL(fileRef);
+      
+      console.log("Upload successful:", downloadUrl);
+      setAvatarUrl(downloadUrl);
+      Alert.alert("Thành công", "Đã tải ảnh lên thành công");
+    } catch (error) {
+      console.error("UPLOAD AVATAR ERROR >>>", error);
+      Alert.alert("Lỗi", "Không thể tải ảnh lên. Kiểm tra quyền và kết nối mạng.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDateChange = (event: any, selectedDate?: Date) => {
+    setShowDatePicker(Platform.OS === "ios");
+    if (selectedDate) setBirthDate(selectedDate);
+  };
+
+  const handleSave = async () => {
+    setLoading(true);
+    try {
+      await updateUserProfile({
+        fullName,
+        phone,
+        birthDate: birthDate ? birthDate.toISOString() : null,
+        photoUrl: avatarUrl,
+      });
+      Alert.alert("Thành công", "Cập nhật thông tin thành công");
+      navigation.goBack();
+    } catch (error) {
+      console.log("UPDATE PROFILE ERROR >>>", error);
+      Alert.alert("Lỗi", "Không thể cập nhật thông tin");
+    }
+    setLoading(false);
+  };
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
@@ -21,12 +155,12 @@ const UpdateProfile: React.FC = () => {
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.avatarContainer}>
           <View style={styles.avatarWrapper}>
-            <Image 
-              source={{ uri: "https://lh3.googleusercontent.com/aida-public/AB6AXuA_vMSFQARLvGWesaN0bPwdT0TwBkCjQuK-p1dyFrGdqF-NhAqX3D22UFhPgycZkrUA24cKIcSZEPLOfhmUcNZTvYIXtJBvgXlaRUnPVCaQ5zWzrC0n45kOlTptHz4fEKjcJrTwoasD3u6BnAo6DO1bJ2oe7sNZMz4X8J4ZExMW6HBrFk1JAZloRwzDfjdw4WOSE8HcBg82M53Zk1lZ9igZ6sqHdz0lO3Cvw1h6_YE38kL45oHN1DtJsD26XLF9ECZDyI3c-2ms-qO0" }}
+            <Image
+              source={{ uri: avatarUrl || "https://via.placeholder.com/150" }}
               style={[styles.avatar, { borderColor: theme.cardBackground }]}
             />
-            <TouchableOpacity style={styles.editIcon}>
-              <MaterialIcons name="edit" size={16} color="white" />
+            <TouchableOpacity style={styles.editIcon} onPress={handleChangeAvatar} disabled={loading}>
+              <MaterialIcons name={loading ? "hourglass-empty" : "edit"} size={16} color="white" />
             </TouchableOpacity>
           </View>
         </View>
@@ -34,52 +168,64 @@ const UpdateProfile: React.FC = () => {
         <View style={styles.form}>
           <View style={styles.inputGroup}>
             <Text style={[styles.label, { color: theme.textSecondary }]}>Họ và Tên</Text>
-            <TextInput 
+            <TextInput
               style={[styles.input, { backgroundColor: theme.cardBackground, borderColor: theme.border, color: theme.textPrimary }]}
-              defaultValue="Nguyễn Văn A"
               placeholder="Nhập họ và tên"
               placeholderTextColor={theme.textSecondary}
+              value={fullName}
+              onChangeText={setFullName}
             />
           </View>
 
           <View style={styles.inputGroup}>
             <Text style={[styles.label, { color: theme.textSecondary }]}>Email</Text>
-            <TextInput 
-              style={[styles.input, { backgroundColor: isDarkMode ? '#374151' : '#f3f4f6', borderColor: theme.border, color: theme.textSecondary }]}
-              defaultValue="nguyenvana@email.com"
+            <TextInput
+              style={[styles.input, { backgroundColor: isDarkMode ? "#374151" : "#f3f4f6", borderColor: theme.border, color: theme.textSecondary }]}
+              value={userEmail}
               editable={false}
             />
           </View>
 
           <View style={styles.inputGroup}>
             <Text style={[styles.label, { color: theme.textSecondary }]}>Số điện thoại</Text>
-            <TextInput 
+            <TextInput
               style={[styles.input, { backgroundColor: theme.cardBackground, borderColor: theme.border, color: theme.textPrimary }]}
-              defaultValue="0901234567"
-              keyboardType="phone-pad"
               placeholder="Nhập số điện thoại"
               placeholderTextColor={theme.textSecondary}
+              value={phone}
+              keyboardType="phone-pad"
+              onChangeText={setPhone}
             />
           </View>
 
           <View style={styles.inputGroup}>
             <Text style={[styles.label, { color: theme.textSecondary }]}>Ngày sinh</Text>
-            <View style={[styles.dateInputWrapper, { backgroundColor: theme.cardBackground, borderColor: theme.border }]}>
-              <TextInput 
-                style={[styles.dateInput, { color: theme.textPrimary }]}
-                defaultValue="15/08/1998"
-                placeholder="DD/MM/YYYY"
-                placeholderTextColor={theme.textSecondary}
-              />
+            <TouchableOpacity
+              style={[styles.dateInputWrapper, { backgroundColor: theme.cardBackground, borderColor: theme.border }]}
+              onPress={() => setShowDatePicker(true)}
+            >
+              <Text style={{ color: theme.textPrimary }}>
+                {birthDate ? birthDate.toLocaleDateString() : "DD/MM/YYYY"}
+              </Text>
               <MaterialIcons name="calendar-today" size={20} color={theme.textSecondary} />
-            </View>
+            </TouchableOpacity>
           </View>
+
+          {showDatePicker && (
+            <DateTimePicker
+              value={birthDate || new Date()}
+              mode="date"
+              display="default"
+              onChange={handleDateChange}
+              maximumDate={new Date()}
+            />
+          )}
         </View>
       </ScrollView>
 
       <View style={[styles.footer, { backgroundColor: theme.cardBackground, borderTopColor: theme.border }]}>
-        <TouchableOpacity style={styles.saveButton} onPress={() => navigation.goBack()}>
-          <Text style={styles.saveButtonText}>Lưu thay đổi</Text>
+        <TouchableOpacity style={styles.saveButton} onPress={handleSave} disabled={loading}>
+          <Text style={styles.saveButtonText}>{loading ? "Đang lưu..." : "Lưu thay đổi"}</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.cancelButton} onPress={() => navigation.goBack()}>
           <Text style={styles.cancelButtonText}>Hủy</Text>
@@ -92,58 +238,58 @@ const UpdateProfile: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f7f8',
+    backgroundColor: "#f5f7f8",
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     height: 60,
     paddingHorizontal: 16,
-    backgroundColor: 'rgba(245, 247, 248, 0.9)',
+    backgroundColor: "rgba(245, 247, 248, 0.9)",
     borderBottomWidth: 1,
-    borderBottomColor: '#e5e7eb',
+    borderBottomColor: "#e5e7eb",
   },
   headerTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
-    color: '#111418',
+    fontWeight: "bold",
+    color: "#111418",
   },
   iconButton: {
     width: 40,
     height: 40,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   content: {
     padding: 16,
   },
   avatarContainer: {
-    alignItems: 'center',
+    alignItems: "center",
     marginVertical: 24,
   },
   avatarWrapper: {
-    position: 'relative',
+    position: "relative",
   },
   avatar: {
     width: 120,
     height: 120,
     borderRadius: 60,
     borderWidth: 4,
-    borderColor: 'white',
+    borderColor: "white",
   },
   editIcon: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 0,
     right: 0,
-    backgroundColor: '#3c83f6',
+    backgroundColor: "#3c83f6",
     width: 36,
     height: 36,
     borderRadius: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     borderWidth: 2,
-    borderColor: 'white',
+    borderColor: "white",
   },
   form: {
     gap: 20,
@@ -153,29 +299,29 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 14,
-    fontWeight: '500',
-    color: '#374151',
+    fontWeight: "500",
+    color: "#374151",
   },
   input: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderWidth: 1,
-    borderColor: '#d1d5db',
+    borderColor: "#d1d5db",
     borderRadius: 8,
     height: 48,
     paddingHorizontal: 16,
     fontSize: 16,
-    color: '#111418',
+    color: "#111418",
   },
   disabledInput: {
-    backgroundColor: '#f3f4f6',
-    color: '#9ca3af',
+    backgroundColor: "#f3f4f6",
+    color: "#9ca3af",
   },
   dateInputWrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'white',
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "white",
     borderWidth: 1,
-    borderColor: '#d1d5db',
+    borderColor: "#d1d5db",
     borderRadius: 8,
     height: 48,
     paddingHorizontal: 16,
@@ -183,37 +329,37 @@ const styles = StyleSheet.create({
   dateInput: {
     flex: 1,
     fontSize: 16,
-    color: '#111418',
+    color: "#111418",
   },
   footer: {
     padding: 16,
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderTopWidth: 1,
-    borderTopColor: '#e5e7eb',
+    borderTopColor: "#e5e7eb",
     gap: 12,
   },
   saveButton: {
-    backgroundColor: '#3c83f6',
+    backgroundColor: "#3c83f6",
     height: 48,
     borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   saveButtonText: {
-    color: 'white',
+    color: "white",
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   cancelButton: {
     height: 48,
     borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   cancelButtonText: {
-    color: '#3c83f6',
+    color: "#3c83f6",
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
 });
 
