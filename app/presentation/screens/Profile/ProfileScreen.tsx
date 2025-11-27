@@ -1,12 +1,49 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, Image, ScrollView, Switch, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialIcons } from '../../../../components/icon';
-import { useTheme } from '../../../context/ThemeContext'; // Import hook
+import { useTheme } from '../../../context/ThemeContext';
+import { auth } from '../../../services/firebase/firebaseConfig';
+import { getCurrentUserProfile } from '../../../services/auth.service';
+
+const DEFAULT_AVATAR =
+  'https://lh3.googleusercontent.com/aida-public/AB6AXuA_vMSFQARLvGWesaN0bPwdT0TwBkCjQuK-p1dyFrGdqF-NhAqX3D22UFhPgycZkrUA24cKIcSZEPLOfhmUcNZTvYIXtJBvgXlaRUnPVCaQ5zWzrC0n45kOlTptHz4fEKjcJrTwoasD3u6BnAo6DO1bJ2oe7sNZMz4X8J4ZExMW6HBrFk1JAZloRwzDfjdw4WOSE8HcBg82M53Zk1lZ9igZ6sqHdz0lO3Cvw1h6_YE38kL45oHN1DtJsD26XLF9ECZDyI3c-2ms-qO0';
 
 const ProfileScreen: React.FC = () => {
   const navigation = useNavigation<any>();
-  const { isDarkMode, theme, toggleDarkMode } = useTheme(); // Sử dụng theme từ context
+  const { isDarkMode, theme, toggleDarkMode } = useTheme();
+
+  const [displayName, setDisplayName] = useState<string>('Người dùng');
+  const [email, setEmail] = useState<string>('');
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const profile = await getCurrentUserProfile();
+
+        if (profile?.fullName) {
+          setDisplayName(profile.fullName);
+        } else if (auth.currentUser?.email) {
+          setDisplayName(auth.currentUser.email.split('@')[0]);
+        }
+
+        setEmail(auth.currentUser?.email || '');
+
+        if (profile?.photoUrl && profile.photoUrl.trim() !== '') {
+          setAvatarUrl(profile.photoUrl);
+        } else if (auth.currentUser?.photoURL) {
+          setAvatarUrl(auth.currentUser.photoURL);
+        } else {
+          setAvatarUrl(null);
+        }
+      } catch (error) {
+        console.log('LOAD PROFILE ERROR >>>', error);
+      }
+    };
+
+    fetchProfile();
+  }, []);
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
@@ -17,13 +54,13 @@ const ProfileScreen: React.FC = () => {
       <ScrollView contentContainerStyle={styles.content}>
         {/* Profile Header */}
         <View style={styles.profileHeader}>
-          <Image 
-            source={{ uri: "https://lh3.googleusercontent.com/aida-public/AB6AXuA_vMSFQARLvGWesaN0bPwdT0TwBkCjQuK-p1dyFrGdqF-NhAqX3D22UFhPgycZkrUA24cKIcSZEPLOfhmUcNZTvYIXtJBvgXlaRUnPVCaQ5zWzrC0n45kOlTptHz4fEKjcJrTwoasD3u6BnAo6DO1bJ2oe7sNZMz4X8J4ZExMW6HBrFk1JAZloRwzDfjdw4WOSE8HcBg82M53Zk1lZ9igZ6sqHdz0lO3Cvw1h6_YE38kL45oHN1DtJsD26XLF9ECZDyI3c-2ms-qO0" }}
+          <Image
+            source={{ uri: avatarUrl || DEFAULT_AVATAR }}
             style={styles.avatar}
           />
           <View style={styles.profileInfo}>
-            <Text style={[styles.profileName, { color: theme.textPrimary }]}>Nguyễn Thị A</Text>
-            <Text style={[styles.profileEmail, { color: theme.textSecondary }]}>nguyenthi.a@email.com</Text>
+            <Text style={[styles.profileName, { color: theme.textPrimary }]}>{displayName}</Text>
+            <Text style={[styles.profileEmail, { color: theme.textSecondary }]}>{email}</Text>
           </View>
         </View>
 
@@ -69,7 +106,7 @@ const ProfileScreen: React.FC = () => {
             
             <View style={[styles.divider, { backgroundColor: theme.divider }]} />
             
-            <TouchableOpacity style={styles.rowItem}>
+            <TouchableOpacity style={styles.rowItem} onPress={() => navigation.navigate('ChangePassword')}>
               <View style={styles.rowLeft}>
                 <View style={[styles.iconBox, { backgroundColor: isDarkMode ? '#1e3d2e' : '#E6F4EA' }]}>
                   <MaterialIcons name="lock" size={24} color="#1E8E3E" />
@@ -81,7 +118,7 @@ const ProfileScreen: React.FC = () => {
 
             <View style={[styles.divider, { backgroundColor: theme.divider }]} />
 
-            <TouchableOpacity style={styles.rowItem}>
+            <TouchableOpacity style={styles.rowItem} onPress={() => navigation.navigate('SecurityPolicy')}>
               <View style={styles.rowLeft}>
                 <View style={[styles.iconBox, { backgroundColor: isDarkMode ? '#4a1d1d' : '#FCE8E6' }]}>
                   <MaterialIcons name="security" size={24} color="#D93025" />
@@ -97,7 +134,7 @@ const ProfileScreen: React.FC = () => {
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: theme.textSecondary }]}>Hỗ trợ</Text>
           <View style={[styles.card, { backgroundColor: theme.cardBackground }]}>
-            <TouchableOpacity style={styles.rowItem}>
+            <TouchableOpacity style={styles.rowItem} onPress={() => navigation.navigate('HelpCenter')}>
               <View style={styles.rowLeft}>
                 <View style={[styles.iconBox, { backgroundColor: isDarkMode ? '#1e3a5f' : '#E8F0FE' }]}>
                   <MaterialIcons name="help-outline" size={24} color="#1A73E8" />
@@ -109,7 +146,7 @@ const ProfileScreen: React.FC = () => {
             
             <View style={[styles.divider, { backgroundColor: theme.divider }]} />
             
-            <TouchableOpacity style={styles.rowItem}>
+            <TouchableOpacity style={styles.rowItem} onPress={() => navigation.navigate('ContactSupport')}>
               <View style={styles.rowLeft}>
                 <View style={[styles.iconBox, { backgroundColor: isDarkMode ? '#0d3d3d' : '#E0F7FA' }]}>
                   <MaterialIcons name="headset-mic" size={24} color="#007B83" />
@@ -121,7 +158,7 @@ const ProfileScreen: React.FC = () => {
 
             <View style={[styles.divider, { backgroundColor: theme.divider }]} />
 
-            <TouchableOpacity style={styles.rowItem}>
+            <TouchableOpacity style={styles.rowItem} onPress={() => navigation.navigate('RateApp')}>
               <View style={styles.rowLeft}>
                 <View style={[styles.iconBox, { backgroundColor: isDarkMode ? '#4a3d1d' : '#FEF7E0' }]}>
                   <MaterialIcons name="star" size={24} color="#F9AB00" />

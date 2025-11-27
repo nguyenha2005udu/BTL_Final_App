@@ -15,7 +15,7 @@ import { useNavigation } from '@react-navigation/native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { styles } from './LoginScreen.styles';
 
-// 👉 đường dẫn này tuỳ theo cấu trúc của bạn, với screenshot trước thì:
+// 👉 đường dẫn này tuỳ theo cấu trúc của bạn
 import { loginWithEmail } from '../../../services/auth.service';
 
 const LoginScreen: React.FC = () => {
@@ -25,6 +25,9 @@ const LoginScreen: React.FC = () => {
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  // ==========================================
+  // ✔ KẾT HỢP LOGIC ĐĂNG NHẬP CHUẨN TỪ MAIN
+  // ==========================================
   const handleSubmit = async () => {
     if (!email || !password) {
       Alert.alert('Lỗi', 'Vui lòng nhập email và mật khẩu');
@@ -69,7 +72,6 @@ const LoginScreen: React.FC = () => {
       setLoading(false);
     }
   };
-
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -163,7 +165,6 @@ const LoginScreen: React.FC = () => {
             >
               <Text style={styles.forgotText}>Quên mật khẩu?</Text>
             </TouchableOpacity>
-
 
             {/* Đăng nhập */}
             <TouchableOpacity
