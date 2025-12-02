@@ -1,4 +1,4 @@
-import { Transaction, Goal, Category } from '../app/type/types';
+import { Goal, Transaction } from '../app/type/types';
 
 export const MOCK_TRANSACTIONS: Transaction[] = [
   {
@@ -73,13 +73,149 @@ export const MOCK_GOALS: Goal[] = [
 ];
 
 export const ICONS = [
-  'restaurant', 'local_cafe', 'bakery_dining', 'local_bar', 'cake', 
-  'local_pizza', 'icecream', 'shopping_cart', 'directions_car', 
-  'directions_bus', 'train', 'flight', 'local_taxi', 'local_gas_station'
-];
+  {
+    key: 'giaodich',
+    label: 'Giao dịch',
+    icons: [
+      'payments',
+      'account-balance-wallet',
+      'savings',
+      'currency-exchange',
+      'point-of-sale',
+    ],
+  },
+  {
+    key: 'anUong',
+    label: 'Ăn uống',
+    icons: [
+      'restaurant',
+      'local-cafe',
+      'local-bar',
+      'cake',
+      'fastfood',
+    ],
+  },
+  {
+    key: 'diChuyen',
+    label: 'Di chuyển',
+    icons: [
+      'local-taxi',
+      'directions-bus',
+      'train',
+      'tram',
+      'flight',
+      'local-gas-station',
+      'directions-bike',
+      'two-wheeler',
+      'sailing',
+      'car-repair',   
+    ],
+  },
+  {
+    key: 'giaDinh',
+    label: 'Gia đình',
+    icons: [
+      'home',
+      'child-care',
+      'elderly',
+      'pets',
+      'favorite',
+    ],
+  },
+  {
+    key: 'giaiTri',
+    label: 'Giải trí',
+    icons: [
+      'movie',
+      'music-note',
+      'sports-esports',
+      'beach-access',
+      'spa',
+    ],
+  },
+  {
+    key: 'hoaDon',
+    label: 'Hóa đơn',
+    icons: [
+      'attach-money',
+      'receipt',
+      'home-repair-service',
+      'account-balance',
+      'local-phone',
+      'wifi',
+      'water-drop',
+      'flash-on',
+      'gas-meter',
+    ],
+  },
+  {
+    key: 'muaSam',
+    label: 'Mua sắm',
+    icons: [
+      'local-grocery-store',
+      'local-mall',
+      'card-giftcard',
+    ],
+  },
+  {
+    key: 'sucKhoe',
+    label: 'Sức khỏe',
+    icons: [
+      'fitness-center',
+      'local-hospital',
+      'spa',
+      'self-improvement',
+      'sports-soccer',
+    ],
+  },
+  {
+    key: 'giaoDuc',
+    label: 'Giáo dục',
+    icons: [
+      'school',
+    ],
+  },
+] as const;
 
 export const COLORS = [
-  '#EF4444', '#F97316', '#F59E0B', '#EAB308', '#84CC16', 
-  '#22C55E', '#10B981', '#14B8A6', '#06B6D4', '#0EA5E9', 
-  '#3B82F6', '#6366F1', '#8B5CF6', '#A855F7', '#D946EF'
+  '#F26060',
+  '#F27660',
+  '#F28C60',
+  '#F2A260',
+  '#F2B860',
+  '#F2CD60',
+  '#F2E360',
+  '#EAF260',
+  '#D5F260',
+  '#BFF260',
+  '#A9F260',
+  '#93F260',
+  '#7DF260',
+  '#68F260',
+  '#60F26F',
+  '#60F285',
+  '#60F29B',
+  '#60F2B1',
+  '#60F2C7',
+  '#60F2DD',
+  '#60EAF2',
+  '#60D4F2',
+  '#60BFF2',
+  '#60A9F2',
+  '#609BF2',
+  '#6085F2',
+  '#606FF2',
+  '#6860F2',
+  '#7D60F2',
+  '#9360F2',
+  '#A960F2',
+  '#BF60F2',
+  '#D560F2',
+  '#EA60F2',
+  '#F260E3',
+  '#F260CD',
+  '#F260B8',
+  '#F260A2',
+  '#F2608C',
+  '#F26076',
 ];
