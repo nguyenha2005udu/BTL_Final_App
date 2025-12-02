@@ -1,24 +1,21 @@
 // services/firebase/firebaseConfig.ts
-import { initializeApp, getApps, getApp } from 'firebase/app';
+import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 
 // 👉 chính là đoạn bạn copy từ console
 const firebaseConfig = {
-  apiKey: 'AIzaSyBZq8chnGtikag5h2jef8WS36TChotRc2Y',
-  authDomain: 'expense-tracker-93b08.firebaseapp.com',
-  projectId: 'expense-tracker-93b08',
-  storageBucket: 'expense-tracker-93b08.firebasestorage.app',
-  messagingSenderId: '6055580612',
-  appId: '1:6055580612:web:3d79d2663eb2a62c1e8a91',
-  measurementId: 'G-841YSZ8JLE', // cái này không sao, RN cũng không dùng
+  apiKey: "AIzaSyBZq8chnGtikag5h2jef8WS36TChotRc2Y",
+  authDomain: "expense-tracker-93b08.firebaseapp.com",
+  projectId: "expense-tracker-93b08",
+  storageBucket: "expense-tracker-93b08.firebasestorage.app",
+  messagingSenderId: "6055580612",
+  appId: "1:6055580612:web:3d79d2663eb2a62c1e8a91",
+  measurementId: "G-841YSZ8JLE"
 };
 
-// Khởi tạo app (tránh khởi tạo lại nhiều lần khi hot reload)
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-
-// Export ra để dùng ở chỗ khác
+const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const storage = getStorage(app); 
