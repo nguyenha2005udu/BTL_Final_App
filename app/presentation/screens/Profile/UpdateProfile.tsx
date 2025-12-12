@@ -131,7 +131,7 @@ const UpdateProfile: React.FC = () => {
         fullName,
         phone,
         birthDate: birthDate ? birthDate.toISOString() : null,
-        photoUrl: avatarUrl,
+
       });
       Alert.alert("Thành công", "Cập nhật thông tin thành công");
       navigation.goBack();

@@ -29,6 +29,7 @@ import SecurityPolicyScreen from '../presentation/screens/Profile/SecurityPolicy
 import HelpCenterScreen from '../presentation/screens/Profile/HelpCenterScreen';
 import ContactSupportScreen from '../presentation/screens/Profile/ContactSupportScreen';
 import RateAppScreen from '../presentation/screens/Profile/RateAppScreen';
+import UpdateTransactionScreen from '../presentation/screens/Home/UpdateTransactionScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -110,6 +111,8 @@ function AppNavigator() {
         <Stack.Screen name="HelpCenter" component={HelpCenterScreen} />
         <Stack.Screen name="ContactSupport" component={ContactSupportScreen} />
         <Stack.Screen name="RateApp" component={RateAppScreen} />
+        <Stack.Screen name="UpdateTransaction" component={UpdateTransactionScreen} />
+
       </Stack.Navigator>
     </>
   );
