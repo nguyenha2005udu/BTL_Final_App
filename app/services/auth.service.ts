@@ -1,5 +1,6 @@
 // services/auth.service.ts
 import { emailSignIn, emailSignUp, logout } from './firebase/authProviders';
+import { googleSignIn, linkGoogleToCurrentUser } from './firebase/authProviders';
 import { auth, db } from './firebase/firebaseConfig';
 import {
   doc,
@@ -117,4 +118,55 @@ export const updateUserProfile = async (payload: UpdateUserProfilePayload): Prom
   await updateDoc(userRef, {
     ...payload,
   });
+};
+
+const upsertUserProfileFromAuth = async (user: User): Promise<void> => {
+  const userRef = doc(db, 'users', user.uid);
+  const snap = await getDoc(userRef);
+
+  const googleName = (user.displayName ?? '').trim();
+  const googlePhoto = user.photoURL ?? '';
+
+  // Nếu đã có profile thì ưu tiên giữ fullName user đã đặt,
+  // còn nếu chưa có (hoặc đang rỗng) thì lấy theo Google.
+  const existingFullName =
+    snap.exists() ? String((snap.data() as any)?.fullName ?? '').trim() : '';
+
+  const fullNameToSave = existingFullName || googleName;
+
+  const baseData = {
+    email: user.email ?? '',
+    fullName: fullNameToSave,     // ✅ lưu theo tên Google (khi chưa có tên)
+    photoUrl: googlePhoto,        // ✅ avatar Google
+    emailVerified: user.emailVerified ?? false,
+  };
+
+  if (!snap.exists()) {
+    await setDoc(userRef, {
+      ...baseData,
+      createdAt: serverTimestamp(),
+      amount: 0,
+      phone: '',
+      birthDate: null,
+    });
+  } else {
+    await updateDoc(userRef, {
+      ...baseData,
+    });
+  }
+};
+
+
+// ✅ Login bằng Google
+export const loginWithGoogle = async (): Promise<User> => {
+  const cred = await googleSignIn();
+  await upsertUserProfileFromAuth(cred.user);
+  return cred.user;
+};
+
+// ✅ “Kết nối” Google vào tài khoản hiện tại (đang login bằng email/password)
+export const connectGoogleToCurrentAccount = async (): Promise<User> => {
+  const cred = await linkGoogleToCurrentUser();
+  await upsertUserProfileFromAuth(cred.user);
+  return cred.user;
 };

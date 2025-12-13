@@ -10,7 +10,7 @@ import {
   Alert,
 } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
-import { MaterialIcons } from '@expo/vector-icons';
+import { MaterialIcons } from "@expo/vector-icons";
 import { useTheme } from "../../../context/ThemeContext";
 
 import type { Category } from "../../../type/types";
@@ -56,10 +56,30 @@ const UpdateTransactionScreen: React.FC = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [categoryModalOpen, setCategoryModalOpen] = useState(false);
 
-  const selectedCategory = useMemo(
-    () => categories.find((c) => c.id === selectedCategoryId),
-    [categories, selectedCategoryId]
+  // Lọc danh mục theo loại thu/chi
+  const filteredCategories = useMemo(
+    () =>
+      categories.filter((c: any) =>
+        c.type ? c.type === type : true
+      ),
+    [categories, type]
   );
+
+  const selectedCategory = useMemo(
+    () => filteredCategories.find((c) => c.id === selectedCategoryId),
+    [filteredCategories, selectedCategoryId]
+  );
+
+  // Khi list category hoặc type thay đổi, đảm bảo selectedCategoryId còn hợp lệ
+  useEffect(() => {
+    if (!filteredCategories.length) {
+      setSelectedCategoryId("");
+      return;
+    }
+    if (!selectedCategoryId || !filteredCategories.some((c) => c.id === selectedCategoryId)) {
+      setSelectedCategoryId(filteredCategories[0].id);
+    }
+  }, [filteredCategories, selectedCategoryId]);
 
   useEffect(() => {
     const unsub = listenCategories(setCategories);
@@ -94,13 +114,18 @@ const UpdateTransactionScreen: React.FC = () => {
     };
 
     load();
-  }, [id]);
+  }, [id, navigation]);
 
   const onUpdate = async () => {
     const mount = Number(mountText);
 
     if (!selectedCategoryId) {
-      Alert.alert("Thiếu danh mục", "Vui lòng chọn danh mục.");
+      Alert.alert(
+        "Thiếu danh mục",
+        `Vui lòng chọn danh mục ${
+          type === "expense" ? "chi tiêu" : "thu nhập"
+        }.`
+      );
       return;
     }
     if (!mountText || Number.isNaN(mount) || mount <= 0) {
@@ -114,7 +139,7 @@ const UpdateTransactionScreen: React.FC = () => {
         mount,
         note: note ?? "",
         type,
-        date: Timestamp.fromDate(date), // ✅ lưu Timestamp
+        date: Timestamp.fromDate(date), // lưu Timestamp
       } as any);
 
       Alert.alert("Thành công", "Đã cập nhật giao dịch.");
@@ -144,6 +169,8 @@ const UpdateTransactionScreen: React.FC = () => {
       },
     ]);
   };
+
+  const hasCategoryForType = filteredCategories.length > 0;
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
@@ -179,7 +206,7 @@ const UpdateTransactionScreen: React.FC = () => {
           </Text>
         ) : (
           <>
-            {/* Type Toggle */}
+            {/* Toggle Thu / Chi */}
             <View
               style={[
                 styles.toggleContainer,
@@ -229,6 +256,7 @@ const UpdateTransactionScreen: React.FC = () => {
             </View>
 
             <View style={styles.form}>
+              {/* Số tiền */}
               <View style={styles.inputGroup}>
                 <Text style={[styles.label, { color: theme.textSecondary }]}>
                   Số tiền
@@ -250,6 +278,7 @@ const UpdateTransactionScreen: React.FC = () => {
                 />
               </View>
 
+              {/* Danh mục */}
               <View style={styles.inputGroup}>
                 <Text style={[styles.label, { color: theme.textSecondary }]}>
                   Danh mục
@@ -260,9 +289,11 @@ const UpdateTransactionScreen: React.FC = () => {
                     {
                       backgroundColor: theme.cardBackground,
                       borderColor: theme.border,
+                      opacity: hasCategoryForType ? 1 : 0.6,
                     },
                   ]}
-                  onPress={() => setCategoryModalOpen(true)}
+                  onPress={() => hasCategoryForType && setCategoryModalOpen(true)}
+                  disabled={!hasCategoryForType}
                 >
                   <View style={styles.selectContent}>
                     <MaterialIcons
@@ -274,7 +305,12 @@ const UpdateTransactionScreen: React.FC = () => {
                     <Text
                       style={[styles.selectText, { color: theme.textPrimary }]}
                     >
-                      {selectedCategory?.name || "Chọn danh mục"}
+                      {selectedCategory?.name ||
+                        (hasCategoryForType
+                          ? "Chọn danh mục"
+                          : type === "expense"
+                          ? "Chưa có danh mục chi tiêu"
+                          : "Chưa có danh mục thu nhập")}
                     </Text>
                   </View>
                   <MaterialIcons
@@ -285,6 +321,7 @@ const UpdateTransactionScreen: React.FC = () => {
                 </TouchableOpacity>
               </View>
 
+              {/* Ngày */}
               <View style={styles.inputGroup}>
                 <Text style={[styles.label, { color: theme.textSecondary }]}>
                   Ngày
@@ -297,7 +334,7 @@ const UpdateTransactionScreen: React.FC = () => {
                       borderColor: theme.border,
                     },
                   ]}
-                  onPress={() => setDate(new Date())} // tối thiểu: bấm để set hôm nay
+                  onPress={() => setDate(new Date())} // tạm: bấm để set hôm nay
                 >
                   <View style={styles.selectContent}>
                     <MaterialIcons
@@ -315,6 +352,7 @@ const UpdateTransactionScreen: React.FC = () => {
                 </TouchableOpacity>
               </View>
 
+              {/* Ghi chú */}
               <View style={styles.inputGroup}>
                 <Text style={[styles.label, { color: theme.textSecondary }]}>
                   Ghi chú
@@ -343,6 +381,7 @@ const UpdateTransactionScreen: React.FC = () => {
         )}
       </ScrollView>
 
+      {/* Footer */}
       <View
         style={[
           styles.footer,
@@ -368,7 +407,7 @@ const UpdateTransactionScreen: React.FC = () => {
         </TouchableOpacity>
       </View>
 
-      {/* Category Modal */}
+      {/* Modal chọn danh mục */}
       <Modal
         visible={categoryModalOpen}
         transparent
@@ -383,11 +422,11 @@ const UpdateTransactionScreen: React.FC = () => {
             ]}
           >
             <Text style={[modalStyles.title, { color: theme.textPrimary }]}>
-              Chọn danh mục
+              Chọn danh mục {type === "expense" ? "chi tiêu" : "thu nhập"}
             </Text>
 
             <ScrollView style={{ maxHeight: 320 }}>
-              {categories.map((c) => (
+              {filteredCategories.map((c) => (
                 <TouchableOpacity
                   key={c.id}
                   style={[modalStyles.item, { borderBottomColor: theme.border }]}
@@ -410,10 +449,25 @@ const UpdateTransactionScreen: React.FC = () => {
                   </View>
 
                   {c.id === selectedCategoryId ? (
-                    <MaterialIcons name="check" size={20} color={theme.textSecondary} />
+                    <MaterialIcons
+                      name="check"
+                      size={20}
+                      color={theme.textSecondary}
+                    />
                   ) : null}
                 </TouchableOpacity>
               ))}
+              {!filteredCategories.length && (
+                <Text
+                  style={{
+                    paddingVertical: 12,
+                    textAlign: "center",
+                    color: theme.textSecondary,
+                  }}
+                >
+                  Chưa có danh mục phù hợp.
+                </Text>
+              )}
             </ScrollView>
 
             <TouchableOpacity
@@ -470,7 +524,7 @@ const modalStyles = StyleSheet.create({
   },
 });
 
-// ✅ giữ style giống AddTransactionScreen (copy lại để đồng bộ)
+// style giữ giống AddTransactionScreen
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#f5f7f8" },
   header: {
@@ -482,7 +536,12 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
   },
   headerTitle: { fontSize: 18, fontWeight: "bold" },
-  iconButton: { width: 40, height: 40, alignItems: "center", justifyContent: "center" },
+  iconButton: {
+    width: 40,
+    height: 40,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   content: { padding: 16 },
   toggleContainer: {
     flexDirection: "row",
@@ -491,8 +550,18 @@ const styles = StyleSheet.create({
     marginBottom: 24,
     height: 48,
   },
-  toggleButton: { flex: 1, alignItems: "center", justifyContent: "center", borderRadius: 8 },
-  toggleActive: { shadowColor: "#000", shadowOpacity: 0.05, shadowRadius: 2, elevation: 1 },
+  toggleButton: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 8,
+  },
+  toggleActive: {
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
+  },
   toggleText: { fontSize: 14, fontWeight: "600" },
   toggleTextActive: { color: "#3c83f6" },
   form: { gap: 20 },
@@ -531,7 +600,12 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   saveButtonText: { color: "white", fontSize: 16, fontWeight: "bold" },
-  cancelButton: { height: 48, borderRadius: 12, alignItems: "center", justifyContent: "center" },
+  cancelButton: {
+    height: 48,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   cancelButtonText: { color: "#3c83f6", fontSize: 16, fontWeight: "bold" },
 });
 

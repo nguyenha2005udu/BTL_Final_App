@@ -8,12 +8,15 @@ import {
   StyleSheet,
   Modal,
   Alert,
+  Platform,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { MaterialIcons } from '../../../../components/icon';
-import { useTheme } from '../../../context/ThemeContext';
 
-// ✅ chỉnh path import cho đúng dự án bạn
+import { useNavigation } from '@react-navigation/native';
+import { MaterialIcons } from '@expo/vector-icons';
+import { useTheme } from '../../../context/ThemeContext';
+import DateTimePicker from '@react-native-community/datetimepicker';
+
+
 import { listenCategories } from '../../../services/category.service';
 import { createTransaction, TransactionType } from '../../../services/transaction.service';
 import type { Category } from '../../../type/types';
@@ -29,40 +32,56 @@ const AddTransactionScreen: React.FC = () => {
   const navigation = useNavigation();
   const { theme, isDarkMode } = useTheme();
 
+  // thu / chi
   const [type, setType] = useState<TransactionType>('expense');
 
-  // ✅ form states
+  // form
   const [mountText, setMountText] = useState('');
   const [note, setNote] = useState('');
   const [date, setDate] = useState<Date>(new Date());
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
-  // ✅ categories
+
+  // categories
   const [categories, setCategories] = useState<Category[]>([]);
   const [categoryModalOpen, setCategoryModalOpen] = useState(false);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>('');
-
-  const selectedCategory = useMemo(
-    () => categories.find(c => c.id === selectedCategoryId),
-    [categories, selectedCategoryId]
-  );
 
   useEffect(() => {
     const unsub = listenCategories(setCategories, (e) => console.log(e));
     return unsub;
   }, []);
 
-  // auto select category đầu tiên nếu chưa chọn
+  // chỉ lấy những category đúng loại (income / expense)
+  const filteredCategories = useMemo(
+    () =>
+      categories.filter((c: any) =>
+        c.type ? c.type === type : true, // nếu category chưa có field type thì cho hiện hết
+      ),
+    [categories, type],
+  );
+
+  const selectedCategory = useMemo(
+    () => filteredCategories.find(c => c.id === selectedCategoryId),
+    [filteredCategories, selectedCategoryId],
+  );
+
+  // auto chọn category đầu tiên của loại hiện tại
   useEffect(() => {
-    if (!selectedCategoryId && categories.length > 0) {
-      setSelectedCategoryId(categories[0].id);
+    if (!filteredCategories.length) {
+      setSelectedCategoryId('');
+      return;
     }
-  }, [categories, selectedCategoryId]);
+    if (!selectedCategoryId || !filteredCategories.some(c => c.id === selectedCategoryId)) {
+      setSelectedCategoryId(filteredCategories[0].id);
+    }
+  }, [filteredCategories, selectedCategoryId]);
 
   const onSave = async () => {
     const mount = Number(mountText);
 
     if (!selectedCategoryId) {
-      Alert.alert('Thiếu danh mục', 'Vui lòng chọn danh mục.');
+      Alert.alert('Thiếu danh mục', `Vui lòng tạo danh mục ${type === 'expense' ? 'chi tiêu' : 'thu nhập'} trước.`);
       return;
     }
     if (!mountText || Number.isNaN(mount) || mount <= 0) {
@@ -87,9 +106,16 @@ const AddTransactionScreen: React.FC = () => {
     }
   };
 
+  const hasCategoryForType = filteredCategories.length > 0;
+
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
-      <View style={[styles.header, { backgroundColor: theme.headerBackground, borderBottomColor: theme.border }]}>
+      <View
+        style={[
+          styles.header,
+          { backgroundColor: theme.headerBackground, borderBottomColor: theme.border },
+        ]}
+      >
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.iconButton}>
           <MaterialIcons name="arrow-back" size={24} color={theme.textPrimary} />
         </TouchableOpacity>
@@ -98,44 +124,84 @@ const AddTransactionScreen: React.FC = () => {
       </View>
 
       <ScrollView contentContainerStyle={styles.content}>
-        {/* Type Toggle */}
-        <View style={[styles.toggleContainer, { backgroundColor: isDarkMode ? '#374151' : '#e5e7eb' }]}>
+        {/* Chọn loại giao dịch */}
+        <View
+          style={[
+            styles.toggleContainer,
+            { backgroundColor: isDarkMode ? '#374151' : '#e5e7eb' },
+          ]}
+        >
           <TouchableOpacity
-            style={[styles.toggleButton, type === 'expense' && [styles.toggleActive, { backgroundColor: theme.cardBackground }]]}
+            style={[
+              styles.toggleButton,
+              type === 'expense' && [styles.toggleActive, { backgroundColor: theme.cardBackground }],
+            ]}
             onPress={() => setType('expense')}
           >
-            <Text style={[styles.toggleText, { color: theme.textSecondary }, type === 'expense' && styles.toggleTextActive]}>
+            <Text
+              style={[
+                styles.toggleText,
+                { color: theme.textSecondary },
+                type === 'expense' && styles.toggleTextActive,
+              ]}
+            >
               Chi tiêu
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.toggleButton, type === 'income' && [styles.toggleActive, { backgroundColor: theme.cardBackground }]]}
+            style={[
+              styles.toggleButton,
+              type === 'income' && [styles.toggleActive, { backgroundColor: theme.cardBackground }],
+            ]}
             onPress={() => setType('income')}
           >
-            <Text style={[styles.toggleText, { color: theme.textSecondary }, type === 'income' && styles.toggleTextActive]}>
+            <Text
+              style={[
+                styles.toggleText,
+                { color: theme.textSecondary },
+                type === 'income' && styles.toggleTextActive,
+              ]}
+            >
               Thu nhập
             </Text>
           </TouchableOpacity>
         </View>
 
         <View style={styles.form}>
-          <View style={styles.inputGroup}>
+          {/* Số tiền */}
+          <View className="inputGroup">
             <Text style={[styles.label, { color: theme.textSecondary }]}>Số tiền</Text>
             <TextInput
               value={mountText}
               onChangeText={setMountText}
-              style={[styles.input, { backgroundColor: theme.cardBackground, borderColor: theme.border, color: theme.textPrimary }]}
+              style={[
+                styles.input,
+                {
+                  backgroundColor: theme.cardBackground,
+                  borderColor: theme.border,
+                  color: theme.textPrimary,
+                },
+              ]}
               placeholder="Nhập số tiền"
               placeholderTextColor={theme.textSecondary}
               keyboardType="numeric"
             />
           </View>
 
+          {/* Danh mục */}
           <View style={styles.inputGroup}>
             <Text style={[styles.label, { color: theme.textSecondary }]}>Danh mục</Text>
             <TouchableOpacity
-              style={[styles.selectInput, { backgroundColor: theme.cardBackground, borderColor: theme.border }]}
-              onPress={() => setCategoryModalOpen(true)}
+              disabled={!hasCategoryForType}
+              style={[
+                styles.selectInput,
+                {
+                  backgroundColor: theme.cardBackground,
+                  borderColor: theme.border,
+                  opacity: hasCategoryForType ? 1 : 0.6,
+                },
+              ]}
+              onPress={() => hasCategoryForType && setCategoryModalOpen(true)}
             >
               <View style={styles.selectContent}>
                 <MaterialIcons
@@ -145,32 +211,76 @@ const AddTransactionScreen: React.FC = () => {
                   style={styles.inputIcon}
                 />
                 <Text style={[styles.selectText, { color: theme.textPrimary }]}>
-                  {selectedCategory?.name || (categories.length ? 'Chọn danh mục' : 'Chưa có danh mục')}
+                  {selectedCategory?.name ||
+                    (hasCategoryForType
+                      ? 'Chọn danh mục'
+                      : type === 'expense'
+                      ? 'Chưa có danh mục chi tiêu'
+                      : 'Chưa có danh mục thu nhập')}
                 </Text>
               </View>
               <MaterialIcons name="expand-more" size={24} color={theme.textSecondary} />
             </TouchableOpacity>
           </View>
 
+          {/* Ngày */}
           <View style={styles.inputGroup}>
             <Text style={[styles.label, { color: theme.textSecondary }]}>Ngày</Text>
             <TouchableOpacity
-              style={[styles.selectInput, { backgroundColor: theme.cardBackground, borderColor: theme.border }]}
-              onPress={() => setDate(new Date())} // ✅ tối thiểu: bấm để set hôm nay
+              style={[
+                styles.selectInput,
+                { backgroundColor: theme.cardBackground, borderColor: theme.border },
+              ]}
+              onPress={() => setShowDatePicker(true)}
             >
               <View style={styles.selectContent}>
-                <MaterialIcons name="calendar-today" size={20} color={theme.textSecondary} style={styles.inputIcon} />
-                <Text style={[styles.selectText, { color: theme.textPrimary }]}>{formatDateYYYYMMDD(date)}</Text>
+                <MaterialIcons
+                  name="calendar-today"
+                  size={20}
+                  color={theme.textSecondary}
+                  style={styles.inputIcon}
+                />
+                <Text style={[styles.selectText, { color: theme.textPrimary }]}>
+                  {formatDateYYYYMMDD(date)}
+                </Text>
               </View>
             </TouchableOpacity>
+
+            {showDatePicker && (
+              <DateTimePicker
+                value={date}
+                mode="date"
+                display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                onChange={(event, selectedDate) => {
+                  // Android: user bấm cancel thì selectedDate = undefined
+                  if (Platform.OS === 'android') {
+                    setShowDatePicker(false);
+                  }
+
+                  if (selectedDate) {
+                    setDate(selectedDate);
+                  }
+                }}
+              />
+            )}
           </View>
 
+
+          {/* Ghi chú */}
           <View style={styles.inputGroup}>
             <Text style={[styles.label, { color: theme.textSecondary }]}>Ghi chú</Text>
             <TextInput
               value={note}
               onChangeText={setNote}
-              style={[styles.input, styles.textArea, { backgroundColor: theme.cardBackground, borderColor: theme.border, color: theme.textPrimary }]}
+              style={[
+                styles.input,
+                styles.textArea,
+                {
+                  backgroundColor: theme.cardBackground,
+                  borderColor: theme.border,
+                  color: theme.textPrimary,
+                },
+              ]}
               placeholder="Nhập ghi chú (không bắt buộc)"
               placeholderTextColor={theme.textSecondary}
               multiline
@@ -181,7 +291,13 @@ const AddTransactionScreen: React.FC = () => {
         </View>
       </ScrollView>
 
-      <View style={[styles.footer, { backgroundColor: theme.cardBackground, borderTopColor: theme.border }]}>
+      {/* Footer */}
+      <View
+        style={[
+          styles.footer,
+          { backgroundColor: theme.cardBackground, borderTopColor: theme.border },
+        ]}
+      >
         <TouchableOpacity style={styles.saveButton} onPress={onSave}>
           <Text style={styles.saveButtonText}>Lưu</Text>
         </TouchableOpacity>
@@ -190,14 +306,26 @@ const AddTransactionScreen: React.FC = () => {
         </TouchableOpacity>
       </View>
 
-      {/* ✅ Category Modal (thêm logic, không đụng style chính) */}
-      <Modal visible={categoryModalOpen} transparent animationType="fade" onRequestClose={() => setCategoryModalOpen(false)}>
+      {/* Modal chọn danh mục */}
+      <Modal
+        visible={categoryModalOpen}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setCategoryModalOpen(false)}
+      >
         <View style={modalStyles.backdrop}>
-          <View style={[modalStyles.sheet, { backgroundColor: theme.cardBackground, borderColor: theme.border }]}>
-            <Text style={[modalStyles.title, { color: theme.textPrimary }]}>Chọn danh mục</Text>
+          <View
+            style={[
+              modalStyles.sheet,
+              { backgroundColor: theme.cardBackground, borderColor: theme.border },
+            ]}
+          >
+            <Text style={[modalStyles.title, { color: theme.textPrimary }]}>
+              Chọn danh mục {type === 'expense' ? 'chi tiêu' : 'thu nhập'}
+            </Text>
 
             <ScrollView style={{ maxHeight: 320 }}>
-              {categories.map((c) => (
+              {filteredCategories.map(c => (
                 <TouchableOpacity
                   key={c.id}
                   style={[modalStyles.item, { borderBottomColor: theme.border }]}
@@ -207,8 +335,14 @@ const AddTransactionScreen: React.FC = () => {
                   }}
                 >
                   <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <MaterialIcons name={(c.icon as any) || 'category'} size={20} color={theme.textSecondary} />
-                    <Text style={[modalStyles.itemText, { color: theme.textPrimary }]}>{c.name}</Text>
+                    <MaterialIcons
+                      name={(c.icon as any) || 'category'}
+                      size={20}
+                      color={theme.textSecondary}
+                    />
+                    <Text style={[modalStyles.itemText, { color: theme.textPrimary }]}>
+                      {c.name}
+                    </Text>
                   </View>
 
                   {c.id === selectedCategoryId ? (
@@ -267,7 +401,7 @@ const modalStyles = StyleSheet.create({
   },
 });
 
-// ===== styles của bạn giữ nguyên =====
+// styles cũ của bạn giữ nguyên
 const styles = StyleSheet.create({
   container: {
     flex: 1,

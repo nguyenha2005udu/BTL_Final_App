@@ -1,26 +1,23 @@
-import React, { useEffect, useState } from "react";
+import { MaterialIcons } from '@expo/vector-icons';
+import { useNavigation } from "@react-navigation/native";
+import React, { useEffect, useMemo, useState } from "react";
 import {
-  View,
-  Text,
-  TouchableOpacity,
   Image,
   ScrollView,
   StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
-import { MaterialIcons } from '@expo/vector-icons';
 import { MOCK_GOALS } from "../../../../constants/constants";
 import { useTheme } from "../../../context/ThemeContext";
 import { getCurrentUserProfile } from "../../../services/auth.service";
-import { auth } from "../../../services/firebase/firebaseConfig";
+import { auth} from "../../../services/firebase/firebaseConfig";
 
-import type { Category, Transaction as UITransaction } from "../../../type/types";
 import { listenCategories } from "../../../services/category.service";
-import {
-  listenHomeSummary,
-  listenRecentTransactions,
-  mapToHomeTransactions,
-} from "../../../services/transaction.service";
+import { listenTransactions } from "../../../services/transaction.service";
+import type { Category, Transaction as UITransaction } from "../../../type/types";
+import MonthlyExpenseChart from "../Home/MonthlyExpenseChart";
 
 const DEFAULT_AVATAR =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuA_vMSFQARLvGWesaN0bPwdT0TwBkCjQuK-p1dyFrGdqF-NhAqX3D22UFhPgycZkrUA24cKIcSZEPLOfhmUcNZTvYIXtJBvgXlaRUnPVCaQ5zWzrC0n45kOlTptHz4fEKjcJrTwoasD3u6BnAo6DO1bJ2oe7sNZMz4X8J4ZExMW6HBrFk1JAZloRwzDfjdw4WOSE8HcBg82M53Zk1lZ9igZ6sqHdz0lO3Cvw1h6_YE38kL45oHN1DtJsD26XLF9ECZDyI3c-2ms-qO0";
@@ -38,6 +35,8 @@ const HomeScreen: React.FC = () => {
 
   const [categories, setCategories] = useState<Category[]>([]);
   const [recentTransactions, setRecentTransactions] = useState<UITransaction[]>([]);
+
+  const [transactions, setTransactions] = useState<any[]>([]);
 
   // 1) Load profile (tên + avatar)
   useEffect(() => {
@@ -72,29 +71,114 @@ const HomeScreen: React.FC = () => {
     fetchProfile();
   }, []);
 
-  // 2) Listen categories + summary + recent tx
+  // 2a) Listen danh mục
   useEffect(() => {
     const unsubCats = listenCategories(setCategories);
+    return () => unsubCats?.();
+  }, []);
 
-    // realtime tổng thu/chi/số dư
-    const unsubSummary = listenHomeSummary((s) => {
-      setTotalIncome(s.totalIncome);
-      setTotalExpense(s.totalExpense);
-      setAmount(s.balance);
+    // 2b) Listen giao dịch
+  useEffect(() => {
+    const unsubTx = listenTransactions(
+      (list: any[]) => {
+        setTransactions(list);
+      },
+      (err) => {
+        console.log("listenTransactions error", err);
+      }
+    );
+
+    return () => unsubTx?.();
+  }, []);
+
+  // 2c) Tính tổng thu/chi/số dư + map giao dịch gần đây
+  useEffect(() => {
+    if (!transactions) return;
+
+    // Tính tổng thu / chi
+    let income = 0;
+    let expense = 0;
+
+    transactions.forEach((tx: any) => {
+      const rawAmount =
+        typeof tx.mount === "number"
+          ? tx.mount
+          : typeof tx.amount === "number"
+          ? tx.amount
+          : 0;
+
+      if (tx.type === "income") {
+        income += rawAmount;
+      } else {
+        expense += rawAmount;
+      }
     });
 
-    // realtime recent tx docs (3 cái mới nhất)
-    const unsubRecent = listenRecentTransactions(3, (txDocs) => {
-      setRecentTransactions(mapToHomeTransactions(txDocs, categories));
+    setTotalIncome(income);
+    setTotalExpense(expense);
+    setAmount(income - expense); // số dư
+
+    // Sắp xếp giao dịch mới nhất
+    const sorted = [...transactions].sort((a: any, b: any) => {
+      const getTime = (t: any) => {
+        const v = t.date || t.createdAt;
+        if (!v) return 0;
+        if (typeof v.toDate === "function") return v.toDate().getTime();
+        const d = new Date(v);
+        return isNaN(d.getTime()) ? 0 : d.getTime();
+      };
+      return getTime(b) - getTime(a);
     });
 
-    return () => {
-      unsubCats?.();
-      unsubSummary?.();
-      unsubRecent?.();
-    };
-    // NOTE: cần categories để map name/icon => dependency
-  }, [categories]);
+    const latest = sorted.slice(0, 3); // 3 giao dịch gần nhất
+
+    const mapped: UITransaction[] = latest.map((tx: any) => {
+      const rawAmount =
+        typeof tx.mount === "number"
+          ? tx.mount
+          : typeof tx.amount === "number"
+          ? tx.amount
+          : 0;
+
+      const signedAmount =
+        tx.type === "income" ? rawAmount : -rawAmount;
+
+      const category = categories.find((c) => c.id === tx.categoryId);
+      const icon = category?.icon || "category";
+      const title = category?.name || "Khác";
+
+      // subtitle = "dd/mm/yyyy • ghi chú"
+      const subtitleParts: string[] = [];
+      const v = tx.date || tx.createdAt;
+      if (v) {
+        let d: Date | null = null;
+        if (typeof v.toDate === "function") d = v.toDate();
+        else {
+          const tmp = new Date(v);
+          if (!isNaN(tmp.getTime())) d = tmp;
+        }
+        if (d) {
+          const day = String(d.getDate()).padStart(2, "0");
+          const month = String(d.getMonth() + 1).padStart(2, "0");
+          const year = d.getFullYear();
+          subtitleParts.push(`${day}/${month}/${year}`);
+        }
+      }
+      if (tx.note) subtitleParts.push(tx.note);
+
+      return {
+        id: tx.id,
+        type: tx.type,
+        amount: signedAmount,
+        icon,
+        title,
+        subtitle: subtitleParts.join(" • "),
+      } as UITransaction;
+    });
+
+    setRecentTransactions(mapped);
+  }, [transactions, categories]);
+
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
@@ -165,41 +249,9 @@ const HomeScreen: React.FC = () => {
           </View>
         </View>
 
-        {/* Monthly Report Card */}
-        <View style={[styles.reportCard, { backgroundColor: theme.cardBackground }]}>
-          <Text style={[styles.reportTitle, { color: theme.textPrimary }]}>
-            Chi tiêu trong tháng
-          </Text>
-          <Text style={[styles.reportAmount, { color: theme.textPrimary }]}>
-            8.530.000₫
-          </Text>
-          <View style={styles.reportTrend}>
-            <MaterialIcons name="arrow-downward" size={16} color="#EF4444" />
-            <Text style={styles.trendText}>5% so với tháng trước</Text>
-          </View>
+        {/* Monthly Report Card – 3 tháng gần nhất */}
+        <MonthlyExpenseChart />
 
-          {/* Mock Bar Chart */}
-          <View style={styles.chartContainer}>
-            {[70, 30, 50, 85, 60, 40, 75].map((height, index) => (
-              <View key={index} style={styles.barWrapper}>
-                <View
-                  style={[
-                    styles.bar,
-                    {
-                      height: `${height}%`,
-                      backgroundColor:
-                        index === 4
-                          ? "#3c83f6"
-                          : isDarkMode
-                          ? "rgba(60, 131, 246, 0.3)"
-                          : "rgba(60, 131, 246, 0.2)",
-                    },
-                  ]}
-                />
-              </View>
-            ))}
-          </View>
-        </View>
 
         {/* Recent Transactions */}
         <View style={styles.section}>
@@ -557,6 +609,12 @@ const styles = StyleSheet.create({
     color: "#60708a",
     fontWeight: "500",
   },
+  monthLabel: {
+  marginTop: 8,
+  fontSize: 12,
+  textAlign: "center",
+  },
+
   progressTextBold: {
     fontSize: 12,
     fontWeight: "bold",
