@@ -26,6 +26,7 @@ export interface Category {
   color: string;
   budget?: number;
   spent?: number;
+  type: 'income' | 'expense';
 }
 
 export interface UserProfile {
