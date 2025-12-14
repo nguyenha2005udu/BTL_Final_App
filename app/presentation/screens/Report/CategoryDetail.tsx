@@ -19,6 +19,9 @@ const CategoryDetail: React.FC = () => {
   const navigation = useNavigation<any>();
   const route = useRoute();
   const { category } = route.params as { category: any };
+  const categoryType: 'income' | 'expense' =
+  category?.type ?? 'expense';
+
   
   const { theme, isDarkMode } = useTheme();
   const { updateCategory, deleteCategory } = useCategories();
@@ -251,6 +254,24 @@ const CategoryDetail: React.FC = () => {
             />
             {nameError ? <Text style={styles.errorText}>{nameError}</Text> : null}
           </View>
+          
+          <View style={styles.typeRow}>
+            <Text style={[styles.label, { color: theme.textSecondary }]}>
+              Loại danh mục
+            </Text>
+            <View
+              style={[
+                styles.typeBadge,
+                categoryType === 'expense'
+                  ? styles.expenseBadge
+                  : styles.incomeBadge,
+              ]}
+            >
+              <Text style={styles.typeBadgeText}>
+                {categoryType === 'expense' ? 'Chi tiêu' : 'Thu nhập'}
+              </Text>
+            </View>
+          </View>
 
           <View>
             <Text style={[styles.label, { color: theme.textSecondary }]}>Màu sắc danh mục</Text>
@@ -280,27 +301,29 @@ const CategoryDetail: React.FC = () => {
             </TouchableOpacity>
           </View>
 
-          <View>
-            <Text style={[styles.label, { color: theme.textSecondary }]}>Ngân sách danh mục</Text>
-            <View style={styles.moneyInputWrapper}>
-              <TextInput
-                style={[
-                  styles.moneyInput,
-                  {
-                    backgroundColor: theme.cardBackground,
-                    borderColor: theme.border,
-                    color: theme.textPrimary,
-                  },
-                ]}
-                placeholder="Nhập ngân sách (tùy chọn)"
-                placeholderTextColor={theme.textSecondary}
-                keyboardType="numeric"
-                value={budget}
-                onChangeText={setBudget}
-              />
-              <Text style={[styles.currencySymbol, { color: theme.textSecondary }]}>₫</Text>
+          {categoryType === 'expense' && (
+            <View>
+              <Text style={[styles.label, { color: theme.textSecondary }]}>Ngân sách danh mục</Text>
+              <View style={styles.moneyInputWrapper}>
+                <TextInput
+                  style={[
+                    styles.moneyInput,
+                    {
+                      backgroundColor: theme.cardBackground,
+                      borderColor: theme.border,
+                      color: theme.textPrimary,
+                    },
+                  ]}
+                  placeholder="Nhập ngân sách (tùy chọn)"
+                  placeholderTextColor={theme.textSecondary}
+                  keyboardType="numeric"
+                  value={budget}
+                  onChangeText={setBudget}
+                />
+                <Text style={[styles.currencySymbol, { color: theme.textSecondary }]}>₫</Text>
+              </View>
             </View>
-          </View>
+          )}
         </View>
 
         <View style={styles.formActions}>
@@ -427,6 +450,32 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#111418',
   },
+  
+  typeRow: {
+  marginTop: 12,
+  marginBottom: 4,
+  flexDirection: 'row',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  },
+  typeBadge: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 999,
+  },
+  expenseBadge: {
+    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+  },
+  incomeBadge: {
+    backgroundColor: 'rgba(34, 197, 94, 0.1)',
+  },
+  typeBadgeText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#111827',
+  },
+
+
   colorPreview: {
     width: 32,
     height: 32,

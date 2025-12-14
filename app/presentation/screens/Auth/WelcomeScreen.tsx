@@ -10,6 +10,8 @@ import {
   View,
 } from 'react-native';
 import styles from './WelcomeScreen.styles';
+import { loginWithGoogle } from '../../../services/auth.service';
+
 
 // Tùy project của bạn, khai báo cho khớp với RootStack
 type RootStackParamList = {
@@ -31,10 +33,11 @@ const WelcomeScreen: React.FC = () => {
     navigation.navigate('App');
   };
 
-  const handleLoginWithGoogle = () => {
-    // TODO: logic Google Sign-in
-    console.log('Google login');
+  const handleLoginWithGoogle = async () => {
+    await loginWithGoogle();
+    navigation.replace('App');
   };
+
 
   const handleLoginWithFacebook = () => {
     // TODO: logic Facebook login

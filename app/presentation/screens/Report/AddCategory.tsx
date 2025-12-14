@@ -25,6 +25,7 @@ const AddCategory: React.FC = () => {
 
   const [name, setName] = useState('');
   const [budget, setBudget] = useState('');
+  const [categoryType, setCategoryType] = useState<'expense' | 'income'>('expense');
   const [nameError, setNameError] = useState<string | null>(null);
 
   const handleSave = async () => {
@@ -48,6 +49,7 @@ const AddCategory: React.FC = () => {
         icon,
         color,
         budget: budgetNumber,
+        type: categoryType,
       });
       navigation.goBack();
     } catch (e) {
@@ -285,6 +287,51 @@ const AddCategory: React.FC = () => {
 
           <View>
             <Text style={[styles.label, { color: theme.textSecondary }]}>
+              Loại danh mục
+            </Text>
+            <View style={styles.typeSelector}>
+              <TouchableOpacity
+                style={[
+                  styles.typeChip,
+                  { backgroundColor: theme.cardBackground, borderColor: theme.border },
+                  categoryType === 'expense' && styles.typeChipActive,
+                ]}
+                onPress={() => setCategoryType('expense')}
+              >
+                <Text
+                  style={[
+                    styles.typeChipText,
+                    { color: theme.textSecondary },
+                    categoryType === 'expense' && styles.typeChipTextActive,
+                  ]}
+                >
+                  Chi tiêu
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[
+                  styles.typeChip,
+                  { backgroundColor: theme.cardBackground, borderColor: theme.border },
+                  categoryType === 'income' && styles.typeChipActive,
+                ]}
+                onPress={() => setCategoryType('income')}
+              >
+                <Text
+                  style={[
+                    styles.typeChipText,
+                    { color: theme.textSecondary },
+                    categoryType === 'income' && styles.typeChipTextActive,
+                  ]}
+                >
+                  Thu nhập
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+  
+          <View>
+            <Text style={[styles.label, { color: theme.textSecondary }]}>
               Màu sắc danh mục
             </Text>
             <TouchableOpacity
@@ -320,36 +367,39 @@ const AddCategory: React.FC = () => {
             </TouchableOpacity>
           </View>
 
-          <View>
-            <Text style={[styles.label, { color: theme.textSecondary }]}>
-              Ngân sách danh mục
-            </Text>
-            <View style={styles.moneyInputWrapper}>
-              <TextInput
-                style={[
-                  styles.moneyInput,
-                  {
-                    backgroundColor: theme.cardBackground,
-                    borderColor: theme.border,
-                    color: theme.textPrimary,
-                  },
-                ]}
-                placeholder="Nhập ngân sách (tùy chọn)"
-                placeholderTextColor={theme.textSecondary}
-                keyboardType="numeric"
-                value={budget}
-                onChangeText={setBudget}
-              />
-              <Text
-                style={[
-                  styles.currencySymbol,
-                  { color: theme.textSecondary },
-                ]}
-              >
-                ₫
+          {categoryType === 'expense' && (
+            <View>
+              <Text style={[styles.label, { color: theme.textSecondary }]}>
+                Ngân sách danh mục
               </Text>
+              <View style={styles.moneyInputWrapper}>
+                <TextInput
+                  style={[
+                    styles.moneyInput,
+                    {
+                      backgroundColor: theme.cardBackground,
+                      borderColor: theme.border,
+                      color: theme.textPrimary,
+                    },
+                  ]}
+                  placeholder="Nhập ngân sách (tùy chọn)"
+                  placeholderTextColor={theme.textSecondary}
+                  keyboardType="numeric"
+                  value={budget}
+                  onChangeText={setBudget}
+                />
+                <Text
+                  style={[
+                    styles.currencySymbol,
+                    { color: theme.textSecondary },
+                  ]}
+                >
+                  ₫
+                </Text>
+              </View>
             </View>
-          </View>
+          )}
+
         </View>
 
         <View style={styles.formActions}>
@@ -476,6 +526,34 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#111418',
   },
+  
+  typeSelector: {
+  flexDirection: 'row',
+  gap: 12,
+  marginTop: 8,
+  },
+  typeChip: {
+    flex: 1,
+    height: 40,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#d1d5db',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  typeChipActive: {
+    backgroundColor: '#3c83f6',
+    borderColor: '#3c83f6',
+  },
+  typeChipText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#6b7280',
+  },
+  typeChipTextActive: {
+    color: '#ffffff',
+  },
+
   colorPreview: {
     width: 32,
     height: 32,

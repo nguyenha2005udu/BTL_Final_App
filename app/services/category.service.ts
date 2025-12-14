@@ -52,6 +52,7 @@ export const createCategory = async (input: {
   icon: string;
   color: string;
   budget?: number;
+  type: 'income' | 'expense';
 }) => {
   const colRef = getCategoriesCollection();
   if (!colRef) {
@@ -64,13 +65,14 @@ export const createCategory = async (input: {
     color: input.color,
     budget: input.budget ?? null,
     spent: 0,
+    type: input.type,
     createdAt: serverTimestamp(),
   });
 };
 
 export const updateCategory = async (
   id: string,
-  data: Partial<Pick<Category, 'name' | 'icon' | 'color' | 'budget'>>,
+  data: Partial<Pick<Category, 'name' | 'icon' | 'color' | 'budget' | 'type'>>,
 ) => {
   const user = auth.currentUser;
   if (!user) throw new Error('User not logged in');

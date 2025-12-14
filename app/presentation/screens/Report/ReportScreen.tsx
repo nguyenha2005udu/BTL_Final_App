@@ -16,10 +16,12 @@ const ReportScreen: React.FC = () => {
   const navigation = useNavigation<any>();
   const { theme, isDarkMode } = useTheme();
   const { categories, loading } = useCategories();
+  const [filterType, setFilterType] = React.useState<'expense' | 'income'>('expense');
 
   // Map Category -> data cho phần "Chi tiêu theo danh mục"
   const rawData = categories.map(cat => ({
     name: cat.name,
+    type : cat.type,
     value: cat.spent ?? 0, // tạm thời 0, sau này cộng từ transactions
     color: cat.color || '#60A5FA',
   }));
@@ -44,6 +46,8 @@ const ReportScreen: React.FC = () => {
       </View>
     );
   }
+
+  const filteredData = data.filter(item => item.type === filterType);
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
@@ -149,6 +153,42 @@ const ReportScreen: React.FC = () => {
 
         {/* Detail Card */}
         <View style={[styles.card, { backgroundColor: theme.cardBackground }]}>
+          <View style={styles.typeFilterRow}>
+            <TouchableOpacity
+              style={[
+                styles.typeFilterChip,
+                filterType === 'expense' && styles.typeFilterChipActive,
+              ]}
+              onPress={() => setFilterType('expense')}
+            >
+              <Text
+                style={[
+                  styles.typeFilterText,
+                  filterType === 'expense' && styles.typeFilterTextActive,
+                ]}
+              >
+                Chi tiêu
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[
+                styles.typeFilterChip,
+                filterType === 'income' && styles.typeFilterChipActive,
+              ]}
+              onPress={() => setFilterType('income')}
+            >
+              <Text
+                style={[
+                  styles.typeFilterText,
+                  filterType === 'income' && styles.typeFilterTextActive,
+                ]}
+              >
+                Thu nhập
+              </Text>
+            </TouchableOpacity>
+          </View>
+          
           <Text style={[styles.cardTitle, { color: theme.textPrimary }]}>
             Chi tiêu theo danh mục
           </Text>
@@ -212,7 +252,7 @@ const ReportScreen: React.FC = () => {
           </View>
 
           <View style={styles.legendList}>
-            {data.map(item => (
+            {filteredData.map(item => (
               <TouchableOpacity 
                 key={item.name}
                 onPress={() => {
@@ -425,6 +465,32 @@ const styles = StyleSheet.create({
   },
   balanceItem: {
     gap: 4,
+  },
+  typeFilterRow: {
+  flexDirection: 'row',
+  gap: 1,
+  marginBottom: 16,
+  },
+  typeFilterChip: {
+    flex: 1,
+    paddingVertical: 8,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#d1d5db',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  typeFilterChipActive: {
+    backgroundColor: '#3c83f6',
+    borderColor: '#3c83f6',
+  },
+  typeFilterText: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: '#6b7280',
+  },
+  typeFilterTextActive: {
+    color: '#ffffff',
   },
   cardTitle: {
     fontSize: 18,

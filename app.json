@@ -51,7 +51,8 @@
           "photosPermission": "Ứng dụng cần truy cập thư viện ảnh để chọn avatar",
           "cameraPermission": "Ứng dụng cần truy cập camera để chụp avatar"
         }
-      ]
+      ],
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true,
