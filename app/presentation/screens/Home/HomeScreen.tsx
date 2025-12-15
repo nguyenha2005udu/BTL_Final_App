@@ -19,7 +19,7 @@ import { auth} from "../../../services/firebase/firebaseConfig";
 
 import { listenCategories } from "../../../services/category.service";
 import { listenTransactions } from "../../../services/transaction.service";
-import type { Category, Transaction as UITransaction } from "../../../type/types";
+import type { Category, UITransaction as UITransaction } from "../../../type/types";
 import MonthlyExpenseChart from "../Home/MonthlyExpenseChart";
 import { getSavingGoalsByUser } from "../../../services/savingGoals.service";
 import { SavingGoal } from "../../../type/types";
@@ -119,8 +119,8 @@ const HomeScreen: React.FC = () => {
 
     transactions.forEach((tx: any) => {
       const rawAmount =
-        typeof tx.mount === "number"
-          ? tx.mount
+        typeof tx.amount === "number"
+          ? tx.amount
           : typeof tx.amount === "number"
           ? tx.amount
           : 0;
@@ -151,15 +151,9 @@ const HomeScreen: React.FC = () => {
     const latest = sorted.slice(0, 3); // 3 giao dịch gần nhất
 
     const mapped: UITransaction[] = latest.map((tx: any) => {
-      const rawAmount =
-        typeof tx.mount === "number"
-          ? tx.mount
-          : typeof tx.amount === "number"
-          ? tx.amount
-          : 0;
-
+      const rawAmount = tx.amount;
       const signedAmount =
-        tx.type === "income" ? rawAmount : -rawAmount;
+        tx.type === "income" ? tx.amount : -tx.amount;
 
       const category = categories.find((c) => c.id === tx.categoryId);
       const icon = category?.icon || "category";
