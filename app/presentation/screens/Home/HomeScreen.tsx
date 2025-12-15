@@ -1,6 +1,9 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import { useNavigation } from "@react-navigation/native";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useFocusEffect } from "@react-navigation/native";
+import { useCallback } from "react";
+
 import {
   Image,
   ScrollView,
@@ -9,7 +12,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { MOCK_GOALS } from "../../../../constants/constants";
+
 import { useTheme } from "../../../context/ThemeContext";
 import { getCurrentUserProfile } from "../../../services/auth.service";
 import { auth} from "../../../services/firebase/firebaseConfig";
@@ -18,7 +21,8 @@ import { listenCategories } from "../../../services/category.service";
 import { listenTransactions } from "../../../services/transaction.service";
 import type { Category, Transaction as UITransaction } from "../../../type/types";
 import MonthlyExpenseChart from "../Home/MonthlyExpenseChart";
-
+import { getSavingGoalsByUser } from "../../../services/savingGoals.service";
+import { SavingGoal } from "../../../type/types";
 const DEFAULT_AVATAR =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuA_vMSFQARLvGWesaN0bPwdT0TwBkCjQuK-p1dyFrGdqF-NhAqX3D22UFhPgycZkrUA24cKIcSZEPLOfhmUcNZTvYIXtJBvgXlaRUnPVCaQ5zWzrC0n45kOlTptHz4fEKjcJrTwoasD3u6BnAo6DO1bJ2oe7sNZMz4X8J4ZExMW6HBrFk1JAZloRwzDfjdw4WOSE8HcBg82M53Zk1lZ9igZ6sqHdz0lO3Cvw1h6_YE38kL45oHN1DtJsD26XLF9ECZDyI3c-2ms-qO0";
 
@@ -35,6 +39,7 @@ const HomeScreen: React.FC = () => {
 
   const [categories, setCategories] = useState<Category[]>([]);
   const [recentTransactions, setRecentTransactions] = useState<UITransaction[]>([]);
+  const [goals, setGoals] = useState<SavingGoal[]>([]);
 
   const [transactions, setTransactions] = useState<any[]>([]);
 
@@ -90,6 +95,19 @@ const HomeScreen: React.FC = () => {
 
     return () => unsubTx?.();
   }, []);
+  useFocusEffect(
+  useCallback(() => {
+    const loadGoals = async () => {
+      const user = auth.currentUser;
+      if (!user) return;
+
+      const data = await getSavingGoalsByUser(user.uid);
+      setGoals(data.slice(0, 3)); // chỉ lấy 3 mục tiêu
+    };
+
+    loadGoals();
+  }, [])
+);
 
   // 2c) Tính tổng thu/chi/số dư + map giao dịch gần đây
   useEffect(() => {
@@ -321,33 +339,102 @@ const HomeScreen: React.FC = () => {
         </View>
 
         {/* Goals */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>
-              Mục tiêu tiết kiệm
-            </Text>
-            <TouchableOpacity onPress={() => navigation.navigate("GoalList")}>
-              <Text style={styles.linkText}>Xem tất cả</Text>
-            </TouchableOpacity>
-          </View>
+<View style={styles.section}>
+  <View style={styles.sectionHeader}>
+    <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>
+      Mục tiêu tiết kiệm
+    </Text>
 
-          <View style={{ gap: 16 }}>
-            {MOCK_GOALS.map((goal) => {
-              const progress = Math.round(
-                (goal.savedAmount / goal.targetAmount) * 100
-              );
-              return (
-                <TouchableOpacity
-                  key={goal.id}
-                  style={[styles.goalCard, { backgroundColor: theme.cardBackground }]}
-                  onPress={() => navigation.navigate("GoalDetail", { id: goal.id })}
-                >
-                  {/* ... phần Goals giữ nguyên như bạn ... */}
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-        </View>
+    <View style={{ flexDirection: "row", gap: 12 }}>
+    <TouchableOpacity onPress={() => navigation.navigate("GoalList")}>
+      <Text style={styles.linkText}>Xem tất cả</Text>
+    </TouchableOpacity>
+
+    <TouchableOpacity onPress={() => navigation.navigate("AddGoals")}>
+      <MaterialIcons name="add" size={22} color="#3c83f6" />
+    </TouchableOpacity>
+  </View>
+  </View>
+
+  <View style={{ gap: 16 }}>
+    {goals.length === 0 ? (
+      <Text style={{ color: "#999", marginTop: 8 }}>
+        Chưa có mục tiêu tiết kiệm
+      </Text>
+    ) : (
+      goals.map((goal) => {
+        const progress =
+          goal.targetAmount > 0
+            ? Math.round(
+                (goal.currentAmount / goal.targetAmount) * 100
+              )
+            : 0;
+
+        return (
+          <TouchableOpacity
+            key={goal.id}
+            style={[
+              styles.goalCard,
+              { backgroundColor: theme.cardBackground },
+            ]}
+            onPress={() =>
+              navigation.navigate("GoalDetail", { id: goal.id })
+            }
+          >
+            {/* Title */}
+            <Text
+              style={{
+                fontSize: 16,
+                fontWeight: "600",
+                color: theme.textPrimary,
+              }}
+            >
+              {goal.title}
+            </Text>
+
+            {/* Amount */}
+            <Text style={{ marginTop: 4, color: theme.textSecondary }}>
+              {goal.currentAmount.toLocaleString()} /{" "}
+              {goal.targetAmount.toLocaleString()} đ
+            </Text>
+
+            {/* Progress bar */}
+            <View
+              style={{
+                height: 8,
+                backgroundColor: "#E5E7EB",
+                borderRadius: 10,
+                marginTop: 10,
+                overflow: "hidden",
+              }}
+            >
+              <View
+                style={{
+                  width: `${Math.min(progress, 100)}%`,
+                  height: "100%",
+                  backgroundColor: "#4C6EF5",
+                }}
+              />
+            </View>
+
+            {/* Percentage */}
+            <Text
+              style={{
+                marginTop: 6,
+                fontSize: 13,
+                color: "#4C6EF5",
+                fontWeight: "500",
+              }}
+            >
+              {progress}% hoàn thành
+            </Text>
+          </TouchableOpacity>
+        );
+      })
+    )}
+  </View>
+</View>
+
 
         <View style={{ height: 100 }} />
       </ScrollView>

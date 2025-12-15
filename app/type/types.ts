@@ -1,3 +1,5 @@
+import { Timestamp } from "firebase/firestore";
+
 export interface Transaction {
   id: string;
   title: string;
@@ -36,3 +38,14 @@ export interface UserProfile {
   phone?: string;
   dob?: string;
 }
+export type SavingGoal = {
+  id: string;
+  userId: string;
+  title: string;
+  targetAmount: number;
+  currentAmount: number;
+  deadline?: Timestamp;
+  createdAt: Timestamp;
+};
+
+
