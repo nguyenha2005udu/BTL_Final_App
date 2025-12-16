@@ -1,203 +1,104 @@
-import React from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { MaterialIcons } from '../../../../components/icon';
-import { useTheme } from '../../../context/ThemeContext';
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+} from "react-native";
+import { createSavingGoal } from "../../../services/savingGoals.service";
+import { auth } from "../../../services/firebase/firebaseConfig";
+import { MaterialIcons } from "@expo/vector-icons";
 
-const AddGoal: React.FC = () => {
-  const navigation = useNavigation();
-  const { theme } = useTheme();
-  const cardBg = isDarkMode ? theme.cardBackground : '#f8f9fa';
+export default function AddGoals({ navigation }: { navigation: any }) {
+  const [title, setTitle] = useState("");
+  const [targetAmount, setTargetAmount] = useState("");
+
+  const handleSave = async () => {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    if (!title || !targetAmount) return;
+
+    await createSavingGoal(user.uid, {
+      title,
+      targetAmount: Number(targetAmount),
+      currentAmount: 0,
+    });
+
+    navigation.goBack();
+  };
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
-      <View style={[styles.header, { backgroundColor: theme.headerBackground, borderBottomColor: theme.border }]}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.iconButton}>
-          <MaterialIcons name="arrow-back" size={24} color={theme.textPrimary} />
-        </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: theme.textPrimary }]}>Tạo mục tiêu mới</Text>
-        <View style={{ width: 40 }} />
-      </View>
+    <View style={styles.container}>
+      {/* Back button */}
+      <TouchableOpacity
+        onPress={() => navigation.goBack()}
+        style={styles.backButton}
+      >
+        <MaterialIcons name="arrow-back" size={28} color="#111" />
+      </TouchableOpacity>
 
-      <ScrollView contentContainerStyle={styles.content}>
-        <View style={styles.form}>
-          <View style={styles.inputGroup}>
-            <Text style={[styles.label, { color: theme.textSecondary }]}>Tên mục tiêu</Text>
-            <TextInput 
-              style={[styles.input, { backgroundColor: theme.cardBackground, borderColor: theme.border, color: theme.textPrimary }]}
-              placeholder="Ví dụ: Mua xe máy"
-              placeholderTextColor={theme.textSecondary}
-            />
-          </View>
+      <Text style={styles.title}>Tạo mục tiêu tiết kiệm</Text>
 
-          <View style={styles.inputGroup}>
-            <Text style={[styles.label, { color: theme.textSecondary }]}>Số tiền mục tiêu</Text>
-            <View style={[styles.currencyInputWrapper, { backgroundColor: theme.cardBackground, borderColor: theme.border }]}>
-              <TextInput 
-                style={[styles.currencyInput, { color: theme.textPrimary }]}
-                placeholder="Nhập số tiền"
-                placeholderTextColor={theme.textSecondary}
-                keyboardType="numeric"
-              />
-              <Text style={[styles.currencySymbol, { color: theme.textSecondary }]}>₫</Text>
-            </View>
-          </View>
+      <TextInput
+        placeholder="Tên mục tiêu"
+        value={title}
+        onChangeText={setTitle}
+        style={styles.input}
+      />
 
-          <View style={styles.inputGroup}>
-            <Text style={[styles.label, { color: theme.textSecondary }]}>Số tiền đã có</Text>
-            <View style={[styles.currencyInputWrapper, { backgroundColor: theme.cardBackground, borderColor: theme.border }]}>
-              <TextInput 
-                style={[styles.currencyInput, { color: theme.textPrimary }]}
-                placeholder="0"
-                placeholderTextColor={theme.textSecondary}
-                keyboardType="numeric"
-                defaultValue="0"
-              />
-              <Text style={[styles.currencySymbol, { color: theme.textSecondary }]}>₫</Text>
-            </View>
-          </View>
+      <TextInput
+        placeholder="Số tiền cần đạt"
+        keyboardType="numeric"
+        value={targetAmount}
+        onChangeText={setTargetAmount}
+        style={styles.input}
+      />
 
-          <View style={styles.inputGroup}>
-            <Text style={[styles.label, { color: theme.textSecondary }]}>Thời hạn</Text>
-            <TouchableOpacity style={[styles.dateInputWrapper, { backgroundColor: theme.cardBackground, borderColor: theme.border }]}>
-              <Text style={[styles.datePlaceholder, { color: theme.textSecondary }]}>Chọn ngày</Text>
-              <MaterialIcons name="calendar-today" size={20} color={theme.textSecondary} />
-            </TouchableOpacity>
-          </View>
-        </View>
-      </ScrollView>
-
-      <View style={[styles.footer, { backgroundColor: theme.cardBackground, borderTopColor: theme.border }]}>
-        <TouchableOpacity style={styles.saveButton} onPress={() => navigation.goBack()}>
-          <Text style={styles.saveButtonText}>Lưu mục tiêu</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.cancelButton} onPress={() => navigation.goBack()}>
-          <Text style={styles.cancelButtonText}>Hủy</Text>
-        </TouchableOpacity>
-      </View>
+      <TouchableOpacity style={styles.button} onPress={handleSave}>
+        <Text style={styles.buttonText}>Lưu mục tiêu</Text>
+      </TouchableOpacity>
     </View>
   );
-};
+}
+
+/* ================= STYLES ================= */
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f7f8',
+    padding: 20,
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    height: 60,
-    paddingHorizontal: 16,
-    backgroundColor: 'rgba(245, 247, 248, 0.9)',
-    borderBottomWidth: 1,
-    borderBottomColor: '#e5e7eb',
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#111418',
-  },
-  iconButton: {
+  backButton: {
+    marginBottom: 16,
     width: 40,
     height: 40,
-    alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: "center",
   },
-  content: {
-    padding: 16,
-  },
-  form: {
-    gap: 20,
-  },
-  inputGroup: {
-    gap: 8,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#374151',
+  title: {
+    fontSize: 22,
+    fontWeight: "bold",
+    marginBottom: 20,
   },
   input: {
-    backgroundColor: 'white',
+    backgroundColor: "#fff",
+    padding: 12,
+    borderRadius: 10,
+    marginBottom: 12,
     borderWidth: 1,
-    borderColor: '#d1d5db',
-    borderRadius: 8,
-    height: 48,
-    paddingHorizontal: 16,
-    fontSize: 16,
-    color: '#111418',
+    borderColor: "#ddd",
   },
-  currencyInputWrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'white',
-    borderWidth: 1,
-    borderColor: '#d1d5db',
-    borderRadius: 8,
-    height: 48,
-  },
-  currencyInput: {
-    flex: 1,
-    height: '100%',
-    paddingLeft: 16,
-    paddingRight: 40,
-    fontSize: 16,
-    color: '#111418',
-  },
-  currencySymbol: {
-    position: 'absolute',
-    right: 16,
-    fontSize: 16,
-    color: '#6b7280',
-    fontWeight: '500',
-  },
-  dateInputWrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: 'white',
-    borderWidth: 1,
-    borderColor: '#d1d5db',
-    borderRadius: 8,
-    height: 48,
-    paddingHorizontal: 16,
-  },
-  datePlaceholder: {
-    color: '#9ca3af',
-    fontSize: 16,
-  },
-  footer: {
-    padding: 16,
-    backgroundColor: 'white',
-    borderTopWidth: 1,
-    borderTopColor: '#e5e7eb',
-    gap: 12,
-  },
-  saveButton: {
-    backgroundColor: '#3c83f6',
-    height: 48,
+  button: {
+    backgroundColor: "#4C6EF5",
+    paddingVertical: 14,
     borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
+    marginTop: 10,
+    alignItems: "center",
   },
-  saveButtonText: {
-    color: 'white',
+  buttonText: {
+    color: "#fff",
     fontSize: 16,
-    fontWeight: 'bold',
-  },
-  cancelButton: {
-    height: 48,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  cancelButtonText: {
-    color: '#3c83f6',
-    fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "600",
   },
 });
-
-export default AddGoal;
