@@ -14,7 +14,9 @@ import {
   Transaction as DbTransaction,
 } from "../../../services/transaction.service";
 
-type FilterType = "7days" | "3days" | "custom";
+/* ================= TYPES ================= */
+
+type FilterType = "all" | "7days" | "3days";
 
 interface UITransaction {
   id: string;
@@ -25,37 +27,38 @@ interface UITransaction {
   type: "income" | "expense";
 }
 
+/* ================= UTILS ================= */
+
+const formatDateDDMMYYYY = (date: Date | any) => {
+  const d = date instanceof Date ? date : new Date(date);
+  const day = String(d.getDate()).padStart(2, "0");
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const year = d.getFullYear();
+  return `${day}/${month}/${year}`;
+};
+
+/* ================= SCREEN ================= */
+
 const StatisticsScreen: React.FC = () => {
   const { theme } = useTheme();
-  const [fromDate, setFromDate] = useState<Date | null>(null);
-  const [toDate, setToDate] = useState<Date | null>(null);
 
   const [transactions, setTransactions] = useState<UITransaction[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [filter, setFilter] = useState<FilterType>("custom");
-  const [showFromPicker, setShowFromPicker] = useState(false);
-  const [showToPicker, setShowToPicker] = useState(false);
+  const [filter, setFilter] = useState<FilterType>("7days");
 
   /* ================= LOAD DATA ================= */
+
   useEffect(() => {
     const unsub = listenTransactions(
       (list: DbTransaction[]) => {
-        const mapped: UITransaction[] = list.map((tx) => {
-          const d = tx.date;
-          const day = String(d.getDate()).padStart(2, "0");
-          const month = String(d.getMonth() + 1).padStart(2, "0");
-          const year = d.getFullYear();
-          return {
-            id: tx.id,
-            title: tx.title || 'Giao dịch',
-            subtitle: tx.note || '',
-            amount: tx.type === 'income' ? tx.amount : -tx.amount,
-            date: tx.date, // ✅ GIỮ DATE
-            icon: tx.icon || 'receipt-long',
-            colorClass: tx.type === 'income' ? 'green' : 'red',
-            type: tx.type,
-  };
-        });
+        const mapped: UITransaction[] = list.map((tx) => ({
+          id: tx.id,
+          title: tx.title || "Giao dịch",
+          subtitle: tx.note || "",
+          amount: tx.type === "income" ? tx.amount : -tx.amount,
+          date: tx.date,
+          type: tx.type,
+        }));
 
         setTransactions(mapped);
       },
@@ -64,57 +67,39 @@ const StatisticsScreen: React.FC = () => {
 
     return () => unsub?.();
   }, []);
-  const parseDDMMYYYY = (dateStr: string): Date | null => {
-  if (!dateStr) return null;
-
-  const [day, month, year] = dateStr.split("/").map(Number);
-  if (!day || !month || !year) return null;
-
-  return new Date(year, month - 1, day);
-};
 
   /* ================= FILTER ================= */
+
   const filteredTransactions = useMemo(() => {
-  const today = new Date();
+    const today = new Date();
 
-  return transactions.filter(tx => {
-    /* ===== SEARCH ===== */
-    if (
-      searchTerm &&
-      !tx.title.toLowerCase().includes(searchTerm.toLowerCase())
-    ) {
-      return false;
-    }
+    return transactions.filter((tx) => {
+      // SEARCH
+      if (
+        searchTerm &&
+        !tx.title.toLowerCase().includes(searchTerm.toLowerCase())
+      ) {
+        return false;
+      }
 
-    /* ===== PARSE DATE ===== */
-    const txDate = tx.date;
-    if (!txDate) return true;
+      // ALL → không lọc theo ngày
+      if (filter === "all") return true;
 
-    /* ===== FILTER ===== */
-    if (filter === "7days") {
+      const txDate = tx.date;
+      if (!txDate) return true;
+
       const diffDays =
         (today.getTime() - txDate.getTime()) / 86400000;
-      return diffDays <= 7;
-    }
 
-    if (filter === "3days") {
-      const diffDays =
-        (today.getTime() - txDate.getTime()) / 86400000;
-      return diffDays <= 3;
-    }
+      if (filter === "7days") return diffDays <= 7;
+      if (filter === "3days") return diffDays <= 3;
 
-    if (filter === "custom") {
-      if (fromDate && txDate < fromDate) return false;
-      if (toDate && txDate > toDate) return false;
       return true;
-    }
-
-    return true;
-  });
-}, [transactions, searchTerm, filter, fromDate, toDate]);
-
+    });
+  }, [transactions, searchTerm, filter]);
 
   /* ================= UI ================= */
+
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
       {/* HEADER */}
@@ -158,9 +143,9 @@ const StatisticsScreen: React.FC = () => {
         contentContainerStyle={styles.filterRow}
       >
         {[
+          { key: "all", label: "Tất cả" },
           { key: "7days", label: "7 ngày gần nhất" },
           { key: "3days", label: "3 ngày gần nhất" },
-          { key: "custom", label: "Tuỳ chọn" },
         ].map((f) => (
           <TouchableOpacity
             key={f.key}
@@ -214,6 +199,7 @@ const StatisticsScreen: React.FC = () => {
                   { backgroundColor: theme.cardBackground },
                 ]}
               >
+                {/* ICON */}
                 <View
                   style={[
                     styles.iconBox,
@@ -231,17 +217,31 @@ const StatisticsScreen: React.FC = () => {
                   />
                 </View>
 
+                {/* INFO */}
                 <View style={{ flex: 1 }}>
                   <Text
                     style={{ fontWeight: "600", color: theme.textPrimary }}
                   >
                     {tx.title}
                   </Text>
-                  <Text style={{ color: theme.textSecondary }}>
-                    {tx.subtitle}
+
+                  <Text
+                    style={{
+                      fontSize: 13,
+                      color: theme.textSecondary,
+                    }}
+                  >
+                    {formatDateDDMMYYYY(tx.date)}
                   </Text>
+
+                  {tx.subtitle ? (
+                    <Text style={{ color: theme.textSecondary }}>
+                      {tx.subtitle}
+                    </Text>
+                  ) : null}
                 </View>
 
+                {/* AMOUNT */}
                 <View style={{ alignItems: "flex-end" }}>
                   <Text
                     style={{
