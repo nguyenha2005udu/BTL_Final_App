@@ -157,7 +157,7 @@ const HomeScreen: React.FC = () => {
 
       const category = categories.find((c) => c.id === tx.categoryId);
       const icon = category?.icon || "category";
-      const title = category?.name || "Khác";
+      const title = tx.title || category?.name || 'Khác';
 
       // subtitle = "dd/mm/yyyy • ghi chú"
       const subtitleParts: string[] = [];
