@@ -3,12 +3,13 @@ import {
   collection,
   deleteDoc,
   doc,
-  getDoc, 
+  getDoc,
   onSnapshot,
   orderBy,
   query,
   serverTimestamp,
   updateDoc,
+  Timestamp,
 } from 'firebase/firestore';
 import { auth, db } from './firebase/firebaseConfig';
 
@@ -16,14 +17,18 @@ export type TransactionType = 'income' | 'expense';
 
 export interface Transaction {
   id: string;
+  title: string;
   categoryId: string;
-  mount: number;           // số tiền (dương)
+  icon: string;
+  amount: number;
   note: string;
-  type: TransactionType;   // 'income' | 'expense'
-  date: Date;              // ngày giao dịch
+  type: TransactionType;
+  date: Date;
   createdAt?: any;
   updatedAt?: any;
 }
+
+/* ================== INTERNAL ================== */
 
 const getTransactionsCollection = () => {
   const user = auth.currentUser;
@@ -31,7 +36,8 @@ const getTransactionsCollection = () => {
   return collection(db, 'users', user.uid, 'transactions');
 };
 
-// Lắng nghe realtime danh sách giao dịch
+/* ================== LISTEN REALTIME ================== */
+
 export const listenTransactions = (
   onChange: (transactions: Transaction[]) => void,
   onError?: (error: Error) => void,
@@ -49,21 +55,19 @@ export const listenTransactions = (
     snapshot => {
       const list: Transaction[] = snapshot.docs.map(docSnap => {
         const data = docSnap.data() as any;
-        const rawDate = data.date;
 
-        let date: Date;
-        if (rawDate?.toDate) {
-          date = rawDate.toDate();
-        } else if (rawDate instanceof Date) {
-          date = rawDate;
-        } else {
-          date = new Date();
-        }
+        const rawDate = data.date;
+        const date =
+          rawDate?.toDate instanceof Function
+            ? rawDate.toDate()
+            : new Date();
 
         return {
           id: docSnap.id,
-          categoryId: data.categoryId || '',
-          mount: typeof data.mount === 'number' ? data.mount : 0,
+          title: data.title ?? '',
+          categoryId: data.categoryId ?? '',
+          icon: data.icon ?? 'category',
+          amount: typeof data.amount === 'number' ? data.amount : 0,
           note: data.note ?? '',
           type: (data.type as TransactionType) ?? 'expense',
           date,
@@ -81,35 +85,41 @@ export const listenTransactions = (
   );
 };
 
+/* ================== CREATE ================== */
+
 export interface CreateTransactionInput {
+  title: string;
   categoryId: string;
-  mount: number;         // truyền dương, type quyết định thu/chi
-  note?: string;
+  icon: string;
+  amount: number;           // luôn truyền dương
   type: TransactionType;
+  note?: string;
   date?: Date;
 }
 
-// Tạo giao dịch mới
-export const createTransaction = async (input: CreateTransactionInput) => {
+export const createTransaction = async (
+  input: CreateTransactionInput,
+) => {
   const colRef = getTransactionsCollection();
   if (!colRef) {
     throw new Error('User not logged in');
   }
 
-  const normalizedMount = Math.abs(input.mount);
-
   await addDoc(colRef, {
+    title: input.title,
     categoryId: input.categoryId,
-    mount: normalizedMount,
-    note: input.note ?? '',
+    icon: input.icon,
+    amount: Math.abs(input.amount),
     type: input.type,
-    date: input.date ?? new Date(),
+    note: input.note ?? '',
+    date: Timestamp.fromDate(input.date ?? new Date()),
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   });
 };
 
-// Cập nhật giao dịch
+/* ================== UPDATE ================== */
+
 export const updateTransaction = async (
   id: string,
   data: Partial<CreateTransactionInput>,
@@ -119,15 +129,27 @@ export const updateTransaction = async (
 
   const ref = doc(db, 'users', user.uid, 'transactions', id);
 
-  const payload: any = { ...data, updatedAt: serverTimestamp() };
-  if (typeof data.mount === 'number') {
-    payload.mount = Math.abs(data.mount);
+  const payload: any = {
+    updatedAt: serverTimestamp(),
+  };
+
+  if (data.title !== undefined) payload.title = data.title;
+  if (data.categoryId !== undefined) payload.categoryId = data.categoryId;
+  if (data.icon !== undefined) payload.icon = data.icon;
+  if (data.type !== undefined) payload.type = data.type;
+  if (data.note !== undefined) payload.note = data.note;
+  if (typeof data.amount === 'number') {
+    payload.amount = Math.abs(data.amount);
+  }
+  if (data.date instanceof Date) {
+    payload.date = Timestamp.fromDate(data.date);
   }
 
   await updateDoc(ref, payload);
 };
 
-// Xoá giao dịch
+/* ================== DELETE ================== */
+
 export const deleteTransaction = async (id: string) => {
   const user = auth.currentUser;
   if (!user) throw new Error('User not logged in');
@@ -136,7 +158,8 @@ export const deleteTransaction = async (id: string) => {
   await deleteDoc(ref);
 };
 
-// 👇 HÀM MỚI: lấy 1 giao dịch theo id
+/* ================== GET BY ID ================== */
+
 export const getTransactionById = async (
   id: string,
 ): Promise<Transaction | null> => {
@@ -150,15 +173,17 @@ export const getTransactionById = async (
   const data = snap.data() as any;
   const rawDate = data.date;
 
-  let date: any = rawDate;
-  if (rawDate?.toDate) {
-    date = rawDate.toDate();
-  }
+  const date =
+    rawDate?.toDate instanceof Function
+      ? rawDate.toDate()
+      : new Date();
 
   return {
     id: snap.id,
-    categoryId: data.categoryId || '',
-    mount: typeof data.mount === 'number' ? data.mount : 0,
+    title: data.title ?? '',
+    categoryId: data.categoryId ?? '',
+    icon: data.icon ?? 'category',
+    amount: typeof data.amount === 'number' ? data.amount : 0,
     note: data.note ?? '',
     type: (data.type as TransactionType) ?? 'expense',
     date,
