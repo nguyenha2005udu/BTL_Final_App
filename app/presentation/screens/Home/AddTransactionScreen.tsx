@@ -107,9 +107,10 @@ const AddTransactionScreen: React.FC = () => {
   };
 
   const hasCategoryForType = filteredCategories.length > 0;
+  const cardBg = isDarkMode ? theme.cardBackground : '#f8f9fa';
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
+    <View style={[styles.container, { backgroundColor: isDarkMode ? theme.background : '#ffffff' }]}>
       <View
         style={[
           styles.header,
@@ -448,9 +449,9 @@ const styles = StyleSheet.create({
   toggleActive: {
     backgroundColor: 'white',
     shadowColor: '#000',
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 2,
   },
   toggleText: {
     fontSize: 14,

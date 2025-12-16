@@ -43,9 +43,10 @@ const HelpCenterScreen: React.FC = () => {
   const toggleExpand = (index: number) => {
     setExpandedIndex(expandedIndex === index ? null : index);
   };
+  const cardBg = isDarkMode ? theme.cardBackground : '#f8f9fa';
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
+    <View style={[styles.container, { backgroundColor: isDarkMode ? theme.background : '#ffffff' }]}>
       <View style={[styles.header, { backgroundColor: theme.headerBackground, borderBottomColor: theme.border }]}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.iconButton}>
           <MaterialIcons name="arrow-back" size={24} color={theme.textPrimary} />
@@ -108,10 +109,10 @@ const styles = StyleSheet.create({
   headerTitle: { fontSize: 18, fontWeight: 'bold' },
   iconButton: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
   content: { padding: 16, paddingBottom: 40 },
-  searchCard: { flexDirection: 'row', alignItems: 'center', padding: 16, borderRadius: 12, marginBottom: 24, gap: 12 },
+  searchCard: { flexDirection: 'row', alignItems: 'center', padding: 16, borderRadius: 12, marginBottom: 24, gap: 12, shadowColor: "#000", shadowOpacity: 0.2, shadowRadius: 8, elevation: 4 },
   searchText: { fontSize: 16 },
   sectionTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 16 },
-  faqCard: { borderRadius: 12, marginBottom: 12, overflow: 'hidden' },
+  faqCard: { borderRadius: 12, marginBottom: 12, overflow: 'hidden', shadowColor: "#000", shadowOpacity: 0.2, shadowRadius: 8, elevation: 4 },
   faqHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16 },
   faqQuestion: { fontSize: 16, fontWeight: '600', flex: 1, paddingRight: 8 },
   faqAnswer: { paddingHorizontal: 16, paddingBottom: 16, borderTopWidth: 1, paddingTop: 12 },

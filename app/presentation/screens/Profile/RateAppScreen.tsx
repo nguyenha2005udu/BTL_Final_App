@@ -60,9 +60,10 @@ const RateAppScreen: React.FC = () => {
     if (rating === 4) return 'Tốt';
     return 'Xuất sắc!';
   };
+  const cardBg = isDarkMode ? theme.cardBackground : '#f8f9fa';
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
+    <View style={[styles.container, { backgroundColor: isDarkMode ? theme.background : '#ffffff' }]}>
       <View style={[styles.header, { backgroundColor: theme.headerBackground, borderBottomColor: theme.border }]}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.iconButton}>
           <MaterialIcons name="arrow-back" size={24} color={theme.textPrimary} />

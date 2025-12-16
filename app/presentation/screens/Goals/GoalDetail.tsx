@@ -12,6 +12,7 @@ const GoalDetail: React.FC = () => {
   const { id } = route.params || {};
   const goal = MOCK_GOALS.find(g => g.id === id) || MOCK_GOALS[0];
   const progress = Math.round((goal.savedAmount / goal.targetAmount) * 100);
+  const cardBg = isDarkMode ? theme.cardBackground : '#f8f9fa';
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>

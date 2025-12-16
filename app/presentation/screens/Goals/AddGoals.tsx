@@ -7,6 +7,7 @@ import { useTheme } from '../../../context/ThemeContext';
 const AddGoal: React.FC = () => {
   const navigation = useNavigation();
   const { theme } = useTheme();
+  const cardBg = isDarkMode ? theme.cardBackground : '#f8f9fa';
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>

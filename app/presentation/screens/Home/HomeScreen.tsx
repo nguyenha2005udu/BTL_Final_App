@@ -1,6 +1,6 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import { useNavigation } from "@react-navigation/native";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Image,
   ScrollView,
@@ -12,8 +12,7 @@ import {
 import { MOCK_GOALS } from "../../../../constants/constants";
 import { useTheme } from "../../../context/ThemeContext";
 import { getCurrentUserProfile } from "../../../services/auth.service";
-import { auth} from "../../../services/firebase/firebaseConfig";
-
+import { auth } from "../../../services/firebase/firebaseConfig";
 import { listenCategories } from "../../../services/category.service";
 import { listenTransactions } from "../../../services/transaction.service";
 import type { Category, Transaction as UITransaction } from "../../../type/types";
@@ -29,22 +28,17 @@ const HomeScreen: React.FC = () => {
   const [displayName, setDisplayName] = useState<string>("");
   const [amount, setAmount] = useState<number | null>(null);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
-
   const [totalIncome, setTotalIncome] = useState<number>(0);
   const [totalExpense, setTotalExpense] = useState<number>(0);
-
   const [categories, setCategories] = useState<Category[]>([]);
   const [recentTransactions, setRecentTransactions] = useState<UITransaction[]>([]);
-
   const [transactions, setTransactions] = useState<any[]>([]);
 
-  // 1) Load profile (tên + avatar)
+  // Load profile
   useEffect(() => {
     const fetchProfile = async () => {
       try {
         const profile = await getCurrentUserProfile();
-
-        // TÊN
         if (profile?.fullName) {
           setDisplayName(profile.fullName);
         } else if (auth.currentUser?.email) {
@@ -52,8 +46,6 @@ const HomeScreen: React.FC = () => {
         } else {
           setDisplayName("Người dùng");
         }
-
-        // AVATAR
         if (profile?.photoUrl && profile.photoUrl.trim() !== "") {
           setAvatarUrl(profile.photoUrl);
         } else if (auth.currentUser?.photoURL) {
@@ -67,58 +59,35 @@ const HomeScreen: React.FC = () => {
         setAvatarUrl(null);
       }
     };
-
     fetchProfile();
   }, []);
 
-  // 2a) Listen danh mục
   useEffect(() => {
     const unsubCats = listenCategories(setCategories);
     return () => unsubCats?.();
   }, []);
 
-    // 2b) Listen giao dịch
   useEffect(() => {
     const unsubTx = listenTransactions(
-      (list: any[]) => {
-        setTransactions(list);
-      },
-      (err) => {
-        console.log("listenTransactions error", err);
-      }
+      (list: any[]) => setTransactions(list),
+      (err) => console.log("listenTransactions error", err)
     );
-
     return () => unsubTx?.();
   }, []);
 
-  // 2c) Tính tổng thu/chi/số dư + map giao dịch gần đây
   useEffect(() => {
     if (!transactions) return;
-
-    // Tính tổng thu / chi
     let income = 0;
     let expense = 0;
-
     transactions.forEach((tx: any) => {
-      const rawAmount =
-        typeof tx.mount === "number"
-          ? tx.mount
-          : typeof tx.amount === "number"
-          ? tx.amount
-          : 0;
-
-      if (tx.type === "income") {
-        income += rawAmount;
-      } else {
-        expense += rawAmount;
-      }
+      const rawAmount = typeof tx.mount === "number" ? tx.mount : typeof tx.amount === "number" ? tx.amount : 0;
+      if (tx.type === "income") income += rawAmount;
+      else expense += rawAmount;
     });
-
     setTotalIncome(income);
     setTotalExpense(expense);
-    setAmount(income - expense); // số dư
+    setAmount(income - expense);
 
-    // Sắp xếp giao dịch mới nhất
     const sorted = [...transactions].sort((a: any, b: any) => {
       const getTime = (t: any) => {
         const v = t.date || t.createdAt;
@@ -130,24 +99,13 @@ const HomeScreen: React.FC = () => {
       return getTime(b) - getTime(a);
     });
 
-    const latest = sorted.slice(0, 3); // 3 giao dịch gần nhất
-
+    const latest = sorted.slice(0, 3);
     const mapped: UITransaction[] = latest.map((tx: any) => {
-      const rawAmount =
-        typeof tx.mount === "number"
-          ? tx.mount
-          : typeof tx.amount === "number"
-          ? tx.amount
-          : 0;
-
-      const signedAmount =
-        tx.type === "income" ? rawAmount : -rawAmount;
-
+      const rawAmount = typeof tx.mount === "number" ? tx.mount : typeof tx.amount === "number" ? tx.amount : 0;
+      const signedAmount = tx.type === "income" ? rawAmount : -rawAmount;
       const category = categories.find((c) => c.id === tx.categoryId);
       const icon = category?.icon || "category";
       const title = category?.name || "Khác";
-
-      // subtitle = "dd/mm/yyyy • ghi chú"
       const subtitleParts: string[] = [];
       const v = tx.date || tx.createdAt;
       if (v) {
@@ -165,7 +123,6 @@ const HomeScreen: React.FC = () => {
         }
       }
       if (tx.note) subtitleParts.push(tx.note);
-
       return {
         id: tx.id,
         type: tx.type,
@@ -175,54 +132,38 @@ const HomeScreen: React.FC = () => {
         subtitle: subtitleParts.join(" • "),
       } as UITransaction;
     });
-
     setRecentTransactions(mapped);
   }, [transactions, categories]);
 
+  // Card background: sáng dùng #f8f9fa, tối giữ nguyên
+  const cardBg = isDarkMode ? theme.cardBackground : '#f8f9fa';
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
+    <View style={[styles.container, { backgroundColor: isDarkMode ? theme.background : '#ffffff' }]}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         {/* Header */}
         <View style={styles.header}>
           <View style={styles.userInfo}>
             <TouchableOpacity onPress={() => navigation.navigate("Profile")}>
-              <Image
-                source={{ uri: avatarUrl || DEFAULT_AVATAR }}
-                style={styles.avatar}
-              />
+              <Image source={{ uri: avatarUrl || DEFAULT_AVATAR }} style={styles.avatar} />
             </TouchableOpacity>
             <View>
-              <Text style={[styles.greeting, { color: theme.textSecondary }]}>
-                Xin chào,
-              </Text>
-              <Text style={[styles.username, { color: theme.textPrimary }]}>
-                {displayName || "Người dùng"}
-              </Text>
+              <Text style={[styles.greeting, { color: theme.textSecondary }]}>Xin chào,</Text>
+              <Text style={[styles.username, { color: theme.textPrimary }]}>{displayName || "Người dùng"}</Text>
             </View>
           </View>
-
           <TouchableOpacity
-            style={[
-              styles.notificationButton,
-              { backgroundColor: theme.cardBackground, borderColor: theme.border },
-            ]}
+            style={[styles.notificationButton, { backgroundColor: cardBg, borderColor: isDarkMode ? theme.border : '#e5e7eb' }]}
             onPress={() => navigation.navigate("Notifications")}
           >
-            <MaterialIcons
-              name="notifications"
-              size={24}
-              color={theme.textPrimary}
-            />
+            <MaterialIcons name="notifications" size={24} color={theme.textPrimary} />
             <View style={styles.badge} />
           </TouchableOpacity>
         </View>
 
         {/* Balance Card */}
-        <View style={[styles.balanceCard, { backgroundColor: theme.cardBackground }]}>
-          <Text style={[styles.balanceLabel, { color: theme.textSecondary }]}>
-            Tổng số dư
-          </Text>
+        <View style={[styles.balanceCard, { backgroundColor: cardBg }]}>
+          <Text style={[styles.balanceLabel, { color: theme.textSecondary }]}>Tổng số dư</Text>
           <Text style={[styles.balanceAmount, { color: "#3c83f6" }]}>
             {amount !== null ? `${amount.toLocaleString("vi-VN")}₫` : "—"}
           </Text>
@@ -230,119 +171,113 @@ const HomeScreen: React.FC = () => {
 
         {/* Income/Expense Grid */}
         <View style={styles.statsGrid}>
-          <View style={[styles.statCard, { backgroundColor: theme.cardBackground }]}>
-            <Text style={[styles.statLabel, { color: theme.textSecondary }]}>
-              Tổng thu
-            </Text>
-            <Text style={[styles.statValue, { color: "#22C55E" }]}>
-              +{totalIncome.toLocaleString("vi-VN")}₫
-            </Text>
+          <View style={[styles.statCard, { backgroundColor: cardBg }]}>
+            <Text style={[styles.statLabel, { color: theme.textSecondary }]}>Tổng thu</Text>
+            <Text style={[styles.statValue, { color: "#22C55E" }]}>+{totalIncome.toLocaleString("vi-VN")}₫</Text>
           </View>
-
-          <View style={[styles.statCard, { backgroundColor: theme.cardBackground }]}>
-            <Text style={[styles.statLabel, { color: theme.textSecondary }]}>
-              Tổng chi
-            </Text>
-            <Text style={[styles.statValue, { color: "#EF4444" }]}>
-              -{totalExpense.toLocaleString("vi-VN")}₫
-            </Text>
+          <View style={[styles.statCard, { backgroundColor: cardBg }]}>
+            <Text style={[styles.statLabel, { color: theme.textSecondary }]}>Tổng chi</Text>
+            <Text style={[styles.statValue, { color: "#EF4444" }]}>-{totalExpense.toLocaleString("vi-VN")}₫</Text>
           </View>
         </View>
 
-        {/* Monthly Report Card – 3 tháng gần nhất */}
+        {/* Monthly Report Card */}
         <MonthlyExpenseChart />
-
 
         {/* Recent Transactions */}
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>
-            Giao dịch gần đây
-          </Text>
-
-          <View style={[styles.cardList, { backgroundColor: theme.cardBackground }]}>
+          <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>Giao dịch gần đây</Text>
+          <View style={[styles.cardList, { backgroundColor: cardBg }]}>
             {(recentTransactions.length ? recentTransactions : []).map((tx) => (
               <TouchableOpacity
                 key={tx.id}
                 style={styles.transactionItem}
                 onPress={() => navigation.navigate("UpdateTransaction", { id: tx.id })}
-
               >
                 <View
                   style={[
                     styles.iconBox,
                     {
-                      backgroundColor:
-                        tx.type === "income"
-                          ? isDarkMode
-                            ? "rgba(34, 197, 94, 0.2)"
-                            : "rgba(34, 197, 94, 0.1)"
-                          : isDarkMode
-                          ? "rgba(60, 131, 246, 0.2)"
-                          : "rgba(60, 131, 246, 0.1)",
+                      backgroundColor: tx.type === "income"
+                        ? isDarkMode ? "rgba(34, 197, 94, 0.2)" : "rgba(34, 197, 94, 0.1)"
+                        : isDarkMode ? "rgba(60, 131, 246, 0.2)" : "rgba(60, 131, 246, 0.1)",
                     },
                   ]}
                 >
-                  <MaterialIcons
-                    name={tx.icon as any}
-                    size={24}
-                    color={tx.type === "income" ? "#22C55E" : "#3c83f6"}
-                  />
+                  <MaterialIcons name={tx.icon as any} size={24} color={tx.type === "income" ? "#22C55E" : "#3c83f6"} />
                 </View>
-
                 <View style={styles.txInfo}>
-                  <Text style={[styles.txTitle, { color: theme.textPrimary }]}>
-                    {tx.title}
-                  </Text>
-                  <Text style={[styles.txSubtitle, { color: theme.textSecondary }]}>
-                    {tx.subtitle}
-                  </Text>
+                  <Text style={[styles.txTitle, { color: theme.textPrimary }]}>{tx.title}</Text>
+                  <Text style={[styles.txSubtitle, { color: theme.textSecondary }]}>{tx.subtitle}</Text>
                 </View>
-
-                <Text
-                  style={[
-                    styles.txAmount,
-                    { color: tx.type === "income" ? "#22C55E" : "#EF4444" },
-                  ]}
-                >
+                <Text style={[styles.txAmount, { color: tx.type === "income" ? "#22C55E" : "#EF4444" }]}>
                   {tx.amount >= 0 ? "+" : "-"}
                   {Math.abs(tx.amount).toLocaleString("vi-VN")}₫
                 </Text>
               </TouchableOpacity>
             ))}
-
-            {!recentTransactions.length ? (
+            {!recentTransactions.length && (
               <View style={{ padding: 16 }}>
-                <Text style={{ color: theme.textSecondary }}>
-                  Chưa có giao dịch nào.
-                </Text>
+                <Text style={{ color: theme.textSecondary }}>Chưa có giao dịch nào.</Text>
               </View>
-            ) : null}
+            )}
           </View>
         </View>
 
         {/* Goals */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>
-              Mục tiêu tiết kiệm
-            </Text>
+            <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>Mục tiêu tiết kiệm</Text>
             <TouchableOpacity onPress={() => navigation.navigate("GoalList")}>
               <Text style={styles.linkText}>Xem tất cả</Text>
             </TouchableOpacity>
           </View>
-
           <View style={{ gap: 16 }}>
             {MOCK_GOALS.map((goal) => {
-              const progress = Math.round(
-                (goal.savedAmount / goal.targetAmount) * 100
-              );
+              const progress = Math.round((goal.savedAmount / goal.targetAmount) * 100);
               return (
                 <TouchableOpacity
                   key={goal.id}
-                  style={[styles.goalCard, { backgroundColor: theme.cardBackground }]}
+                  style={[styles.goalCard, { backgroundColor: cardBg }]}
                   onPress={() => navigation.navigate("GoalDetail", { id: goal.id })}
                 >
-                  {/* ... phần Goals giữ nguyên như bạn ... */}
+                  <View style={styles.goalHeader}>
+                    <Text style={[styles.goalTitle, { color: theme.textPrimary }]}>{goal.title}</Text>
+                    <View style={[styles.statusBadge, {
+                      backgroundColor: goal.status === "ongoing" ? (isDarkMode ? '#1e3a5f' : '#EFF6FF')
+                        : goal.status === "completed" ? (isDarkMode ? '#1e3d2e' : '#F0FDF4')
+                        : (isDarkMode ? '#374151' : '#E2E8F0')
+                    }]}>
+                      <Text style={[styles.statusText, {
+                        color: goal.status === "ongoing" ? (isDarkMode ? '#60a5fa' : '#2563EB')
+                          : goal.status === "completed" ? '#16A34A' : '#475569'
+                      }]}>
+                        {goal.status === "ongoing" ? "Đang tiến hành" : goal.status === "completed" ? "Hoàn thành" : "Đã hủy"}
+                      </Text>
+                    </View>
+                  </View>
+                  <View style={styles.goalProgress}>
+                    <View style={styles.progressLabels}>
+                      <Text style={[styles.progressText, { color: theme.textSecondary }]}>
+                        {goal.status === "completed" ? "Đã đạt mục tiêu" : goal.status === "cancelled" ? "Mục tiêu đã hủy" : "Đúng tiến độ"}
+                      </Text>
+                      <Text style={[styles.progressTextBold, { color: theme.textPrimary }]}>{progress}% đã tiết kiệm</Text>
+                    </View>
+                    <View style={[styles.progressBarBg, { backgroundColor: isDarkMode ? theme.divider : '#e5e7eb' }]}>
+                      <View style={[styles.progressBarFill, {
+                        width: `${progress}%`,
+                        backgroundColor: goal.status === "ongoing" ? "#3c83f6" : goal.status === "completed" ? "#22C55E" : "#9CA3AF"
+                      }]} />
+                    </View>
+                    <View style={styles.progressAmounts}>
+                      <Text style={[styles.amountLabel, { color: theme.textSecondary }]}>
+                        Đã tiết kiệm: <Text style={[styles.amountValue, { color: theme.textPrimary }]}>{goal.savedAmount.toLocaleString()}₫</Text>
+                      </Text>
+                      <Text style={[styles.amountLabel, { color: theme.textSecondary }]}>
+                        Mục tiêu: <Text style={[styles.amountValue, { color: theme.textPrimary }]}>{goal.targetAmount.toLocaleString()}₫</Text>
+                      </Text>
+                    </View>
+                  </View>
                 </TouchableOpacity>
               );
             })}
@@ -352,10 +287,7 @@ const HomeScreen: React.FC = () => {
         <View style={{ height: 100 }} />
       </ScrollView>
 
-      <TouchableOpacity
-        style={styles.fab}
-        onPress={() => navigation.navigate("AddTransaction")}
-      >
+      <TouchableOpacity style={styles.fab} onPress={() => navigation.navigate("AddTransaction")}>
         <MaterialIcons name="add" size={32} color="white" />
       </TouchableOpacity>
     </View>
@@ -365,7 +297,7 @@ const HomeScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f7f8",
+    backgroundColor: "#ffffff",
   },
   scrollContent: {
     padding: 16,
@@ -426,9 +358,9 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     marginBottom: 16,
     shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 4,
   },
   balanceLabel: {
     fontSize: 16,
@@ -452,9 +384,9 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 16,
     shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 4,
   },
   statLabel: {
     fontSize: 14,
@@ -472,9 +404,9 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     marginBottom: 16,
     shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 4,
   },
   reportTitle: {
     fontSize: 16,
@@ -573,9 +505,9 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 16,
     shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 4,
   },
   goalHeader: {
     flexDirection: "row",

@@ -32,14 +32,15 @@ const ContactSupportScreen: React.FC = () => {
   const openWebsite = () => {
     Linking.openURL('https://expensetracker.com/support');
   };
+  const cardBg = isDarkMode ? theme.cardBackground : '#f8f9fa';
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
+   <View style={[styles.container, { backgroundColor: isDarkMode ? theme.background : '#ffffff' }]}>
       <View style={[styles.header, { backgroundColor: theme.headerBackground, borderBottomColor: theme.border }]}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.iconButton}>
           <MaterialIcons name="arrow-back" size={24} color={theme.textPrimary} />
         </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: theme.textPrimary }]}>Liên hệ Hỗ trợ</Text>
+        <Text style={[styles.headerTitle, { color: theme.textPrimary }]}>Liên hệ để được hỗ trợ</Text>
         <View style={{ width: 40 }} />
       </View>
 

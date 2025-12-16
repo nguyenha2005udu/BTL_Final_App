@@ -24,9 +24,10 @@ const StatisticsScreen: React.FC = () => {
     if (filter === '3days') return diffDays <= 3;
     return true;
   });
+  const cardBg = isDarkMode ? theme.cardBackground : '#f8f9fa';
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
+    <View style={[styles.container, { backgroundColor: isDarkMode ? theme.background : '#ffffff' }]}>
       <View style={[styles.header, { backgroundColor: theme.headerBackground }]}>
         <Text style={[styles.headerTitle, { color: theme.textPrimary }]}>Giao dịch</Text>
       </View>

@@ -59,7 +59,7 @@ const AddCategory: React.FC = () => {
   };
 
   const renderIconSelection = () => (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
+   <View style={[styles.container, { backgroundColor: isDarkMode ? theme.background : '#ffffff' }]}>
       <View
         style={[
           styles.header,

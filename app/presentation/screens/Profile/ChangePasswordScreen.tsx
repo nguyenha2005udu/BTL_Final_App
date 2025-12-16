@@ -137,9 +137,10 @@ const ChangePasswordScreen: React.FC = () => {
       ]
     );
   };
+  const cardBg = isDarkMode ? theme.cardBackground : '#f8f9fa';
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
+    <View style={[styles.container, { backgroundColor: isDarkMode ? theme.background : '#ffffff' }]}>
       <View style={[styles.header, { backgroundColor: theme.headerBackground, borderBottomColor: theme.border }]}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.iconButton}>
           <MaterialIcons name="arrow-back" size={24} color={theme.textPrimary} />
@@ -151,7 +152,7 @@ const ChangePasswordScreen: React.FC = () => {
       <ScrollView contentContainerStyle={styles.content}>
         {/* Security Notice */}
         <View style={[styles.noticeCard, { backgroundColor: isDarkMode ? '#1e3a5f' : '#EFF6FF' }]}>
-          <MaterialIcons name="info" size={24} color="#3c83f6" />
+          <MaterialIcons name="info" size={24} color="#3580f8ff" />
           <Text style={[styles.noticeText, { color: theme.textPrimary }]}>
             Để bảo mật tài khoản, vui lòng xác nhận mật khẩu hiện tại trước khi thay đổi.
           </Text>
@@ -286,7 +287,7 @@ const styles = StyleSheet.create({
   content: { padding: 16 },
   noticeCard: { flexDirection: 'row', padding: 16, borderRadius: 12, marginBottom: 16, gap: 12 },
   noticeText: { flex: 1, fontSize: 14, lineHeight: 20 },
-  card: { borderRadius: 16, padding: 20, marginBottom: 16 },
+  card: { borderRadius: 16, padding: 20, marginBottom: 16, shadowColor: "#000", shadowOpacity: 0.2, shadowRadius: 8, elevation: 4 },
   inputGroup: { marginBottom: 20 },
   label: { fontSize: 14, fontWeight: '500', marginBottom: 8 },
   passwordInput: { flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderRadius: 8, height: 48, paddingHorizontal: 12, gap: 8 },
@@ -294,7 +295,7 @@ const styles = StyleSheet.create({
   helperText: { fontSize: 12, marginTop: 4 },
   forgotButton: { alignSelf: 'flex-end' },
   forgotText: { color: '#3c83f6', fontSize: 14, fontWeight: '600' },
-  requirementsCard: { borderRadius: 12, padding: 16, marginBottom: 16 },
+  requirementsCard: { borderRadius: 12, padding: 16, marginBottom: 16, shadowColor: "#000", shadowOpacity: 0.2, shadowRadius: 8, elevation: 4 },
   requirementsTitle: { fontSize: 14, fontWeight: '600', marginBottom: 12 },
   requirement: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 },
   requirementText: { fontSize: 14 },

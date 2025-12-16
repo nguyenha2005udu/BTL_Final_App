@@ -44,9 +44,10 @@ const ProfileScreen: React.FC = () => {
 
     fetchProfile();
   }, []);
+  const cardBg = isDarkMode ? theme.cardBackground : '#f8f9fa';
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
+    <View style={[styles.container, { backgroundColor: isDarkMode ? theme.background : '#ffffff' }]}>
       <View style={[styles.header, { backgroundColor: theme.headerBackground, borderBottomColor: theme.border }]}>
         <Text style={[styles.headerTitle, { color: theme.textPrimary }]}>Hồ sơ</Text>
       </View>
@@ -231,6 +232,10 @@ const styles = StyleSheet.create({
   },
   section: {
     marginBottom: 24,
+    shadowColor: "#000",
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 4,
   },
   sectionTitle: {
     fontSize: 14,
