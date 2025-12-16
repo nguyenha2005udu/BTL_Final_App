@@ -9,32 +9,54 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { ReportCategoryList } from '../../../../components/report/ReportCategoryList';
+import { ReportPeriodSelector } from '../../../../components/report/ReportPeriodSelector';
 import { useCategories } from '../../../../hooks/useCategories';
+import { useReportTotals } from '../../../../hooks/useReportTotals';
+import { useTransactions } from '../../../../hooks/useTransactions';
 import { useTheme } from '../../../context/ThemeContext';
 
 const ReportScreen: React.FC = () => {
   const navigation = useNavigation<any>();
   const { theme, isDarkMode } = useTheme();
   const { categories, loading } = useCategories();
+  const { transactions, loading: txLoading } = useTransactions();
+  const { period, setPeriod, totalIncome, totalExpense, balance, txInRange } = useReportTotals(transactions);
   const [filterType, setFilterType] = React.useState<'expense' | 'income'>('expense');
 
+  const amountByCategory = React.useMemo(() => {
+    const typeById = new Map(categories.map(c => [c.id, c.type]));
+    const map = new Map<string, number>();
+
+    for (const tx of txInRange) {
+      const catId = (tx as any).categoryId; 
+      if (!catId) continue;
+
+      const catType = typeById.get(catId);
+      if (catType && catType !== tx.type) continue;
+
+      map.set(catId, (map.get(catId) ?? 0) + (tx.mount ?? 0));
+    }
+    return map;
+  }, [categories, txInRange]);
+  
   // Map Category -> data cho phần "Chi tiêu theo danh mục"
   const rawData = categories.map(cat => ({
+    id : cat.id,
     name: cat.name,
     type : cat.type,
-    value: cat.spent ?? 0, // tạm thời 0, sau này cộng từ transactions
+    value: amountByCategory.get(cat.id) ?? 0, 
+    budget: cat.budget ?? 0,                 
     color: cat.color || '#60A5FA',
+    icon: cat.icon || 'category',
   }));
 
-  const totalExpense = rawData.reduce((sum, item) => sum + item.value, 0);
+  const data = rawData.map(item => {
+    const denom = item.type === 'income' ? totalIncome : totalExpense;
+    return { ...item, percentage: denom > 0 ? Math.round((item.value / denom) * 100) : 0 };
+  });
 
-  const data = rawData.map(item => ({
-    ...item,
-    percentage:
-      totalExpense > 0 ? Math.round((item.value / totalExpense) * 100) : 0,
-  }));
-
-  if (loading) {
+  if (loading || txLoading) {
     return (
       <View
         style={[
@@ -67,36 +89,12 @@ const ReportScreen: React.FC = () => {
 
       <ScrollView contentContainerStyle={styles.content}>
         {/* Period Selector */}
-        <View
-          style={[
-            styles.periodSelector,
-            { backgroundColor: isDarkMode ? '#374151' : '#e5e7eb' },
-          ]}
-        >
-          <TouchableOpacity style={styles.periodButton}>
-            <Text
-              style={[styles.periodText, { color: theme.textSecondary }]}
-            >
-              Tuần này
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[
-              styles.periodButton,
-              styles.periodButtonActive,
-              { backgroundColor: theme.cardBackground },
-            ]}
-          >
-            <Text style={styles.periodTextActive}>Tháng này</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.periodButton}>
-            <Text
-              style={[styles.periodText, { color: theme.textSecondary }]}
-            >
-              Tùy chọn
-            </Text>
-          </TouchableOpacity>
-        </View>
+        <ReportPeriodSelector
+          period={period}
+          onChange={setPeriod}
+          theme={theme}
+          isDarkMode={isDarkMode}
+        />
 
         {/* Summary Card */}
         <View style={[styles.card, { backgroundColor: theme.cardBackground }]}>
@@ -111,8 +109,8 @@ const ReportScreen: React.FC = () => {
                 Tổng thu
               </Text>
               <Text style={[styles.summaryValue, { color: '#22C55E' }]}>
-                0₫ {/* TODO: sau dùng totalIncome */}
-              </Text>
+                {totalIncome.toLocaleString()}₫
+              </Text> 
             </View>
             <View style={styles.summaryItem}>
               <Text
@@ -143,17 +141,16 @@ const ReportScreen: React.FC = () => {
             <Text
               style={[
                 styles.summaryValue,
-                { color: '#3c83f6', fontSize: 24 },
+                { color: balance >= 0 ? '#22C55E' : '#EF4444', fontSize: 24 },
               ]}
             >
-              {(-totalExpense).toLocaleString()}₫
+              {balance.toLocaleString()}₫
             </Text>
           </View>
         </View>
 
-        {/* Detail Card */}
-        <View style={[styles.card, { backgroundColor: theme.cardBackground }]}>
-          <View style={styles.typeFilterRow}>
+        {/* Type Filter */}
+        <View style={styles.typeFilterRow}>
             <TouchableOpacity
               style={[
                 styles.typeFilterChip,
@@ -188,143 +185,26 @@ const ReportScreen: React.FC = () => {
               </Text>
             </TouchableOpacity>
           </View>
-          
-          <Text style={[styles.cardTitle, { color: theme.textPrimary }]}>
-            Chi tiêu theo danh mục
-          </Text>
-
-          {/* Vòng tròn tổng chi (demo) */}
-          <View style={styles.chartArea}>
-            <View
-              style={[
-                styles.piePlaceholder,
-                {
-                  backgroundColor: isDarkMode ? '#374151' : '#f9fafb',
-                },
-              ]}
-            >
-              <View style={styles.pieInnerCircle}>
-                <Text
-                  style={[
-                    styles.pieLabel,
-                    { color: theme.textSecondary },
-                  ]}
-                >
-                  Tổng chi
-                </Text>
-                <Text
-                  style={[
-                    styles.pieValue,
-                    { color: theme.textPrimary },
-                  ]}
-                >
-                  {totalExpense.toLocaleString()}₫
-                </Text>
-              </View>
-              <View
-                style={[
-                  styles.slice,
-                  {
-                    backgroundColor: '#60A5FA',
-                    transform: [{ rotate: '0deg' }],
-                  },
-                ]}
-              />
-              <View
-                style={[
-                  styles.slice,
-                  {
-                    backgroundColor: '#F87171',
-                    transform: [{ rotate: '90deg' }],
-                  },
-                ]}
-              />
-              <View
-                style={[
-                  styles.slice,
-                  {
-                    backgroundColor: '#FBBF24',
-                    transform: [{ rotate: '180deg' }],
-                  },
-                ]}
-              />
-            </View>
-          </View>
-
-          <View style={styles.legendList}>
-            {filteredData.map(item => (
-              <TouchableOpacity 
-                key={item.name}
-                onPress={() => {
-                  const fullCategory = categories.find(cat => cat.name === item.name);
-                  if (fullCategory) {
-                    navigation.navigate('CategoryDetail', { category: fullCategory });
-                  }
-                }}
-                style={styles.legendItem}
-                >
-
-                <View
-                  style={[
-                    styles.legendColor,
-                    { backgroundColor: item.color },
-                  ]}
-                />
-                <View style={styles.legendInfo}>
-                  <Text
-                    style={[
-                      styles.legendName,
-                      { color: theme.textPrimary },
-                    ]}
-                  >
-                    {item.name}
-                  </Text>
-                </View>
-                <View style={styles.legendValues}>
-                  <Text
-                    style={[
-                      styles.legendAmount,
-                      { color: theme.textPrimary },
-                    ]}
-                  >
-                    {item.value.toLocaleString()}₫
-                  </Text>
-                  <Text
-                    style={[
-                      styles.legendPercent,
-                      { color: theme.textSecondary },
-                    ]}
-                  >
-                    {item.percentage}%
-                  </Text>
-                </View>
-              </TouchableOpacity>
-            ))}
-
-            <TouchableOpacity
-              style={[
-                styles.addCategoryButton,
-                { borderTopColor: theme.divider },
-              ]}
-              onPress={() => navigation.navigate('AddCategory' as never)}
-            >
-              <View
-                style={[
-                  styles.addIcon,
-                  { backgroundColor: theme.iconBoxBg },
-                ]}
-              >
-                <MaterialIcons
-                  name="add"
-                  size={20}
-                  color={theme.textSecondary}
-                />
-              </View>
-              <Text style={styles.addText}>Thêm danh mục</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-
+    
+        {/* Legend */}
+        <ReportCategoryList
+          items={filteredData.map(i => ({
+            id: i.id,
+            name: i.name,
+            color: i.color,
+            icon: i.icon,
+            value: i.value,
+            budget: i.budget,
+          }))}
+          mode={filterType}
+          theme={theme}
+          onPressItem={(id) => {
+            const fullCategory = categories.find(cat => cat.id === id);
+            if (fullCategory) navigation.navigate('CategoryDetail', { category: fullCategory });
+          }}
+          onAddCategory={() => navigation.navigate('AddCategory' as never)}
+        />
+      
         <View style={styles.actionButtons}>
           <TouchableOpacity
             style={[
@@ -400,37 +280,6 @@ const styles = StyleSheet.create({
     padding: 16,
     paddingBottom: 100,
   },
-  periodSelector: {
-    flexDirection: 'row',
-    backgroundColor: '#e5e7eb',
-    borderRadius: 10,
-    padding: 4,
-    marginBottom: 16,
-    height: 40,
-  },
-  periodButton: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 8,
-  },
-  periodButtonActive: {
-    backgroundColor: 'white',
-    shadowColor: '#000',
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
-  },
-  periodText: {
-    fontSize: 13,
-    color: '#6b7280',
-    fontWeight: '500',
-  },
-  periodTextActive: {
-    fontSize: 13,
-    color: '#3c83f6',
-    fontWeight: '600',
-  },
   card: {
     backgroundColor: 'white',
     borderRadius: 16,
@@ -468,7 +317,7 @@ const styles = StyleSheet.create({
   },
   typeFilterRow: {
   flexDirection: 'row',
-  gap: 1,
+  gap: 12,
   marginBottom: 16,
   },
   typeFilterChip: {
@@ -540,11 +389,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
-  legendColor: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    marginRight: 12,
+  legendIconBox: {
+  width: 28,
+  height: 28,
+  borderRadius: 14,
+  marginRight: 12,
+  alignItems: 'center',
+  justifyContent: 'center',
   },
   legendInfo: {
     flex: 1,

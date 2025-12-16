@@ -1,6 +1,6 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import { useNavigation } from "@react-navigation/native";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Image,
   ScrollView,
@@ -12,7 +12,7 @@ import {
 import { MOCK_GOALS } from "../../../../constants/constants";
 import { useTheme } from "../../../context/ThemeContext";
 import { getCurrentUserProfile } from "../../../services/auth.service";
-import { auth} from "../../../services/firebase/firebaseConfig";
+import { auth } from "../../../services/firebase/firebaseConfig";
 
 import { listenCategories } from "../../../services/category.service";
 import { listenTransactions } from "../../../services/transaction.service";
@@ -171,6 +171,7 @@ const HomeScreen: React.FC = () => {
         type: tx.type,
         amount: signedAmount,
         icon,
+        colorClass: category?.color || "#60A5FA",
         title,
         subtitle: subtitleParts.join(" • "),
       } as UITransaction;
@@ -268,24 +269,11 @@ const HomeScreen: React.FC = () => {
 
               >
                 <View
-                  style={[
-                    styles.iconBox,
-                    {
-                      backgroundColor:
-                        tx.type === "income"
-                          ? isDarkMode
-                            ? "rgba(34, 197, 94, 0.2)"
-                            : "rgba(34, 197, 94, 0.1)"
-                          : isDarkMode
-                          ? "rgba(60, 131, 246, 0.2)"
-                          : "rgba(60, 131, 246, 0.1)",
-                    },
-                  ]}
-                >
+                  style={[styles.iconBox,{ backgroundColor: tx.colorClass + '33' }]}>
                   <MaterialIcons
                     name={tx.icon as any}
                     size={24}
-                    color={tx.type === "income" ? "#22C55E" : "#3c83f6"}
+                    color={tx.colorClass}
                   />
                 </View>
 
