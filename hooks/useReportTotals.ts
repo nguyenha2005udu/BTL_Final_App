@@ -49,8 +49,8 @@ export const useReportTotals = (transactions: Transaction[]) => {
     let totalExpense = 0;
 
     for (const t of txInRange) {
-      if (t.type === 'income') totalIncome += t.mount;
-      else totalExpense += t.mount;
+      if (t.type === 'income') totalIncome += t.amount;
+      else totalExpense += t.amount;
     }
 
     return {

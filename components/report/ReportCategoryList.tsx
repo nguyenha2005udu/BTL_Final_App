@@ -243,3 +243,4 @@ const styles = StyleSheet.create({
   },
   addText: { fontSize: 16, fontWeight: '800' },
 });
+

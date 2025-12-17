@@ -1,8 +1,6 @@
 import { MaterialIcons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
-import React, { useEffect, useState } from "react";
-import { useFocusEffect } from "@react-navigation/native";
-import { useCallback } from "react";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
+import React, { useCallback, useEffect, useState } from "react";
 
 import {
   Image,
@@ -18,14 +16,14 @@ import { getCurrentUserProfile } from "../../../services/auth.service";
 import { auth } from "../../../services/firebase/firebaseConfig";
 
 import { listenCategories } from "../../../services/category.service";
+import { getSavingGoalsByUser } from "../../../services/savingGoals.service";
 import { listenTransactions } from "../../../services/transaction.service";
 import type {
   Category,
-  UITransaction as UITransaction,
+  UITransaction,
 } from "../../../type/types";
-import MonthlyExpenseChart from "../Home/MonthlyExpenseChart";
-import { getSavingGoalsByUser } from "../../../services/savingGoals.service";
 import { SavingGoal } from "../../../type/types";
+import MonthlyExpenseChart from "../Home/MonthlyExpenseChart";
 const DEFAULT_AVATAR =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuA_vMSFQARLvGWesaN0bPwdT0TwBkCjQuK-p1dyFrGdqF-NhAqX3D22UFhPgycZkrUA24cKIcSZEPLOfhmUcNZTvYIXtJBvgXlaRUnPVCaQ5zWzrC0n45kOlTptHz4fEKjcJrTwoasD3u6BnAo6DO1bJ2oe7sNZMz4X8J4ZExMW6HBrFk1JAZloRwzDfjdw4WOSE8HcBg82M53Zk1lZ9igZ6sqHdz0lO3Cvw1h6_YE38kL45oHN1DtJsD26XLF9ECZDyI3c-2ms-qO0";
 
@@ -187,6 +185,7 @@ const HomeScreen: React.FC = () => {
         type: tx.type,
         amount: signedAmount,
         icon,
+        colorClass: category?.color || "#60A5FA",
         title,
         subtitle: subtitleParts.join(" • "),
       } as UITransaction;
@@ -272,7 +271,7 @@ const HomeScreen: React.FC = () => {
         </View>
 
         {/* Monthly Report Card – 3 tháng gần nhất */}
-        <View style={styles.chartSection}>
+        <View style={styles.section}>
           <MonthlyExpenseChart />
         </View>
 
