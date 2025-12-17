@@ -114,9 +114,7 @@ const MonthlyExpenseChart: React.FC = () => {
   }, [monthlyExpenses]);
 
   return (
-    <View
-      style={[styles.reportCard, { backgroundColor: theme.cardBackground }]}
-    >
+    <View style={[styles.container, { backgroundColor: isDarkMode ? theme.background : '#ffffff' }]}>
       <Text style={[styles.reportTitle, { color: theme.textPrimary }]}>
         Chi tiêu 3 tháng gần nhất
       </Text>

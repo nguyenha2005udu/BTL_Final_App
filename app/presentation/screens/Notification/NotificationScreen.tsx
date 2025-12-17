@@ -8,8 +8,10 @@ const NotificationsScreen: React.FC = () => {
   const navigation = useNavigation();
   const { theme, isDarkMode } = useTheme();
 
+  const cardBg = isDarkMode ? theme.cardBackground : '#f8f9fa';
+
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
+   <View style={[styles.container, { backgroundColor: isDarkMode ? theme.background : '#ffffff' }]}>
       <View style={[styles.header, { backgroundColor: theme.headerBackground, borderBottomColor: theme.border }]}>
         <View style={styles.headerTop}>
           <TouchableOpacity onPress={() => navigation.goBack()} style={styles.iconButton}>

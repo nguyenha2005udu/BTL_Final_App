@@ -1,11 +1,12 @@
 import { StyleSheet } from 'react-native';
 
-const PRIMARY = '#2563EB';
+const PRIMARY = '#3c83f6';
+const PRIMARY_DARK = '#2563EB';
 
 export const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: '#FFFFFF',
   },
   container: {
     flex: 1,
@@ -15,14 +16,15 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 12,
+    backgroundColor: '#FFFFFF',
   },
   backButton: {
     width: 40,
     height: 40,
-    borderRadius: 999,
+    borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#E5E7EB',
+    backgroundColor: '#F3F4F6',
   },
   headerTitle: {
     flex: 1,
@@ -34,95 +36,108 @@ export const styles = StyleSheet.create({
   main: {
     flex: 1,
     paddingHorizontal: 24,
-    paddingBottom: 24,
-    justifyContent: 'center',
+    paddingTop: 40,
+    justifyContent: 'flex-start',
   },
   titleBlock: {
-    marginBottom: 24,
+    marginBottom: 40,
+    alignItems: 'center',
   },
   title: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: '700',
     color: '#111827',
+    textAlign: 'center',
+    marginBottom: 8,
   },
   subtitle: {
-    marginTop: 8,
+    fontSize: 15,
     color: '#6B7280',
+    textAlign: 'center',
+    lineHeight: 22,
   },
 
   field: {
-    marginBottom: 16,
+    marginBottom: 20,
   },
   label: {
-    marginBottom: 6,
+    marginBottom: 8,
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: '600',
     color: '#374151',
   },
 
-  // 🔧 SỬA Ở ĐÂY
   inputWrapper: {
     position: 'relative',
     justifyContent: 'center',
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#D1D5DB',
-    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    borderWidth: 1.5,
+    borderColor: '#E5E7EB',
+    backgroundColor: '#F9FAFB',
+    shadowColor: '#000',
+    shadowOpacity: 0.03,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 1,
   },
 
   inputIcon: {
     position: 'absolute',
-    left: 12,
-    top: 12,
+    left: 14,
+    top: 14,
   },
 
-  // 🔧 BỎ border + background khỏi input
   input: {
-    paddingLeft: 40,
-    paddingRight: 40,
-    paddingVertical: 12,
-    fontSize: 16,
+    paddingLeft: 44,
+    paddingRight: 44,
+    paddingVertical: 14,
+    fontSize: 15,
     color: '#111827',
+    fontWeight: '500',
   },
 
   passwordToggle: {
     position: 'absolute',
     right: 12,
-    top: 10,
+    top: 12,
+    padding: 4,
   },
 
   forgotButton: {
     alignSelf: 'flex-end',
-    marginBottom: 8,
+    marginBottom: 12,
+    marginTop: -8,
   },
   forgotText: {
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: '600',
     color: PRIMARY,
   },
   submitButton: {
-    marginTop: 8,
+    marginTop: 12,
     borderRadius: 12,
     backgroundColor: PRIMARY,
-    paddingVertical: 14,
+    paddingVertical: 16,
     alignItems: 'center',
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 2,
+    shadowColor: PRIMARY,
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 4,
   },
   submitText: {
     fontSize: 16,
     fontWeight: '700',
     color: '#FFFFFF',
+    letterSpacing: 0.5,
   },
   footer: {
     paddingHorizontal: 16,
-    paddingVertical: 16,
+    paddingVertical: 24,
     alignItems: 'center',
   },
   footerText: {
-    fontSize: 14,
+    fontSize: 15,
     color: '#6B7280',
   },
   footerLink: {
