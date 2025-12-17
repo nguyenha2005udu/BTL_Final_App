@@ -171,9 +171,10 @@ const UpdateTransactionScreen: React.FC = () => {
   };
 
   const hasCategoryForType = filteredCategories.length > 0;
+  const cardBg = isDarkMode ? theme.cardBackground : '#f8f9fa';
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
+   <View style={[styles.container, { backgroundColor: isDarkMode ? theme.background : '#ffffff' }]}>
       <View
         style={[
           styles.header,

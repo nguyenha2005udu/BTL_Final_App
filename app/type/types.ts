@@ -1,10 +1,17 @@
-export interface Transaction {
+import { Timestamp } from "firebase/firestore";
+import { MaterialIcons } from "@expo/vector-icons";
+
+export type MaterialIconName =
+  React.ComponentProps<typeof MaterialIcons>["name"];
+/* ================= UI MODELS ================= */
+
+export interface UITransaction {
   id: string;
   title: string;
-  subtitle: string; // Date or Category
-  amount: number; // Positive for income, negative for expense
+  subtitle: string;      // "15/12/2025 • Ăn trưa"
+  amount: number;        // + thu | - chi
   date: string;
-  icon: string;
+  icon: MaterialIconName;
   colorClass: string;
   type: 'income' | 'expense';
 }
@@ -35,4 +42,16 @@ export interface UserProfile {
   avatar: string;
   phone?: string;
   dob?: string;
+}
+
+/* ================= FIRESTORE MODELS ================= */
+
+export interface SavingGoal {
+  id: string;
+  userId: string;
+  title: string;
+  targetAmount: number;
+  currentAmount: number;
+  deadline?: Timestamp;
+  createdAt: Timestamp;
 }

@@ -35,7 +35,7 @@ const ReportScreen: React.FC = () => {
       const catType = typeById.get(catId);
       if (catType && catType !== tx.type) continue;
 
-      map.set(catId, (map.get(catId) ?? 0) + (tx.mount ?? 0));
+      map.set(catId, (map.get(catId) ?? 0) + (tx.amount ?? 0));
     }
     return map;
   }, [categories, txInRange]);

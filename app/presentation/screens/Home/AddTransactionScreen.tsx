@@ -40,6 +40,7 @@ const AddTransactionScreen: React.FC = () => {
   const [note, setNote] = useState('');
   const [date, setDate] = useState<Date>(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [title, setTitle] = useState('');
 
 
   // categories
@@ -78,25 +79,33 @@ const AddTransactionScreen: React.FC = () => {
   }, [filteredCategories, selectedCategoryId]);
 
   const onSave = async () => {
-    const mount = Number(mountText);
+    const amount = Number(mountText);
 
-    if (!selectedCategoryId) {
-      Alert.alert('Thiếu danh mục', `Vui lòng tạo danh mục ${type === 'expense' ? 'chi tiêu' : 'thu nhập'} trước.`);
+    if (!title.trim()) {
+  Alert.alert('Thiếu thông tin', 'Vui lòng nhập tên giao dịch.');
+  return;
+}
+
+    if (!title.trim()) {
+      Alert.alert('Thiếu thông tin', 'Vui lòng nhập tên giao dịch.');
       return;
-    }
-    if (!mountText || Number.isNaN(mount) || mount <= 0) {
+}
+
+    if (!mountText || Number.isNaN(amount) || amount <= 0) {
       Alert.alert('Số tiền không hợp lệ', 'Vui lòng nhập số tiền > 0.');
       return;
     }
 
     try {
       await createTransaction({
-        categoryId: selectedCategoryId,
-        type,
-        mount,
-        note,
-        date,
-      });
+  title: title.trim(),
+  amount,
+  categoryId: selectedCategoryId,
+  icon: selectedCategory?.icon || 'category',
+  type,
+  note: note ?? '',
+  date,
+});
 
       Alert.alert('Thành công', 'Đã thêm giao dịch.');
       navigation.goBack();
@@ -107,9 +116,10 @@ const AddTransactionScreen: React.FC = () => {
   };
 
   const hasCategoryForType = filteredCategories.length > 0;
+  const cardBg = isDarkMode ? theme.cardBackground : '#f8f9fa';
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
+    <View style={[styles.container, { backgroundColor: isDarkMode ? theme.background : '#ffffff' }]}>
       <View
         style={[
           styles.header,
@@ -168,25 +178,48 @@ const AddTransactionScreen: React.FC = () => {
         </View>
 
         <View style={styles.form}>
-          {/* Số tiền */}
-          <View className="inputGroup">
-            <Text style={[styles.label, { color: theme.textSecondary }]}>Số tiền</Text>
-            <TextInput
-              value={mountText}
-              onChangeText={setMountText}
-              style={[
-                styles.input,
-                {
-                  backgroundColor: theme.cardBackground,
-                  borderColor: theme.border,
-                  color: theme.textPrimary,
-                },
-              ]}
-              placeholder="Nhập số tiền"
-              placeholderTextColor={theme.textSecondary}
-              keyboardType="numeric"
-            />
-          </View>
+          {/* Tên giao dich*/}
+          <View style={styles.inputGroup}>
+            <Text style={[styles.label, { color: theme.textSecondary }]}>
+              Tên giao dịch
+            </Text>
+          <TextInput
+          value={title}
+          onChangeText={setTitle}
+          style={[
+          styles.input,
+          {
+          backgroundColor: theme.cardBackground,
+          borderColor: theme.border,
+          color: theme.textPrimary,
+          },
+          ]}
+          placeholder="VD: Lương tháng 12, Ăn trưa..."
+          placeholderTextColor={theme.textSecondary}
+          />
+        </View>
+        {/* Số tiền */}
+  <View style={styles.inputGroup}>
+  <Text style={[styles.label, { color: theme.textSecondary }]}>
+    Số tiền
+  </Text>
+  <TextInput
+    value={mountText}
+    onChangeText={setMountText}
+    style={[
+      styles.input,
+      {
+        backgroundColor: theme.cardBackground,
+        borderColor: theme.border,
+        color: theme.textPrimary,
+      },
+    ]}
+    placeholder="Nhập số tiền"
+    placeholderTextColor={theme.textSecondary}
+    keyboardType="numeric"
+  />
+</View>
+
 
           {/* Danh mục */}
           <View style={styles.inputGroup}>
@@ -448,9 +481,9 @@ const styles = StyleSheet.create({
   toggleActive: {
     backgroundColor: 'white',
     shadowColor: '#000',
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 2,
   },
   toggleText: {
     fontSize: 14,

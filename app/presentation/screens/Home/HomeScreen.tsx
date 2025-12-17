@@ -1,6 +1,12 @@
-import { MaterialIcons } from '@expo/vector-icons';
+import { MaterialIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import React, { useEffect, useState } from "react";
+<<<<<<< HEAD
+=======
+import { useFocusEffect } from "@react-navigation/native";
+import { useCallback } from "react";
+
+>>>>>>> main
 import {
   Image,
   ScrollView,
@@ -9,16 +15,20 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { MOCK_GOALS } from "../../../../constants/constants";
+
 import { useTheme } from "../../../context/ThemeContext";
 import { getCurrentUserProfile } from "../../../services/auth.service";
 import { auth } from "../../../services/firebase/firebaseConfig";
 
 import { listenCategories } from "../../../services/category.service";
 import { listenTransactions } from "../../../services/transaction.service";
-import type { Category, Transaction as UITransaction } from "../../../type/types";
+import type {
+  Category,
+  UITransaction as UITransaction,
+} from "../../../type/types";
 import MonthlyExpenseChart from "../Home/MonthlyExpenseChart";
-
+import { getSavingGoalsByUser } from "../../../services/savingGoals.service";
+import { SavingGoal } from "../../../type/types";
 const DEFAULT_AVATAR =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuA_vMSFQARLvGWesaN0bPwdT0TwBkCjQuK-p1dyFrGdqF-NhAqX3D22UFhPgycZkrUA24cKIcSZEPLOfhmUcNZTvYIXtJBvgXlaRUnPVCaQ5zWzrC0n45kOlTptHz4fEKjcJrTwoasD3u6BnAo6DO1bJ2oe7sNZMz4X8J4ZExMW6HBrFk1JAZloRwzDfjdw4WOSE8HcBg82M53Zk1lZ9igZ6sqHdz0lO3Cvw1h6_YE38kL45oHN1DtJsD26XLF9ECZDyI3c-2ms-qO0";
 
@@ -34,7 +44,10 @@ const HomeScreen: React.FC = () => {
   const [totalExpense, setTotalExpense] = useState<number>(0);
 
   const [categories, setCategories] = useState<Category[]>([]);
-  const [recentTransactions, setRecentTransactions] = useState<UITransaction[]>([]);
+  const [recentTransactions, setRecentTransactions] = useState<UITransaction[]>(
+    []
+  );
+  const [goals, setGoals] = useState<SavingGoal[]>([]);
 
   const [transactions, setTransactions] = useState<any[]>([]);
 
@@ -77,7 +90,7 @@ const HomeScreen: React.FC = () => {
     return () => unsubCats?.();
   }, []);
 
-    // 2b) Listen giao dịch
+  // 2b) Listen giao dịch
   useEffect(() => {
     const unsubTx = listenTransactions(
       (list: any[]) => {
@@ -90,6 +103,19 @@ const HomeScreen: React.FC = () => {
 
     return () => unsubTx?.();
   }, []);
+  useFocusEffect(
+    useCallback(() => {
+      const loadGoals = async () => {
+        const user = auth.currentUser;
+        if (!user) return;
+
+        const data = await getSavingGoalsByUser(user.uid);
+        setGoals(data.slice(0, 3)); // chỉ lấy 3 mục tiêu
+      };
+
+      loadGoals();
+    }, [])
+  );
 
   // 2c) Tính tổng thu/chi/số dư + map giao dịch gần đây
   useEffect(() => {
@@ -101,8 +127,8 @@ const HomeScreen: React.FC = () => {
 
     transactions.forEach((tx: any) => {
       const rawAmount =
-        typeof tx.mount === "number"
-          ? tx.mount
+        typeof tx.amount === "number"
+          ? tx.amount
           : typeof tx.amount === "number"
           ? tx.amount
           : 0;
@@ -133,19 +159,12 @@ const HomeScreen: React.FC = () => {
     const latest = sorted.slice(0, 3); // 3 giao dịch gần nhất
 
     const mapped: UITransaction[] = latest.map((tx: any) => {
-      const rawAmount =
-        typeof tx.mount === "number"
-          ? tx.mount
-          : typeof tx.amount === "number"
-          ? tx.amount
-          : 0;
-
-      const signedAmount =
-        tx.type === "income" ? rawAmount : -rawAmount;
+      const rawAmount = tx.amount;
+      const signedAmount = tx.type === "income" ? tx.amount : -tx.amount;
 
       const category = categories.find((c) => c.id === tx.categoryId);
       const icon = category?.icon || "category";
-      const title = category?.name || "Khác";
+      const title = tx.title || category?.name || "Khác";
 
       // subtitle = "dd/mm/yyyy • ghi chú"
       const subtitleParts: string[] = [];
@@ -180,10 +199,12 @@ const HomeScreen: React.FC = () => {
     setRecentTransactions(mapped);
   }, [transactions, categories]);
 
-
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+<View style={[styles.container, { backgroundColor: isDarkMode ? theme.background : '#FFFFFF' }]}>
+      <ScrollView 
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
         {/* Header */}
         <View style={styles.header}>
           <View style={styles.userInfo}>
@@ -206,7 +227,7 @@ const HomeScreen: React.FC = () => {
           <TouchableOpacity
             style={[
               styles.notificationButton,
-              { backgroundColor: theme.cardBackground, borderColor: theme.border },
+              { backgroundColor: isDarkMode ? theme.cardBackground : '#F8FAFC', borderColor: isDarkMode ? theme.border : '#E2E8F0' },
             ]}
             onPress={() => navigation.navigate("Notifications")}
           >
@@ -220,18 +241,20 @@ const HomeScreen: React.FC = () => {
         </View>
 
         {/* Balance Card */}
-        <View style={[styles.balanceCard, { backgroundColor: theme.cardBackground }]}>
+        <View style={[styles.balanceCard, { backgroundColor: isDarkMode ? theme.cardBackground : '#FFFFFF' }]}>
           <Text style={[styles.balanceLabel, { color: theme.textSecondary }]}>
             Tổng số dư
           </Text>
-          <Text style={[styles.balanceAmount, { color: "#3c83f6" }]}>
+          <Text style={[styles.balanceAmount, { color: "#3B82F6" }]}>
             {amount !== null ? `${amount.toLocaleString("vi-VN")}₫` : "—"}
           </Text>
         </View>
 
         {/* Income/Expense Grid */}
         <View style={styles.statsGrid}>
-          <View style={[styles.statCard, { backgroundColor: theme.cardBackground }]}>
+          <View
+            style={[styles.statCard, { backgroundColor: theme.cardBackground }]}
+          >
             <Text style={[styles.statLabel, { color: theme.textSecondary }]}>
               Tổng thu
             </Text>
@@ -240,7 +263,9 @@ const HomeScreen: React.FC = () => {
             </Text>
           </View>
 
-          <View style={[styles.statCard, { backgroundColor: theme.cardBackground }]}>
+          <View
+            style={[styles.statCard, { backgroundColor: theme.cardBackground }]}
+          >
             <Text style={[styles.statLabel, { color: theme.textSecondary }]}>
               Tổng chi
             </Text>
@@ -251,25 +276,37 @@ const HomeScreen: React.FC = () => {
         </View>
 
         {/* Monthly Report Card – 3 tháng gần nhất */}
-        <MonthlyExpenseChart />
-
+        <View style={styles.chartSection}>
+          <MonthlyExpenseChart />
+        </View>
 
         {/* Recent Transactions */}
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>
-            Giao dịch gần đây
-          </Text>
+          <View style={styles.sectionHeader}>
+            <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>
+              Giao dịch gần đây
+            </Text>
+            <TouchableOpacity onPress={() => navigation.navigate("Transactions")}>
+              <Text style={styles.linkText}>Xem tất cả</Text>
+            </TouchableOpacity>
+          </View>
 
-          <View style={[styles.cardList, { backgroundColor: theme.cardBackground }]}>
-            {(recentTransactions.length ? recentTransactions : []).map((tx) => (
+          <View style={[styles.cardList, { backgroundColor: isDarkMode ? theme.cardBackground : '#FFFFFF' }]}>
+            {(recentTransactions.length ? recentTransactions : []).map((tx, index) => (
               <TouchableOpacity
                 key={tx.id}
-                style={styles.transactionItem}
+                style={[
+                  styles.transactionItem,
+                  index < recentTransactions.length - 1 && styles.transactionItemBorder
+                ]}
                 onPress={() => navigation.navigate("UpdateTransaction", { id: tx.id })}
-
               >
                 <View
+<<<<<<< HEAD
                   style={[styles.iconBox,{ backgroundColor: tx.colorClass + '33' }]}>
+=======
+                  style={[styles.iconBox, { backgroundColor: tx.colorClass + '20' }]}>
+>>>>>>> main
                   <MaterialIcons
                     name={tx.icon as any}
                     size={24}
@@ -299,9 +336,10 @@ const HomeScreen: React.FC = () => {
             ))}
 
             {!recentTransactions.length ? (
-              <View style={{ padding: 16 }}>
-                <Text style={{ color: theme.textSecondary }}>
-                  Chưa có giao dịch nào.
+              <View style={styles.emptyState}>
+                <MaterialIcons name="receipt-long" size={48} color={theme.textSecondary} />
+                <Text style={[styles.emptyText, { color: theme.textSecondary }]}>
+                  Chưa có giao dịch nào
                 </Text>
               </View>
             ) : null}
@@ -314,26 +352,92 @@ const HomeScreen: React.FC = () => {
             <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>
               Mục tiêu tiết kiệm
             </Text>
-            <TouchableOpacity onPress={() => navigation.navigate("GoalList")}>
-              <Text style={styles.linkText}>Xem tất cả</Text>
-            </TouchableOpacity>
+
+            <View style={{ flexDirection: "row", gap: 12 }}>
+              <TouchableOpacity onPress={() => navigation.navigate("GoalList")}>
+                <Text style={styles.linkText}>Xem tất cả</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity onPress={() => navigation.navigate("AddGoals")}>
+                <MaterialIcons name="add" size={22} color="#3c83f6" />
+              </TouchableOpacity>
+            </View>
           </View>
 
           <View style={{ gap: 16 }}>
-            {MOCK_GOALS.map((goal) => {
-              const progress = Math.round(
-                (goal.savedAmount / goal.targetAmount) * 100
-              );
-              return (
-                <TouchableOpacity
-                  key={goal.id}
-                  style={[styles.goalCard, { backgroundColor: theme.cardBackground }]}
-                  onPress={() => navigation.navigate("GoalDetail", { id: goal.id })}
-                >
-                  {/* ... phần Goals giữ nguyên như bạn ... */}
-                </TouchableOpacity>
-              );
-            })}
+            {goals.length === 0 ? (
+              <Text style={{ color: "#999", marginTop: 8 }}>
+                Chưa có mục tiêu tiết kiệm
+              </Text>
+            ) : (
+              goals.map((goal) => {
+                const progress =
+                  goal.targetAmount > 0
+                    ? Math.round((goal.currentAmount / goal.targetAmount) * 100)
+                    : 0;
+
+                return (
+                  <TouchableOpacity
+                    key={goal.id}
+                    style={[
+                      styles.goalCard,
+                      { backgroundColor: theme.cardBackground },
+                    ]}
+                    onPress={() =>
+                      navigation.navigate("GoalDetail", { id: goal.id })
+                    }
+                  >
+                    {/* Title */}
+                    <Text
+                      style={{
+                        fontSize: 16,
+                        fontWeight: "600",
+                        color: theme.textPrimary,
+                      }}
+                    >
+                      {goal.title}
+                    </Text>
+
+                    {/* Amount */}
+                    <Text style={{ marginTop: 4, color: theme.textSecondary }}>
+                      {goal.currentAmount.toLocaleString()} /{" "}
+                      {goal.targetAmount.toLocaleString()} đ
+                    </Text>
+
+                    {/* Progress bar */}
+                    <View
+                      style={{
+                        height: 8,
+                        backgroundColor: "#E5E7EB",
+                        borderRadius: 10,
+                        marginTop: 10,
+                        overflow: "hidden",
+                      }}
+                    >
+                      <View
+                        style={{
+                          width: `${Math.min(progress, 100)}%`,
+                          height: "100%",
+                          backgroundColor: "#4C6EF5",
+                        }}
+                      />
+                    </View>
+
+                    {/* Percentage */}
+                    <Text
+                      style={{
+                        marginTop: 6,
+                        fontSize: 13,
+                        color: "#4C6EF5",
+                        fontWeight: "500",
+                      }}
+                    >
+                      {progress}% hoàn thành
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })
+            )}
           </View>
         </View>
 
@@ -353,16 +457,16 @@ const HomeScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f7f8",
   },
   scrollContent: {
-    padding: 16,
+    padding: 20,
+    paddingTop: 16,
   },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 16,
+    marginBottom: 24,
     marginTop: 8,
   },
   userInfo: {
@@ -371,36 +475,38 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   avatar: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    borderWidth: 3,
+    borderColor: "#EFF6FF",
+  },
+  greeting: {
+    fontSize: 14,
+    fontWeight: "500",
+    marginBottom: 2,
+  },
+  username: {
+    fontSize: 18,
+    fontWeight: "700",
+  },
+  notificationButton: {
     width: 44,
     height: 44,
     borderRadius: 22,
-    borderWidth: 2,
-    borderColor: "white",
-  },
-  greeting: {
-    fontSize: 12,
-    color: "#60708a",
-    fontWeight: "500",
-  },
-  username: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#111418",
-  },
-  notificationButton: {
-    width: 40,
-    height: 40,
-    backgroundColor: "white",
-    borderRadius: 20,
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
-    borderColor: "#f3f4f6",
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
   },
   badge: {
     position: "absolute",
-    top: 10,
-    right: 10,
+    top: 8,
+    right: 8,
     width: 10,
     height: 10,
     backgroundColor: "#EF4444",
@@ -409,113 +515,85 @@ const styles = StyleSheet.create({
     borderColor: "white",
   },
   balanceCard: {
-    backgroundColor: "white",
     padding: 24,
-    borderRadius: 16,
-    marginBottom: 16,
-    shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
+    borderRadius: 20,
+    marginBottom: 20,
+    shadowColor: "#3c83f6",
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 6,
+  },
+  balanceContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 16,
+  },
+  balanceIconCircle: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: "#EFF6FF",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  balanceTextContainer: {
+    flex: 1,
   },
   balanceLabel: {
-    fontSize: 16,
-    color: "#60708a",
+    fontSize: 14,
     fontWeight: "500",
     marginBottom: 4,
   },
   balanceAmount: {
-    fontSize: 30,
-    fontWeight: "bold",
-    color: "#3c83f6",
+    fontSize: 28,
+    fontWeight: "800",
+    letterSpacing: -0.5,
   },
   statsGrid: {
     flexDirection: "row",
     gap: 16,
-    marginBottom: 16,
+    marginBottom: 24,
   },
   statCard: {
     flex: 1,
-    backgroundColor: "white",
-    padding: 16,
+    padding: 20,
     borderRadius: 16,
     shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 3,
+    gap: 8,
+  },
+  statIconBox: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 4,
   },
   statLabel: {
-    fontSize: 14,
-    color: "#60708a",
+    fontSize: 13,
     fontWeight: "500",
-    marginBottom: 4,
   },
   statValue: {
     fontSize: 18,
-    fontWeight: "bold",
-  },
-  reportCard: {
-    backgroundColor: "white",
-    padding: 24,
-    borderRadius: 16,
-    marginBottom: 16,
-    shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  reportTitle: {
-    fontSize: 16,
-    fontWeight: "500",
-    color: "#111418",
-  },
-  reportAmount: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#111418",
-    marginVertical: 4,
-  },
-  reportTrend: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-  },
-  trendText: {
-    color: "#EF4444",
-    fontSize: 14,
-    fontWeight: "500",
-  },
-  chartContainer: {
-    flexDirection: "row",
-    height: 120,
-    alignItems: "flex-end",
-    justifyContent: "space-between",
-    marginTop: 20,
-    gap: 8,
-  },
-  barWrapper: {
-    flex: 1,
-    height: "100%",
-    justifyContent: "flex-end",
-  },
-  bar: {
-    width: "100%",
-    borderTopLeftRadius: 4,
-    borderTopRightRadius: 4,
+    fontWeight: "700",
   },
   section: {
-    marginBottom: 16,
+    marginBottom: 24,
   },
   sectionHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 12,
+    marginBottom: 16,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#111418",
+    fontSize: 20,
+    fontWeight: "700",
   },
   linkText: {
     fontSize: 14,
@@ -523,20 +601,28 @@ const styles = StyleSheet.create({
     color: "#3c83f6",
   },
   cardList: {
-    backgroundColor: "white",
     borderRadius: 16,
-    padding: 16,
-    gap: 12,
+    padding: 20,
+    shadowColor: "#000",
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 3,
   },
   transactionItem: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 16,
+    gap: 12,
+    paddingVertical: 12,
+  },
+  transactionItemBorder: {
+    borderBottomWidth: 1,
+    borderBottomColor: "#F3F4F6",
   },
   iconBox: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 48,
+    height: 48,
+    borderRadius: 14,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -546,39 +632,61 @@ const styles = StyleSheet.create({
   txTitle: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#111418",
+    marginBottom: 4,
   },
   txSubtitle: {
-    fontSize: 14,
-    color: "#60708a",
+    fontSize: 13,
   },
   txAmount: {
-    fontWeight: "bold",
+    fontWeight: "700",
     fontSize: 16,
   },
+  emptyState: {
+    alignItems: "center",
+    paddingVertical: 32,
+  },
+  emptyText: {
+    fontSize: 14,
+    marginTop: 12,
+    fontWeight: "500",
+  },
   goalCard: {
-    backgroundColor: "white",
-    padding: 16,
+    padding: 20,
     borderRadius: 16,
     shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 3,
   },
   goalHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 12,
+    marginBottom: 16,
+  },
+  goalTitleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    flex: 1,
+  },
+  goalIconBox: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: "#EFF6FF",
+    alignItems: "center",
+    justifyContent: "center",
   },
   goalTitle: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#111418",
+    fontSize: 17,
+    fontWeight: "700",
+    flex: 1,
   },
   statusBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 2,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
     borderRadius: 12,
   },
   statusText: {
@@ -586,37 +694,28 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   goalProgress: {
-    gap: 8,
+    gap: 12,
   },
   progressLabels: {
     flexDirection: "row",
     justifyContent: "space-between",
   },
   progressText: {
-    fontSize: 12,
-    color: "#60708a",
+    fontSize: 13,
     fontWeight: "500",
   },
-  monthLabel: {
-  marginTop: 8,
-  fontSize: 12,
-  textAlign: "center",
-  },
-
   progressTextBold: {
-    fontSize: 12,
-    fontWeight: "bold",
-    color: "#111418",
+    fontSize: 13,
+    fontWeight: "700",
   },
   progressBarBg: {
-    height: 8,
-    backgroundColor: "#e5e7eb",
-    borderRadius: 4,
+    height: 10,
+    borderRadius: 5,
     overflow: "hidden",
   },
   progressBarFill: {
     height: "100%",
-    borderRadius: 4,
+    borderRadius: 5,
   },
   progressAmounts: {
     flexDirection: "row",
@@ -624,27 +723,28 @@ const styles = StyleSheet.create({
   },
   amountLabel: {
     fontSize: 12,
-    color: "#60708a",
+    marginBottom: 4,
+    fontWeight: "500",
   },
   amountValue: {
-    color: "#111418",
-    fontWeight: "500",
+    fontSize: 15,
+    fontWeight: "700",
   },
   fab: {
     position: "absolute",
-    bottom: 24,
-    right: 24,
+    bottom: 28,
+    right: 20,
     width: 64,
     height: 64,
     borderRadius: 32,
     backgroundColor: "#3c83f6",
     alignItems: "center",
     justifyContent: "center",
-    elevation: 6,
     shadowColor: "#3c83f6",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.4,
+    shadowRadius: 12,
+    elevation: 8,
   },
 });
 

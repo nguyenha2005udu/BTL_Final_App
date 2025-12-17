@@ -138,9 +138,25 @@ const ChangePasswordScreen: React.FC = () => {
     );
   };
 
+  // Check password strength
+  const getPasswordStrength = (password: string) => {
+    const checks = {
+      length: password.length >= 8,
+      uppercase: /[A-Z]/.test(password),
+      lowercase: /[a-z]/.test(password),
+      number: /[0-9]/.test(password),
+    };
+    return checks;
+  };
+
+  const passwordChecks = getPasswordStrength(newPassword);
+
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
-      <View style={[styles.header, { backgroundColor: theme.headerBackground, borderBottomColor: theme.border }]}>
+    <View style={[styles.container, { backgroundColor: isDarkMode ? theme.background : '#FFFFFF' }]}>
+      <View style={[styles.header, { 
+        backgroundColor: isDarkMode ? theme.headerBackground : '#FFFFFF',
+        borderBottomColor: isDarkMode ? theme.border : '#F1F5F9'
+      }]}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.iconButton}>
           <MaterialIcons name="arrow-back" size={24} color={theme.textPrimary} />
         </TouchableOpacity>
@@ -148,21 +164,39 @@ const ChangePasswordScreen: React.FC = () => {
         <View style={{ width: 40 }} />
       </View>
 
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView 
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+      >
         {/* Security Notice */}
-        <View style={[styles.noticeCard, { backgroundColor: isDarkMode ? '#1e3a5f' : '#EFF6FF' }]}>
-          <MaterialIcons name="info" size={24} color="#3c83f6" />
-          <Text style={[styles.noticeText, { color: theme.textPrimary }]}>
-            Để bảo mật tài khoản, vui lòng xác nhận mật khẩu hiện tại trước khi thay đổi.
-          </Text>
+        <View style={[styles.noticeCard, { 
+          backgroundColor: isDarkMode ? '#1E3A5F' : '#EFF6FF'
+        }]}>
+          <View style={[styles.noticeIcon, { backgroundColor: isDarkMode ? '#3B82F6' : '#DBEAFE' }]}>
+            <MaterialIcons name="security" size={24} color="#3B82F6" />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={[styles.noticeTitle, { color: theme.textPrimary }]}>
+              Bảo mật tài khoản
+            </Text>
+            <Text style={[styles.noticeText, { color: theme.textSecondary }]}>
+              Xác nhận mật khẩu hiện tại trước khi thay đổi để đảm bảo an toàn.
+            </Text>
+          </View>
         </View>
 
-        {/* Form */}
-        <View style={[styles.card, { backgroundColor: theme.cardBackground }]}>
+        {/* Form Card */}
+        <View style={[styles.formCard, { 
+          backgroundColor: isDarkMode ? theme.cardBackground : '#FFFFFF'
+        }]}>
           {/* Current Password */}
           <View style={styles.inputGroup}>
             <Text style={[styles.label, { color: theme.textSecondary }]}>Mật khẩu hiện tại</Text>
-            <View style={[styles.passwordInput, { backgroundColor: theme.background, borderColor: theme.border }]}>
+            <View style={[styles.passwordInput, { 
+              backgroundColor: isDarkMode ? '#1F2937' : '#F8FAFC',
+              borderColor: isDarkMode ? theme.border : '#E2E8F0'
+            }]}>
+              <MaterialIcons name="lock-outline" size={20} color={theme.textSecondary} style={styles.inputIcon} />
               <TextInput
                 style={[styles.input, { color: theme.textPrimary }]}
                 placeholder="Nhập mật khẩu hiện tại"
@@ -172,10 +206,13 @@ const ChangePasswordScreen: React.FC = () => {
                 onChangeText={setCurrentPassword}
                 autoCapitalize="none"
               />
-              <TouchableOpacity onPress={() => setShowCurrentPassword(!showCurrentPassword)}>
+              <TouchableOpacity 
+                onPress={() => setShowCurrentPassword(!showCurrentPassword)}
+                style={styles.eyeButton}
+              >
                 <MaterialIcons 
                   name={showCurrentPassword ? "visibility" : "visibility-off"} 
-                  size={24} 
+                  size={22} 
                   color={theme.textSecondary} 
                 />
               </TouchableOpacity>
@@ -185,7 +222,11 @@ const ChangePasswordScreen: React.FC = () => {
           {/* New Password */}
           <View style={styles.inputGroup}>
             <Text style={[styles.label, { color: theme.textSecondary }]}>Mật khẩu mới</Text>
-            <View style={[styles.passwordInput, { backgroundColor: theme.background, borderColor: theme.border }]}>
+            <View style={[styles.passwordInput, { 
+              backgroundColor: isDarkMode ? '#1F2937' : '#F8FAFC',
+              borderColor: isDarkMode ? theme.border : '#E2E8F0'
+            }]}>
+              <MaterialIcons name="vpn-key" size={20} color={theme.textSecondary} style={styles.inputIcon} />
               <TextInput
                 style={[styles.input, { color: theme.textPrimary }]}
                 placeholder="Nhập mật khẩu mới"
@@ -195,23 +236,27 @@ const ChangePasswordScreen: React.FC = () => {
                 onChangeText={setNewPassword}
                 autoCapitalize="none"
               />
-              <TouchableOpacity onPress={() => setShowNewPassword(!showNewPassword)}>
+              <TouchableOpacity 
+                onPress={() => setShowNewPassword(!showNewPassword)}
+                style={styles.eyeButton}
+              >
                 <MaterialIcons 
                   name={showNewPassword ? "visibility" : "visibility-off"} 
-                  size={24} 
+                  size={22} 
                   color={theme.textSecondary} 
                 />
               </TouchableOpacity>
             </View>
-            <Text style={[styles.helperText, { color: theme.textSecondary }]}>
-              Ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường và số
-            </Text>
           </View>
 
           {/* Confirm Password */}
           <View style={styles.inputGroup}>
             <Text style={[styles.label, { color: theme.textSecondary }]}>Xác nhận mật khẩu mới</Text>
-            <View style={[styles.passwordInput, { backgroundColor: theme.background, borderColor: theme.border }]}>
+            <View style={[styles.passwordInput, { 
+              backgroundColor: isDarkMode ? '#1F2937' : '#F8FAFC',
+              borderColor: isDarkMode ? theme.border : '#E2E8F0'
+            }]}>
+              <MaterialIcons name="check-circle-outline" size={20} color={theme.textSecondary} style={styles.inputIcon} />
               <TextInput
                 style={[styles.input, { color: theme.textPrimary }]}
                 placeholder="Nhập lại mật khẩu mới"
@@ -221,10 +266,13 @@ const ChangePasswordScreen: React.FC = () => {
                 onChangeText={setConfirmPassword}
                 autoCapitalize="none"
               />
-              <TouchableOpacity onPress={() => setShowConfirmPassword(!showConfirmPassword)}>
+              <TouchableOpacity 
+                onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+                style={styles.eyeButton}
+              >
                 <MaterialIcons 
                   name={showConfirmPassword ? "visibility" : "visibility-off"} 
-                  size={24} 
+                  size={22} 
                   color={theme.textSecondary} 
                 />
               </TouchableOpacity>
@@ -232,46 +280,105 @@ const ChangePasswordScreen: React.FC = () => {
           </View>
 
           {/* Forgot Password Link */}
-          <TouchableOpacity onPress={handleForgotPassword} style={styles.forgotButton}>
+          <TouchableOpacity 
+            onPress={handleForgotPassword} 
+            style={styles.forgotButton}
+            activeOpacity={0.7}
+          >
+            <MaterialIcons name="help-outline" size={16} color="#3B82F6" />
             <Text style={styles.forgotText}>Quên mật khẩu?</Text>
           </TouchableOpacity>
         </View>
 
         {/* Password Requirements */}
-        <View style={[styles.requirementsCard, { backgroundColor: theme.cardBackground }]}>
-          <Text style={[styles.requirementsTitle, { color: theme.textPrimary }]}>Yêu cầu mật khẩu:</Text>
+        <View style={[styles.requirementsCard, { 
+          backgroundColor: isDarkMode ? theme.cardBackground : '#FFFFFF'
+        }]}>
+          <Text style={[styles.requirementsTitle, { color: theme.textPrimary }]}>
+            Yêu cầu mật khẩu:
+          </Text>
+          
           <View style={styles.requirement}>
-            <MaterialIcons name="check-circle" size={16} color="#22C55E" />
-            <Text style={[styles.requirementText, { color: theme.textSecondary }]}>Ít nhất 8 ký tự</Text>
+            <MaterialIcons 
+              name={passwordChecks.length ? "check-circle" : "radio-button-unchecked"} 
+              size={20} 
+              color={passwordChecks.length ? "#22C55E" : theme.textSecondary} 
+            />
+            <Text style={[styles.requirementText, { 
+              color: passwordChecks.length ? "#22C55E" : theme.textSecondary 
+            }]}>
+              Ít nhất 8 ký tự
+            </Text>
           </View>
+
           <View style={styles.requirement}>
-            <MaterialIcons name="check-circle" size={16} color="#22C55E" />
-            <Text style={[styles.requirementText, { color: theme.textSecondary }]}>Có chữ hoa (A-Z)</Text>
+            <MaterialIcons 
+              name={passwordChecks.uppercase ? "check-circle" : "radio-button-unchecked"} 
+              size={20} 
+              color={passwordChecks.uppercase ? "#22C55E" : theme.textSecondary} 
+            />
+            <Text style={[styles.requirementText, { 
+              color: passwordChecks.uppercase ? "#22C55E" : theme.textSecondary 
+            }]}>
+              Có chữ hoa (A-Z)
+            </Text>
           </View>
+
           <View style={styles.requirement}>
-            <MaterialIcons name="check-circle" size={16} color="#22C55E" />
-            <Text style={[styles.requirementText, { color: theme.textSecondary }]}>Có chữ thường (a-z)</Text>
+            <MaterialIcons 
+              name={passwordChecks.lowercase ? "check-circle" : "radio-button-unchecked"} 
+              size={20} 
+              color={passwordChecks.lowercase ? "#22C55E" : theme.textSecondary} 
+            />
+            <Text style={[styles.requirementText, { 
+              color: passwordChecks.lowercase ? "#22C55E" : theme.textSecondary 
+            }]}>
+              Có chữ thường (a-z)
+            </Text>
           </View>
+
           <View style={styles.requirement}>
-            <MaterialIcons name="check-circle" size={16} color="#22C55E" />
-            <Text style={[styles.requirementText, { color: theme.textSecondary }]}>Có số (0-9)</Text>
+            <MaterialIcons 
+              name={passwordChecks.number ? "check-circle" : "radio-button-unchecked"} 
+              size={20} 
+              color={passwordChecks.number ? "#22C55E" : theme.textSecondary} 
+            />
+            <Text style={[styles.requirementText, { 
+              color: passwordChecks.number ? "#22C55E" : theme.textSecondary 
+            }]}>
+              Có số (0-9)
+            </Text>
           </View>
         </View>
+
+        <View style={{ height: 20 }} />
       </ScrollView>
 
       {/* Footer Buttons */}
-      <View style={[styles.footer, { backgroundColor: theme.cardBackground, borderTopColor: theme.border }]}>
+      <View style={[styles.footer, { 
+        backgroundColor: isDarkMode ? theme.cardBackground : '#FFFFFF',
+        borderTopColor: isDarkMode ? theme.border : '#F1F5F9'
+      }]}>
         <TouchableOpacity
           style={[styles.saveButton, loading && styles.saveButtonDisabled]}
           onPress={handleChangePassword}
           disabled={loading}
+          activeOpacity={0.8}
         >
+          {loading && (
+            <MaterialIcons name="hourglass-empty" size={20} color="white" style={{ marginRight: 8 }} />
+          )}
           <Text style={styles.saveButtonText}>
             {loading ? 'Đang xử lý...' : 'Đổi mật khẩu'}
           </Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.cancelButton} onPress={() => navigation.goBack()}>
-          <Text style={styles.cancelButtonText}>Hủy</Text>
+        
+        <TouchableOpacity 
+          style={[styles.cancelButton, { borderColor: isDarkMode ? theme.border : '#E2E8F0' }]} 
+          onPress={() => navigation.goBack()}
+          activeOpacity={0.7}
+        >
+          <Text style={[styles.cancelButtonText, { color: theme.textSecondary }]}>Hủy</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -279,31 +386,201 @@ const ChangePasswordScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', height: 60, paddingHorizontal: 16, borderBottomWidth: 1 },
-  headerTitle: { fontSize: 18, fontWeight: 'bold' },
-  iconButton: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
-  content: { padding: 16 },
-  noticeCard: { flexDirection: 'row', padding: 16, borderRadius: 12, marginBottom: 16, gap: 12 },
-  noticeText: { flex: 1, fontSize: 14, lineHeight: 20 },
-  card: { borderRadius: 16, padding: 20, marginBottom: 16 },
-  inputGroup: { marginBottom: 20 },
-  label: { fontSize: 14, fontWeight: '500', marginBottom: 8 },
-  passwordInput: { flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderRadius: 8, height: 48, paddingHorizontal: 12, gap: 8 },
-  input: { flex: 1, fontSize: 16 },
-  helperText: { fontSize: 12, marginTop: 4 },
-  forgotButton: { alignSelf: 'flex-end' },
-  forgotText: { color: '#3c83f6', fontSize: 14, fontWeight: '600' },
-  requirementsCard: { borderRadius: 12, padding: 16, marginBottom: 16 },
-  requirementsTitle: { fontSize: 14, fontWeight: '600', marginBottom: 12 },
-  requirement: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 },
-  requirementText: { fontSize: 14 },
-  footer: { padding: 16, borderTopWidth: 1, gap: 12 },
-  saveButton: { backgroundColor: '#3c83f6', height: 48, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
-  saveButtonDisabled: { opacity: 0.5 },
-  saveButtonText: { color: 'white', fontSize: 16, fontWeight: 'bold' },
-  cancelButton: { height: 48, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
-  cancelButtonText: { color: '#3c83f6', fontSize: 16, fontWeight: 'bold' },
+  container: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    height: 60,
+    paddingHorizontal: 16,
+    backgroundColor: '#FFFFFF',
+    borderBottomWidth: 1,
+    borderBottomColor: '#F1F5F9',
+  },
+  headerTitle: {
+    fontSize: 19,
+    fontWeight: '700',
+    color: '#0F172A',
+    letterSpacing: -0.3,
+  },
+  iconButton: {
+    width: 40,
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  content: {
+    padding: 20,
+  },
+  noticeCard: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    padding: 18,
+    borderRadius: 16,
+    marginBottom: 20,
+    gap: 14,
+    backgroundColor: '#EFF6FF',
+    borderWidth: 1,
+    borderColor: '#DBEAFE',
+  },
+  noticeIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#DBEAFE',
+  },
+  noticeTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#0F172A',
+    marginBottom: 4,
+  },
+  noticeText: {
+    fontSize: 13,
+    lineHeight: 19,
+    color: '#64748B',
+    fontWeight: '500',
+  },
+  formCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 18,
+    padding: 20,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: '#F1F5F9',
+  },
+  inputGroup: {
+    marginBottom: 20,
+  },
+  label: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#64748B',
+    marginBottom: 8,
+    letterSpacing: 0.2,
+  },
+  passwordInput: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    borderRadius: 12,
+    height: 52,
+    paddingLeft: 48,
+    paddingRight: 12,
+  },
+  inputIcon: {
+    position: 'absolute',
+    left: 16,
+  },
+  input: {
+    flex: 1,
+    fontSize: 15,
+    color: '#0F172A',
+    fontWeight: '500',
+  },
+  eyeButton: {
+    padding: 4,
+  },
+  forgotButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-end',
+    gap: 6,
+    marginTop: 4,
+  },
+  forgotText: {
+    color: '#3B82F6',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  requirementsCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 18,
+    padding: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: '#F1F5F9',
+  },
+  requirementsTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#0F172A',
+    marginBottom: 16,
+  },
+  requirement: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: 12,
+  },
+  requirementText: {
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  footer: {
+    padding: 20,
+    backgroundColor: '#FFFFFF',
+    borderTopWidth: 1,
+    borderTopColor: '#F1F5F9',
+    gap: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  saveButton: {
+    backgroundColor: '#3B82F6',
+    height: 52,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
+    shadowColor: '#3B82F6',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  saveButtonDisabled: {
+    backgroundColor: '#94A3B8',
+    shadowOpacity: 0.1,
+  },
+  saveButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '700',
+    letterSpacing: -0.2,
+  },
+  cancelButton: {
+    height: 52,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
+  },
+  cancelButtonText: {
+    color: '#64748B',
+    fontSize: 16,
+    fontWeight: '600',
+  },
 });
 
 export default ChangePasswordScreen;
