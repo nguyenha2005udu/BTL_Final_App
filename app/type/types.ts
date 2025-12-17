@@ -10,7 +10,7 @@ export interface UITransaction {
   title: string;
   subtitle: string;      // "15/12/2025 • Ăn trưa"
   amount: number;        // + thu | - chi
-  date: string;
+  date: Date;
   icon: MaterialIconName;
   colorClass: string;
   type: 'income' | 'expense';

@@ -13,6 +13,8 @@ import {
   listenTransactions,
   Transaction as DbTransaction,
 } from "../../../services/transaction.service";
+import { listenCategories } from "../../../services/category.service";
+import type { Category } from "../../../type/types";
 
 /* ================= TYPES ================= */
 
@@ -41,32 +43,71 @@ const formatDateDDMMYYYY = (date: Date | any) => {
 
 const StatisticsScreen: React.FC = () => {
   const { theme, isDarkMode } = useTheme();
+  const [categories, setCategories] = useState<Category[]>([]);
 
   const [transactions, setTransactions] = useState<UITransaction[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [filter, setFilter] = useState<FilterType>("7days");
-
+  const [rawTransactions, setRawTransactions] = useState<DbTransaction[]>([]);
   /* ================= LOAD DATA ================= */
+  useEffect(() => {
+  const unsub = listenCategories(setCategories);
+  return () => unsub?.();
+}, []);
 
   useEffect(() => {
-    const unsub = listenTransactions(
-      (list: DbTransaction[]) => {
-        const mapped: UITransaction[] = list.map((tx) => ({
-          id: tx.id,
-          title: tx.title || "Giao dịch",
-          subtitle: tx.note || "",
-          amount: tx.type === "income" ? tx.amount : -tx.amount,
-          date: tx.date,
-          type: tx.type,
-        }));
+  const unsub = listenTransactions(
+    (list: DbTransaction[]) => {
+      setRawTransactions(list); // ✅ chỉ lưu raw
+    },
+    (err) => console.log("listenTransactions error", err)
+  );
 
-        setTransactions(mapped);
-      },
-      (err) => console.log("listenTransactions error", err)
-    );
+  return () => unsub?.();
+}, []);
+  useEffect(() => {
+  if (!rawTransactions.length) {
+    setTransactions([]);
+    return;
+  }
 
-    return () => unsub?.();
-  }, []);
+  const mapped: UITransaction[] = rawTransactions.map((tx) => {
+    const category = categories.find(c => c.id === tx.categoryId);
+
+    // TITLE = DANH MỤC
+    const title = category?.name || "Khác";
+
+    // SUBTITLE = TÊN GIAO DỊCH + NGÀY
+    const subtitleParts: string[] = [];
+
+    if (tx.title) subtitleParts.push(tx.title);
+
+    if (tx.date instanceof Date) {
+      const d = tx.date;
+      subtitleParts.push(
+        `${String(d.getDate()).padStart(2, "0")}/${
+          String(d.getMonth() + 1).padStart(2, "0")
+        }/${d.getFullYear()}`
+      );
+    }
+
+    return {
+      id: tx.id,
+      title, // 👈 DANH MỤC
+      subtitle: subtitleParts.join(" • "),
+      amount: tx.type === "income" ? tx.amount : -tx.amount,
+      date: tx.date,
+      type: tx.type,
+      icon:
+        category?.icon ||
+        (tx.type === "income" ? "trending-up" : "trending-down"),
+      color: category?.color,
+    };
+  });
+
+  setTransactions(mapped);
+}, [rawTransactions, categories]); // ✅ dependency BẮT BUỘC
+
 
   /* ================= FILTER ================= */
 

@@ -31,19 +31,34 @@ export const listenCategories = (
   }
 
   return onSnapshot(
-    colRef,
-    snapshot => {
-      const list: Category[] = snapshot.docs.map(docSnap => ({
+  colRef,
+  snapshot => {
+    const list: Category[] = snapshot.docs.map(docSnap => {
+      const data = docSnap.data() as any;
+
+      return {
         id: docSnap.id,
-        ...(docSnap.data() as Omit<Category, 'id'>),
-      }));
-      onChange(list);
-    },
-    error => {
-      console.log('listenCategories error', error);
-      onError?.(error as Error);
-    },
-  );
+        name: data.name,
+        icon: data.icon,
+        color: data.color,
+        budget: data.budget ?? null,
+        spent: data.spent ?? 0,
+
+        // 🔥 FIX QUAN TRỌNG
+        type: data.type || data.kind || 'expense',
+
+        createdAt: data.createdAt,
+      };
+    });
+
+    onChange(list);
+  },
+  error => {
+    console.log('listenCategories error', error);
+    onError?.(error as Error);
+  },
+);
+
 };
 
 // Tạo danh mục mới – ở đây vẫn yêu cầu phải login
