@@ -7,8 +7,8 @@ export type ReportCategoryListItem = {
   name: string;
   color: string;
   icon: string;
-  value: number; // đã chi / đã thu
-  budget: number; // ngân sách / mục tiêu
+  value: number; 
+  budget: number; 
 };
 
 type Props = {
@@ -19,7 +19,29 @@ type Props = {
   onAddCategory: () => void;
 };
 
-const formatMoney = (n: number) => `${Math.max(0, Math.round(n)).toLocaleString('vi-VN')}đ`;
+const formatMoney = (n: number) =>
+  `${Math.max(0, Math.round(n)).toLocaleString('vi-VN')}₫`;
+
+const getIconBg = (color: string, fallback: string) => {
+  if (typeof color !== 'string' || color.length === 0) return fallback;
+  if (!color.startsWith('#')) return fallback;
+
+  // #RRGGBBAA
+  if (color.length === 9) return color;
+
+  // #RGB -> #RRGGBB22
+  if (color.length === 4) {
+    const r = color[1];
+    const g = color[2];
+    const b = color[3];
+    return `#${r}${r}${g}${g}${b}${b}22`;
+  }
+
+  // #RRGGBB -> #RRGGBB22
+  if (color.length === 7) return `${color}22`;
+
+  return fallback;
+};
 
 export const ReportCategoryList: React.FC<Props> = ({
   items,
@@ -72,7 +94,7 @@ export const ReportCategoryList: React.FC<Props> = ({
               onPress={() => onPressItem(item.id)}
               activeOpacity={0.75}
             >
-              <View style={[styles.iconBox, { backgroundColor: `${item.color}22` }]}>
+              <View style={[styles.iconBox, { backgroundColor: getIconBg(item.color, theme.divider) }]}>
                 <MaterialIcons
                     name={(item.icon as any) || 'category'}
                     size={20}
@@ -180,21 +202,25 @@ const styles = StyleSheet.create({
   },
 
   headerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    minHeight: 28,
+  flexDirection: 'row',
+  alignItems: 'center',
+  minHeight: 44,
+  paddingVertical: 6,
   },
   iconBox: {
-  width: 32,
-  height: 32,
-  borderRadius: 16,
-  marginRight: 10,
-  alignItems: 'center',
-  justifyContent: 'center',
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    marginRight: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-
-  title: { flex: 1, fontSize: 18, fontWeight: '700' },
-
+  title: {
+    flex: 1,
+    fontSize: 16,
+    fontWeight: '800',
+  },
+  
   row: { flexDirection: 'row', marginTop: 12 },
   rowBottom: { marginTop: 10 },
   col: { flex: 1 },

@@ -27,6 +27,21 @@ const getThisMonthRange = (now = new Date()) => {
   return { from: startOfDay(from), to: endOfDay(to) };
 };
 
+const getTxMs = (t: any) => {
+  const v = t?.date ?? t?.createdAt;
+  if (!v) return NaN;
+  if (typeof v?.toDate === 'function') return v.toDate().getTime(); // Firestore Timestamp
+  const d = v instanceof Date ? v : new Date(v);
+  return d.getTime();
+};
+
+const getTxAmount = (t: any) => {
+  if (typeof t?.mount === 'number') return Math.abs(t.mount);
+  if (typeof t?.amount === 'number') return Math.abs(t.amount);
+  const n = Number(t?.mount ?? t?.amount ?? 0);
+  return Number.isFinite(n) ? Math.abs(n) : 0;
+};
+
 export const useReportTotals = (transactions: Transaction[]) => {
   const [period, setPeriod] = React.useState<ReportPeriod>('month');
 
@@ -38,9 +53,10 @@ export const useReportTotals = (transactions: Transaction[]) => {
   const txInRange = React.useMemo(() => {
     const fromMs = range.from.getTime();
     const toMs = range.to.getTime();
-    return transactions.filter(t => {
-      const ms = t.date.getTime();
-      return ms >= fromMs && ms <= toMs;
+
+    return (transactions ?? []).filter(t => {
+      const ms = getTxMs(t);
+      return Number.isFinite(ms) && ms >= fromMs && ms <= toMs;
     });
   }, [transactions, range]);
 
@@ -49,8 +65,9 @@ export const useReportTotals = (transactions: Transaction[]) => {
     let totalExpense = 0;
 
     for (const t of txInRange) {
-      if (t.type === 'income') totalIncome += t.amount;
-      else totalExpense += t.amount;
+      const money = getTxAmount(t);
+      if (t.type === 'income') totalIncome += money;
+      else totalExpense += money;
     }
 
     return {

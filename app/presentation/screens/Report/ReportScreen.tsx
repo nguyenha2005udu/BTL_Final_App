@@ -10,6 +10,7 @@ import {
   View,
 } from 'react-native';
 import { ReportCategoryList } from '../../../../components/report/ReportCategoryList';
+import { ReportCategoryPieCard } from '../../../../components/report/ReportCategoryPieCard';
 import { ReportPeriodSelector } from '../../../../components/report/ReportPeriodSelector';
 import { useCategories } from '../../../../hooks/useCategories';
 import { useReportTotals } from '../../../../hooks/useReportTotals';
@@ -28,14 +29,24 @@ const ReportScreen: React.FC = () => {
     const typeById = new Map(categories.map(c => [c.id, c.type]));
     const map = new Map<string, number>();
 
-    for (const tx of txInRange) {
-      const catId = (tx as any).categoryId; 
+    for (const tx of (txInRange ?? [])) {
+      const catId = tx.categoryId;
       if (!catId) continue;
 
       const catType = typeById.get(catId);
       if (catType && catType !== tx.type) continue;
 
-      map.set(catId, (map.get(catId) ?? 0) + (tx.amount ?? 0));
+      const raw =
+        typeof (tx as any).mount === 'number'
+          ? (tx as any).mount
+          : typeof (tx as any).amount === 'number'
+          ? (tx as any).amount
+          : Number((tx as any).mount ?? (tx as any).amount ?? 0);
+
+      if (!Number.isFinite(raw)) continue;
+
+      const money = Math.abs(raw);
+      map.set(catId, (map.get(catId) ?? 0) + money);
     }
     return map;
   }, [categories, txInRange]);
@@ -70,6 +81,10 @@ const ReportScreen: React.FC = () => {
   }
 
   const filteredData = data.filter(item => item.type === filterType);
+
+  const pieItems = filteredData
+  .filter(i => i.value > 0)
+  .map(i => ({ id: i.id, name: i.name, value: i.value, color: i.color }));
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
@@ -109,7 +124,7 @@ const ReportScreen: React.FC = () => {
                 Tổng thu
               </Text>
               <Text style={[styles.summaryValue, { color: '#22C55E' }]}>
-                {totalIncome.toLocaleString()}₫
+                {totalIncome.toLocaleString('vi-VN')}₫
               </Text> 
             </View>
             <View style={styles.summaryItem}>
@@ -122,7 +137,7 @@ const ReportScreen: React.FC = () => {
                 Tổng chi
               </Text>
               <Text style={[styles.summaryValue, { color: '#EF4444' }]}>
-                {totalExpense.toLocaleString()}₫
+                {totalExpense.toLocaleString('vi-VN')}₫
               </Text>
             </View>
           </View>
@@ -144,7 +159,7 @@ const ReportScreen: React.FC = () => {
                 { color: balance >= 0 ? '#22C55E' : '#EF4444', fontSize: 24 },
               ]}
             >
-              {balance.toLocaleString()}₫
+              {balance.toLocaleString('vi-VN')}₫
             </Text>
           </View>
         </View>
@@ -185,7 +200,14 @@ const ReportScreen: React.FC = () => {
               </Text>
             </TouchableOpacity>
           </View>
-    
+                
+        <ReportCategoryPieCard
+          mode={filterType}
+          items={pieItems}
+          total={filterType === 'expense' ? totalExpense : totalIncome}
+          theme={theme}
+          isDarkMode={isDarkMode}
+        />
         {/* Legend */}
         <ReportCategoryList
           items={filteredData.map(i => ({

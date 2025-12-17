@@ -1,6 +1,6 @@
+import { MaterialIcons } from "@expo/vector-icons";
 import React, { useEffect, useMemo, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
-import { MaterialIcons } from "@expo/vector-icons";
 import { useTheme } from "../../../context/ThemeContext";
 import { listenTransactions } from "../../../services/transaction.service";
 
@@ -114,7 +114,7 @@ const MonthlyExpenseChart: React.FC = () => {
   }, [monthlyExpenses]);
 
   return (
-    <View style={[styles.container, { backgroundColor: isDarkMode ? theme.background : '#ffffff' }]}>
+    <View style={[styles.reportCard, { backgroundColor: isDarkMode ? theme.background : '#ffffff' }]}>
       <Text style={[styles.reportTitle, { color: theme.textPrimary }]}>
         Chi tiêu 3 tháng gần nhất
       </Text>

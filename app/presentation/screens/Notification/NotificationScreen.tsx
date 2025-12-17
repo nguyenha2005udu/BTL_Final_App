@@ -1,93 +1,182 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import { MaterialIcons } from '../../../../components/icon';
+import React from 'react';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useTheme } from '../../../context/ThemeContext';
+import { listenAppNotifications, type AppNotification } from '../../../services/notification.service';
+
+type Filter = 'all' | 'unread';
+
+const formatTimeAgo = (d: Date) => {
+  const now = Date.now();
+  const diff = Math.max(0, now - d.getTime());
+
+  const sec = Math.floor(diff / 1000);
+  const min = Math.floor(sec / 60);
+  const hour = Math.floor(min / 60);
+  const day = Math.floor(hour / 24);
+
+  if (sec < 60) return 'Vừa xong';
+  if (min < 60) return `${min} phút trước`;
+  if (hour < 24) return `${hour} giờ trước`;
+  return `${day} ngày trước`;
+};
+
+const buildSections = (list: AppNotification[]) => {
+  const now = new Date();
+  const startToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
+
+  const today: AppNotification[] = [];
+  const older: AppNotification[] = [];
+
+  list.forEach(n => {
+    if (n.createdAt.getTime() >= startToday.getTime()) today.push(n);
+    else older.push(n);
+  });
+
+  const sections: { title: string; data: AppNotification[] }[] = [];
+  if (today.length) sections.push({ title: 'Hôm nay', data: today });
+  if (older.length) sections.push({ title: 'Tuần trước', data: older });
+
+  return sections;
+};
 
 const NotificationsScreen: React.FC = () => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
   const { theme, isDarkMode } = useTheme();
 
-  const cardBg = isDarkMode ? theme.cardBackground : '#f8f9fa';
+  const [filter, setFilter] = React.useState<Filter>('all');
+  const [items, setItems] = React.useState<AppNotification[]>([]);
+
+  React.useEffect(() => {
+    const unsub = listenAppNotifications(
+      n => {
+        setItems(prev => [n, ...prev].slice(0, 80));
+      },
+      err => console.log('listenAppNotifications error', err),
+    );
+
+    return () => unsub?.();
+  }, []);
+
+  const visible = React.useMemo(() => {
+    return filter === 'unread' ? items.filter(i => !i.read) : items;
+  }, [items, filter]);
+
+  const sections = React.useMemo(() => buildSections(visible), [visible]);
+
+  const markAllRead = () => setItems(prev => prev.map(i => ({ ...i, read: true })));
+
+  const onPressNotif = (id: string) => {
+    setItems(prev => prev.map(i => (i.id === id ? { ...i, read: true } : i)));
+  };
 
   return (
-   <View style={[styles.container, { backgroundColor: isDarkMode ? theme.background : '#ffffff' }]}>
+    <View style={[styles.container, { backgroundColor: isDarkMode ? theme.background : '#ffffff' }]}>
       <View style={[styles.header, { backgroundColor: theme.headerBackground, borderBottomColor: theme.border }]}>
         <View style={styles.headerTop}>
           <TouchableOpacity onPress={() => navigation.goBack()} style={styles.iconButton}>
             <MaterialIcons name="arrow-back" size={24} color={theme.textPrimary} />
           </TouchableOpacity>
+
           <Text style={[styles.headerTitle, { color: theme.textPrimary }]}>Thông báo</Text>
-          <TouchableOpacity style={styles.iconButton}>
+
+          <TouchableOpacity style={styles.iconButton} onPress={markAllRead}>
             <MaterialIcons name="mark-chat-read" size={24} color={theme.textPrimary} />
           </TouchableOpacity>
         </View>
+
         <View style={styles.filterRow}>
-          <TouchableOpacity style={[styles.filterButton, styles.filterButtonActive]}>
-            <Text style={styles.filterTextActive}>Tất cả</Text>
+          <TouchableOpacity
+            style={[
+              styles.filterButton,
+              filter === 'all'
+                ? styles.filterButtonActive
+                : { backgroundColor: theme.cardBackground, borderColor: theme.border },
+            ]}
+            onPress={() => setFilter('all')}
+            activeOpacity={0.85}
+          >
+            <Text style={filter === 'all' ? styles.filterTextActive : [styles.filterText, { color: theme.textSecondary }]}>
+              Tất cả
+            </Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.filterButton, { backgroundColor: theme.cardBackground, borderColor: theme.border }]}>
-            <Text style={[styles.filterText, { color: theme.textSecondary }]}>Chưa đọc</Text>
+
+          <TouchableOpacity
+            style={[
+              styles.filterButton,
+              filter === 'unread'
+                ? styles.filterButtonActive
+                : { backgroundColor: theme.cardBackground, borderColor: theme.border },
+            ]}
+            onPress={() => setFilter('unread')}
+            activeOpacity={0.85}
+          >
+            <Text
+              style={
+                filter === 'unread' ? styles.filterTextActive : [styles.filterText, { color: theme.textSecondary }]
+              }
+            >
+              Chưa đọc
+            </Text>
           </TouchableOpacity>
         </View>
       </View>
 
       <ScrollView contentContainerStyle={styles.content}>
-        <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>Hôm nay</Text>
-          <View style={styles.cardList}>
-            <View style={[styles.notificationCard, { backgroundColor: isDarkMode ? '#1e3a5f' : '#eff6ff' }]}>
-              <View style={[styles.iconBox, { backgroundColor: isDarkMode ? '#4a1d1d' : '#FEE2E2' }]}>
-                <MaterialIcons name="payments" size={24} color="#EF4444" />
-              </View>
-              <View style={styles.notifContent}>
-                <Text style={[styles.notifTitle, { color: theme.textPrimary }]}>Giao dịch mới</Text>
-                <Text style={[styles.notifBody, { color: theme.textSecondary }]}>Bạn đã chi tiêu 250.000₫ cho ăn uống.</Text>
-                <Text style={styles.notifTime}>5 phút trước</Text>
-              </View>
-              <View style={styles.dot} />
-            </View>
-            
-            <View style={[styles.notificationCard, { backgroundColor: isDarkMode ? '#1e3a5f' : '#eff6ff' }]}>
-              <View style={[styles.iconBox, { backgroundColor: isDarkMode ? '#1e3d2e' : '#DCFCE7' }]}>
-                <MaterialIcons name="emoji-events" size={24} color="#22C55E" />
-              </View>
-              <View style={styles.notifContent}>
-                <Text style={[styles.notifTitle, { color: theme.textPrimary }]}>Mục tiêu hoàn thành</Text>
-                <Text style={[styles.notifBody, { color: theme.textSecondary }]}>Bạn đã đạt được mục tiêu Mua laptop mới!</Text>
-                <Text style={styles.notifTime}>1 giờ trước</Text>
-              </View>
-              <View style={styles.dot} />
-            </View>
+        {visible.length === 0 ? (
+          <View style={[styles.emptyWrap, { borderColor: theme.border }]}>
+            <MaterialIcons name="notifications-none" size={28} color={theme.textSecondary} />
+            <Text style={[styles.emptyTitle, { color: theme.textPrimary }]}>Chưa có thông báo</Text>
+            <Text style={[styles.emptyDesc, { color: theme.textSecondary }]}>
+              Khi dữ liệu thay đổi trên Firebase, thông báo sẽ xuất hiện ở đây.
+            </Text>
           </View>
-        </View>
+        ) : (
+          sections.map(section => (
+            <View key={section.title} style={styles.section}>
+              <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>{section.title}</Text>
 
-        <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>Tuần trước</Text>
-          <View style={styles.cardList}>
-            <View style={[styles.notificationCard, { backgroundColor: theme.cardBackground }]}>
-              <View style={[styles.iconBox, { backgroundColor: isDarkMode ? '#1e3a5f' : '#DBEAFE' }]}>
-                <MaterialIcons name="notifications-active" size={24} color="#3c83f6" />
-              </View>
-              <View style={styles.notifContent}>
-                <Text style={[styles.notifTitle, { color: theme.textPrimary }]}>Nhắc nhở ngân sách</Text>
-                <Text style={[styles.notifBody, { color: theme.textSecondary }]}>Bạn sắp đạt đến giới hạn ngân sách Ăn uống.</Text>
-                <Text style={[styles.notifTime, { color: theme.textSecondary }]}>2 ngày trước</Text>
+              <View style={styles.cardList}>
+                {section.data.map(item => {
+                  const cardBg = !item.read
+                    ? isDarkMode
+                      ? '#1e3a5f'
+                      : '#eff6ff'
+                    : theme.cardBackground;
+
+                  const timeColor = item.read ? theme.textSecondary : '#3c83f6';
+                  const iconBg = isDarkMode ? item.iconBgDark : item.iconBgLight;
+
+                  return (
+                    <TouchableOpacity
+                      key={item.id}
+                      activeOpacity={0.8}
+                      onPress={() => onPressNotif(item.id)}
+                      style={[styles.notificationCard, { backgroundColor: cardBg }]}
+                    >
+                      <View style={[styles.iconBox, { backgroundColor: iconBg }]}>
+                        <MaterialIcons name={item.icon as any} size={24} color={item.iconColor} />
+                      </View>
+
+                      <View style={styles.notifContent}>
+                        <Text style={[styles.notifTitle, { color: theme.textPrimary }]} numberOfLines={1}>
+                          {item.title}
+                        </Text>
+                        <Text style={[styles.notifBody, { color: theme.textSecondary }]} numberOfLines={2}>
+                          {item.body}
+                        </Text>
+                        <Text style={[styles.notifTime, { color: timeColor }]}>{formatTimeAgo(item.createdAt)}</Text>
+                      </View>
+
+                      {!item.read ? <View style={styles.dot} /> : null}
+                    </TouchableOpacity>
+                  );
+                })}
               </View>
             </View>
-
-            <View style={[styles.notificationCard, { backgroundColor: theme.cardBackground }]}>
-              <View style={[styles.iconBox, { backgroundColor: isDarkMode ? '#1e3d2e' : '#DCFCE7' }]}>
-                <MaterialIcons name="savings" size={24} color="#22C55E" />
-              </View>
-              <View style={styles.notifContent}>
-                <Text style={[styles.notifTitle, { color: theme.textPrimary }]}>Thêm vào mục tiêu</Text>
-                <Text style={[styles.notifBody, { color: theme.textSecondary }]}>Bạn đã thêm 2.000.000₫ vào mục tiêu Du lịch Nhật Bản.</Text>
-                <Text style={[styles.notifTime, { color: theme.textSecondary }]}>5 ngày trước</Text>
-              </View>
-            </View>
-          </View>
-        </View>
+          ))
+        )}
       </ScrollView>
     </View>
   );
@@ -170,13 +259,9 @@ const styles = StyleSheet.create({
   notificationCard: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    backgroundColor: 'white',
     padding: 16,
     borderRadius: 12,
     gap: 16,
-  },
-  unreadCard: {
-    backgroundColor: '#eff6ff',
   },
   iconBox: {
     width: 40,
@@ -210,6 +295,22 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     backgroundColor: '#3c83f6',
     marginTop: 6,
+  },
+  emptyWrap: {
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    alignItems: 'center',
+    gap: 6,
+  },
+  emptyTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  emptyDesc: {
+    fontSize: 13,
+    textAlign: 'center',
+    lineHeight: 18,
   },
 });
 
