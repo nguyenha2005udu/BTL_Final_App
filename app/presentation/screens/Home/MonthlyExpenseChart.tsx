@@ -182,9 +182,8 @@ const MonthlyExpenseChart: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  reportCard: {
+  container: {
     padding: 24,
-    borderRadius: 16,
     marginBottom: 16,
     shadowColor: "#000",
     shadowOpacity: 0.05,
@@ -192,13 +191,13 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   reportTitle: {
-    fontSize: 16,
-    fontWeight: "500",
+    fontSize: 20,
+    fontWeight: "700",
     color: "#111418",
   },
   reportAmount: {
-    fontSize: 24,
-    fontWeight: "bold",
+    fontSize: 18,
+    fontWeight: "600",
     color: "#111418",
     marginVertical: 4,
   },

@@ -49,65 +49,55 @@ const StatisticsScreen: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filter, setFilter] = useState<FilterType>("7days");
   const [rawTransactions, setRawTransactions] = useState<DbTransaction[]>([]);
+  
   /* ================= LOAD DATA ================= */
   useEffect(() => {
-  const unsub = listenCategories(setCategories);
-  return () => unsub?.();
-}, []);
+    const unsub = listenCategories(setCategories);
+    return () => unsub?.();
+  }, []);
 
   useEffect(() => {
-  const unsub = listenTransactions(
-    (list: DbTransaction[]) => {
-      setRawTransactions(list); // ✅ chỉ lưu raw
-    },
-    (err) => console.log("listenTransactions error", err)
-  );
+    const unsub = listenTransactions(
+      (list: DbTransaction[]) => {
+        setRawTransactions(list);
+      },
+      (err) => console.log("listenTransactions error", err)
+    );
 
-  return () => unsub?.();
-}, []);
+    return () => unsub?.();
+  }, []);
+
   useEffect(() => {
-  if (!rawTransactions.length) {
-    setTransactions([]);
-    return;
-  }
-
-  const mapped: UITransaction[] = rawTransactions.map((tx) => {
-    const category = categories.find(c => c.id === tx.categoryId);
-
-    // TITLE = DANH MỤC
-    const title = category?.name || "Khác";
-
-    // SUBTITLE = TÊN GIAO DỊCH + NGÀY
-    const subtitleParts: string[] = [];
-
-    if (tx.title) subtitleParts.push(tx.title);
-
-    if (tx.date instanceof Date) {
-      const d = tx.date;
-      subtitleParts.push(
-        `${String(d.getDate()).padStart(2, "0")}/${
-          String(d.getMonth() + 1).padStart(2, "0")
-        }/${d.getFullYear()}`
-      );
+    if (!rawTransactions.length) {
+      setTransactions([]);
+      return;
     }
 
-    return {
-      id: tx.id,
-      title, // 👈 DANH MỤC
-      subtitle: subtitleParts.join(" • "),
-      amount: tx.type === "income" ? tx.amount : -tx.amount,
-      date: tx.date,
-      type: tx.type,
-      icon:
-        category?.icon ||
-        (tx.type === "income" ? "trending-up" : "trending-down"),
-      color: category?.color,
-    };
-  });
+    const mapped: UITransaction[] = rawTransactions.map((tx) => {
+      const category = categories.find(c => c.id === tx.categoryId);
 
-  setTransactions(mapped);
-}, [rawTransactions, categories]); // ✅ dependency BẮT BUỘC
+      // TITLE = TÊN GIAO DỊCH (hiển thị rõ ràng)
+      const title = tx.title || "Không có tiêu đề";
 
+      // SUBTITLE = DANH MỤC
+      const subtitle = category?.name || "Khác";
+
+      return {
+        id: tx.id,
+        title, // 👈 TÊN GIAO DỊCH
+        subtitle, // 👈 DANH MỤC
+        amount: tx.type === "income" ? tx.amount : -tx.amount,
+        date: tx.date,
+        type: tx.type,
+        icon:
+          category?.icon ||
+          (tx.type === "income" ? "trending-up" : "trending-down"),
+        color: category?.color,
+      };
+    });
+
+    setTransactions(mapped);
+  }, [rawTransactions, categories]);
 
   /* ================= FILTER ================= */
 
@@ -115,12 +105,14 @@ const StatisticsScreen: React.FC = () => {
     const today = new Date();
 
     return transactions.filter((tx) => {
-      // SEARCH
-      if (
-        searchTerm &&
-        !tx.title.toLowerCase().includes(searchTerm.toLowerCase())
-      ) {
-        return false;
+      // SEARCH - tìm cả title và subtitle
+      if (searchTerm) {
+        const searchLower = searchTerm.toLowerCase();
+        const matchTitle = tx.title.toLowerCase().includes(searchLower);
+        const matchSubtitle = tx.subtitle.toLowerCase().includes(searchLower);
+        if (!matchTitle && !matchSubtitle) {
+          return false;
+        }
       }
 
       // ALL → không lọc theo ngày
@@ -149,7 +141,7 @@ const StatisticsScreen: React.FC = () => {
         </Text>
       </View>
 
-      {/* SEARCH */}
+      {/* SEARCH - CỐ ĐỊNH */}
       <View style={styles.searchContainer}>
         <View
           style={[
@@ -167,7 +159,7 @@ const StatisticsScreen: React.FC = () => {
             style={{ marginRight: 10 }}
           />
           <TextInput
-            placeholder="Tìm theo mô tả..."
+            placeholder="Tìm giao dịch hoặc danh mục..."
             placeholderTextColor={theme.textSecondary}
             style={[styles.searchInput, { color: theme.textPrimary }]}
             value={searchTerm}
@@ -181,48 +173,50 @@ const StatisticsScreen: React.FC = () => {
         </View>
       </View>
 
-      {/* FILTER */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.filterRow}
-      >
-        {[
-          { key: "all", label: "Tất cả" },
-          { key: "7days", label: "7 ngày gần nhất" },
-          { key: "3days", label: "3 ngày gần nhất" },
-        ].map((f) => (
-          <TouchableOpacity
-            key={f.key}
-            onPress={() => setFilter(f.key as FilterType)}
-            style={[
-              styles.filterChip,
-              {
-                backgroundColor: filter === f.key 
-                  ? "#3c83f6" 
-                  : isDarkMode ? theme.cardBackground : '#F9FAFB',
-                borderColor: filter === f.key
-                  ? "#3c83f6"
-                  : isDarkMode ? theme.border : '#E5E7EB',
-              },
-            ]}
-            activeOpacity={0.7}
-          >
-            <Text
+      {/* FILTER - CỐ ĐỊNH */}
+      <View style={styles.filterContainer}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.filterRow}
+        >
+          {[
+            { key: "all", label: "Tất cả" },
+            { key: "3days", label: "3 ngày gần nhất" }, // 👈 ĐỔI THỨ TỰ
+            { key: "7days", label: "7 ngày gần nhất" },
+          ].map((f) => (
+            <TouchableOpacity
+              key={f.key}
+              onPress={() => setFilter(f.key as FilterType)}
               style={[
-                styles.filterChipText,
+                styles.filterChip,
                 {
-                  color: filter === f.key ? "#fff" : theme.textPrimary,
+                  backgroundColor: filter === f.key 
+                    ? "#3c83f6" 
+                    : isDarkMode ? theme.cardBackground : '#F9FAFB',
+                  borderColor: filter === f.key
+                    ? "#3c83f6"
+                    : isDarkMode ? theme.border : '#E5E7EB',
                 },
               ]}
+              activeOpacity={0.7}
             >
-              {f.label}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
+              <Text
+                style={[
+                  styles.filterChipText,
+                  {
+                    color: filter === f.key ? "#fff" : theme.textPrimary,
+                  },
+                ]}
+              >
+                {f.label}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      </View>
 
-      {/* LIST */}
+      {/* LIST - CHỈ PHẦN NÀY SCROLL */}
       <ScrollView 
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
@@ -274,19 +268,20 @@ const StatisticsScreen: React.FC = () => {
 
                 {/* INFO */}
                 <View style={{ flex: 1 }}>
+                  {/* TÊN GIAO DỊCH */}
                   <Text style={[styles.cardTitle, { color: theme.textPrimary }]}>
                     {tx.title}
                   </Text>
 
+                  {/* DANH MỤC */}
+                  <Text style={[styles.cardSubtitle, { color: theme.textSecondary }]}>
+                    {tx.subtitle}
+                  </Text>
+
+                  {/* NGÀY */}
                   <Text style={[styles.cardDate, { color: theme.textSecondary }]}>
                     {formatDateDDMMYYYY(tx.date)}
                   </Text>
-
-                  {tx.subtitle ? (
-                    <Text style={[styles.cardSubtitle, { color: theme.textSecondary }]}>
-                      {tx.subtitle}
-                    </Text>
-                  ) : null}
                 </View>
 
                 {/* AMOUNT */}
@@ -353,7 +348,9 @@ const styles = StyleSheet.create({
   },
   searchContainer: {
     paddingHorizontal: 20,
-    paddingVertical: 12,
+    paddingTop: 12,
+    paddingBottom: 8,
+    backgroundColor: 'transparent', // Đảm bảo không bị che
   },
   searchBar: {
     flexDirection: "row",
@@ -374,9 +371,12 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '500',
   },
+  filterContainer: {
+    paddingBottom: 12,
+    backgroundColor: 'transparent', // Đảm bảo không bị che
+  },
   filterRow: {
     paddingHorizontal: 20,
-    paddingVertical: 12,
     gap: 10,
   },
   filterChip: {
@@ -434,15 +434,14 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     marginBottom: 4,
   },
+  cardSubtitle: {
+    fontSize: 13,
+    fontWeight: "600",
+    marginBottom: 3,
+  },
   cardDate: {
     fontSize: 13,
     fontWeight: "500",
-    marginBottom: 2,
-  },
-  cardSubtitle: {
-    fontSize: 13,
-    fontWeight: "500",
-    marginTop: 2,
   },
   cardAmount: {
     fontSize: 17,
