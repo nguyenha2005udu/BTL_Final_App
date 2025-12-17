@@ -1,12 +1,9 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import React, { useEffect, useState } from "react";
-<<<<<<< HEAD
-=======
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback } from "react";
 
->>>>>>> main
 import {
   Image,
   ScrollView,
