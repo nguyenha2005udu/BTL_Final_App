@@ -153,43 +153,56 @@ const HomeScreen: React.FC = () => {
 
     const latest = sorted.slice(0, 3); // 3 giao dịch gần nhất
 
+    // Map sang UITransaction
     const mapped: UITransaction[] = latest.map((tx: any) => {
-      const rawAmount = tx.amount;
-      const signedAmount = tx.type === "income" ? tx.amount : -tx.amount;
+  const category = categories.find(c => c.id === tx.categoryId);
 
-      const category = categories.find((c) => c.id === tx.categoryId);
-      const icon = category?.icon || "category";
-      const title = tx.title || category?.name || "Khác";
+  // 👉 TITLE = DANH MỤC
+  const title = category?.name || "Khác";
 
-      // subtitle = "dd/mm/yyyy • ghi chú"
-      const subtitleParts: string[] = [];
-      const v = tx.date || tx.createdAt;
-      if (v) {
-        let d: Date | null = null;
-        if (typeof v.toDate === "function") d = v.toDate();
-        else {
-          const tmp = new Date(v);
-          if (!isNaN(tmp.getTime())) d = tmp;
-        }
-        if (d) {
-          const day = String(d.getDate()).padStart(2, "0");
-          const month = String(d.getMonth() + 1).padStart(2, "0");
-          const year = d.getFullYear();
-          subtitleParts.push(`${day}/${month}/${year}`);
-        }
-      }
-      if (tx.note) subtitleParts.push(tx.note);
+  // 👉 SUBTITLE = TÊN GIAO DỊCH + NGÀY
+  const subtitleParts: string[] = [];
 
-      return {
-        id: tx.id,
-        type: tx.type,
-        amount: signedAmount,
-        icon,
-        colorClass: category?.color || "#60A5FA",
-        title,
-        subtitle: subtitleParts.join(" • "),
-      } as UITransaction;
-    });
+  if (tx.title) {
+    subtitleParts.push(tx.title);
+  }
+
+  // 👉 PARSE DATE (BẮT BUỘC cho UITransaction)
+  const v = tx.date || tx.createdAt;
+  let date: Date = new Date();
+
+  if (v) {
+    if (typeof v.toDate === "function") {
+      date = v.toDate();
+    } else {
+      const tmp = new Date(v);
+      if (!isNaN(tmp.getTime())) date = tmp;
+    }
+  }
+
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const year = date.getFullYear();
+  subtitleParts.push(`${day}/${month}/${year}`);
+
+  return {
+    id: tx.id,
+    type: tx.type,
+    amount: tx.type === "income" ? tx.amount : -tx.amount,
+    icon:
+      (category?.icon as keyof typeof MaterialIcons.glyphMap) ??
+      (tx.type === "income" ? "trending-up" : "trending-down"),
+
+    colorClass: category?.color || "#60A5FA",
+    title,                               // 👈 DANH MỤC
+    subtitle: subtitleParts.join(" • "), // 👈 TÊN GIAO DỊCH
+    date,                                // ✅ BẮT BUỘC – FIX LỖI TYPESCRIPT
+  };
+});
+
+
+setRecentTransactions(mapped);
+
 
     setRecentTransactions(mapped);
   }, [transactions, categories]);
