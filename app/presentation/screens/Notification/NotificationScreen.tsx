@@ -11,8 +11,8 @@ const NotificationsScreen: React.FC = () => {
   const cardBg = isDarkMode ? theme.cardBackground : '#f8f9fa';
 
   return (
-   <View style={[styles.container, { backgroundColor: isDarkMode ? theme.background : '#ffffff' }]}>
-      <View style={[styles.header, { backgroundColor: theme.headerBackground, borderBottomColor: theme.border }]}>
+   <View style={styles.container}>
+      <View style={[styles.header, { backgroundColor: isDarkMode ? theme.headerBackground : 'rgba(245, 247, 248, 0.9)', borderBottomColor: theme.border }]}>
         <View style={styles.headerTop}>
           <TouchableOpacity onPress={() => navigation.goBack()} style={styles.iconButton}>
             <MaterialIcons name="arrow-back" size={24} color={theme.textPrimary} />
@@ -26,7 +26,7 @@ const NotificationsScreen: React.FC = () => {
           <TouchableOpacity style={[styles.filterButton, styles.filterButtonActive]}>
             <Text style={styles.filterTextActive}>Tất cả</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.filterButton, { backgroundColor: theme.cardBackground, borderColor: theme.border }]}>
+          <TouchableOpacity style={[styles.filterButton, { backgroundColor: isDarkMode ? theme.cardBackground : 'white', borderColor: theme.border }]}>
             <Text style={[styles.filterText, { color: theme.textSecondary }]}>Chưa đọc</Text>
           </TouchableOpacity>
         </View>
@@ -65,7 +65,7 @@ const NotificationsScreen: React.FC = () => {
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>Tuần trước</Text>
           <View style={styles.cardList}>
-            <View style={[styles.notificationCard, { backgroundColor: theme.cardBackground }]}>
+            <View style={[styles.notificationCard, { backgroundColor: isDarkMode ? theme.cardBackground : 'white' }]}>
               <View style={[styles.iconBox, { backgroundColor: isDarkMode ? '#1e3a5f' : '#DBEAFE' }]}>
                 <MaterialIcons name="notifications-active" size={24} color="#3c83f6" />
               </View>
@@ -76,7 +76,7 @@ const NotificationsScreen: React.FC = () => {
               </View>
             </View>
 
-            <View style={[styles.notificationCard, { backgroundColor: theme.cardBackground }]}>
+            <View style={[styles.notificationCard, { backgroundColor: isDarkMode ? theme.cardBackground : 'white' }]}>
               <View style={[styles.iconBox, { backgroundColor: isDarkMode ? '#1e3d2e' : '#DCFCE7' }]}>
                 <MaterialIcons name="savings" size={24} color="#22C55E" />
               </View>
@@ -96,7 +96,7 @@ const NotificationsScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f7f8',
+    backgroundColor: '#ffffff',
   },
   header: {
     backgroundColor: 'rgba(245, 247, 248, 0.9)',
