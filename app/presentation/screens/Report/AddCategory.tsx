@@ -17,7 +17,7 @@ import { useTheme } from '../../../context/ThemeContext';
 const AddCategory: React.FC = () => {
   const navigation = useNavigation<any>();
   const { theme, isDarkMode } = useTheme();
-  const { addCategory } = useCategories();
+  const { addCategory } = useCategories(); // gọi để lưu vào Firestore
 
   const [step, setStep] = useState<'form' | 'icon' | 'color'>('form');
   const [selectedIcon, setSelectedIcon] = useState<string | null>(null);
@@ -59,14 +59,22 @@ const AddCategory: React.FC = () => {
   };
 
   const renderIconSelection = () => (
-    <View style={[styles.container, { backgroundColor: isDarkMode ? theme.background : '#FFFFFF' }]}>
-      <View style={[styles.header, { backgroundColor: isDarkMode ? theme.headerBackground : '#FFFFFF' }]}>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
+      <View
+        style={[
+          styles.header,
+          { backgroundColor: theme.headerBackground },
+        ]}
+        >
         <TouchableOpacity
           onPress={() => setStep('form')}
           style={styles.iconButton}
-          activeOpacity={0.7}
         >
-          <MaterialIcons name="arrow-back" size={24} color={theme.textPrimary} />
+          <MaterialIcons
+            name="arrow-back"
+            size={24}
+            color={theme.textPrimary}
+          />
         </TouchableOpacity>
         <Text style={[styles.headerTitle, { color: theme.textPrimary }]}>
           Chọn biểu tượng
@@ -74,12 +82,9 @@ const AddCategory: React.FC = () => {
         <View style={{ width: 40 }} />
       </View>
 
-      <ScrollView 
-        contentContainerStyle={styles.gridContent}
-        showsVerticalScrollIndicator={false}
-      >
+      <ScrollView contentContainerStyle={styles.gridContent}>
         {ICONS.map(group => (
-          <View key={group.key} style={{ marginBottom: 24 }}>
+          <View key={group.key} style={{ marginBottom: 16 }}>
             <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>
               {group.label}
             </Text>
@@ -90,15 +95,16 @@ const AddCategory: React.FC = () => {
                   onPress={() => setSelectedIcon(icon)}
                   style={[
                     styles.gridItem,
-                    { backgroundColor: isDarkMode ? theme.cardBackground : '#F9FAFB' },
+                    { backgroundColor: theme.cardBackground },
                     selectedIcon === icon && styles.gridItemActive,
                   ]}
-                  activeOpacity={0.7}
                 >
                   <MaterialIcons
                     name={icon as any}
                     size={32}
-                    color={selectedIcon === icon ? '#3c83f6' : theme.textSecondary}
+                    color={
+                      selectedIcon === icon ? '#3c83f6' : theme.textSecondary
+                    }
                   />
                 </TouchableOpacity>
               ))}
@@ -107,12 +113,17 @@ const AddCategory: React.FC = () => {
         ))}
       </ScrollView>
 
-      <View style={[styles.bottomAction, { backgroundColor: isDarkMode ? theme.headerBackground : '#FFFFFF' }]}>
+
+      <View
+        style={[
+          styles.bottomAction,
+          { backgroundColor: theme.headerBackground },
+        ]}
+        >
         <TouchableOpacity
           onPress={() => setStep('form')}
           style={styles.primaryButton}
-          activeOpacity={0.8}
-        >
+          >
           <Text style={styles.primaryButtonText}>Xác nhận</Text>
         </TouchableOpacity>
       </View>
@@ -120,14 +131,22 @@ const AddCategory: React.FC = () => {
   );
 
   const renderColorSelection = () => (
-    <View style={[styles.container, { backgroundColor: isDarkMode ? theme.background : '#FFFFFF' }]}>
-      <View style={[styles.header, { backgroundColor: isDarkMode ? theme.headerBackground : '#FFFFFF' }]}>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
+      <View
+        style={[
+          styles.header,
+          { backgroundColor: theme.headerBackground },
+        ]}
+        >
         <TouchableOpacity
           onPress={() => setStep('form')}
           style={styles.iconButton}
-          activeOpacity={0.7}
         >
-          <MaterialIcons name="arrow-back" size={24} color={theme.textPrimary} />
+          <MaterialIcons
+            name="arrow-back"
+            size={24}
+            color={theme.textPrimary}
+          />
         </TouchableOpacity>
         <Text style={[styles.headerTitle, { color: theme.textPrimary }]}>
           Chọn màu sắc
@@ -135,10 +154,7 @@ const AddCategory: React.FC = () => {
         <View style={{ width: 40 }} />
       </View>
 
-      <ScrollView 
-        contentContainerStyle={styles.content}
-        showsVerticalScrollIndicator={false}
-      >
+      <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.colorGrid}>
           {COLORS.map(color => (
             <TouchableOpacity
@@ -149,27 +165,29 @@ const AddCategory: React.FC = () => {
                 { backgroundColor: color },
                 selectedColor === color && styles.colorItemActive,
               ]}
-              activeOpacity={0.7}
             />
           ))}
         </View>
         <View style={{ height: 160 }} />
       </ScrollView>
 
-      <View style={[styles.bottomAction, { backgroundColor: isDarkMode ? theme.headerBackground : '#FFFFFF' }]}>
+      <View
+        style={[
+          styles.bottomAction,
+          { backgroundColor: theme.headerBackground },
+        ]}
+        >
         <TouchableOpacity
           onPress={() => setStep('form')}
           style={styles.primaryButton}
-          activeOpacity={0.8}
-        >
+          >
           <Text style={styles.primaryButtonText}>Xác nhận</Text>
         </TouchableOpacity>
         
         <TouchableOpacity
           onPress={() => setStep('form')}
           style={styles.textButton}
-          activeOpacity={0.7}
-        >
+          >
           <Text style={styles.textButtonText}>Hủy</Text>
         </TouchableOpacity>
       </View>
@@ -180,14 +198,22 @@ const AddCategory: React.FC = () => {
   if (step === 'color') return renderColorSelection();
 
   return (
-    <View style={[styles.container, { backgroundColor: isDarkMode ? theme.background : '#FFFFFF' }]}>
-      <View style={[styles.header, { backgroundColor: isDarkMode ? theme.headerBackground : '#FFFFFF' }]}>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
+      <View
+        style={[
+          styles.header,
+          { backgroundColor: theme.headerBackground },
+        ]}
+      >
         <TouchableOpacity
           onPress={() => navigation.goBack()}
           style={styles.iconButton}
-          activeOpacity={0.7}
         >
-          <MaterialIcons name="arrow-back" size={24} color={theme.textPrimary} />
+          <MaterialIcons
+            name="arrow-back"
+            size={24}
+            color={theme.textPrimary}
+          />
         </TouchableOpacity>
         <Text style={[styles.headerTitle, { color: theme.textPrimary }]}>
           Thêm danh mục
@@ -195,10 +221,7 @@ const AddCategory: React.FC = () => {
         <View style={{ width: 40 }} />
       </View>
 
-      <ScrollView 
-        contentContainerStyle={styles.content}
-        showsVerticalScrollIndicator={false}
-      >
+      <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.form}>
           <View>
             <Text style={[styles.label, { color: theme.textSecondary }]}>
@@ -209,28 +232,33 @@ const AddCategory: React.FC = () => {
               style={[
                 styles.selectInput,
                 {
-                  backgroundColor: isDarkMode ? theme.cardBackground : '#F9FAFB',
-                  borderColor: isDarkMode ? theme.border : '#E5E7EB',
+                  backgroundColor: theme.cardBackground,
+                  borderColor: theme.border,
                 },
               ]}
-              activeOpacity={0.7}
             >
               <View
                 style={[
                   styles.selectIconBox,
-                  { backgroundColor: isDarkMode ? theme.iconBoxBg : '#EFF6FF' },
+                  { backgroundColor: theme.iconBoxBg },
                 ]}
               >
                 <MaterialIcons
                   name={(selectedIcon as any) || 'category'}
                   size={20}
-                  color={selectedIcon ? '#3c83f6' : theme.textSecondary}
+                  color={theme.textSecondary}
                 />
               </View>
-              <Text style={[styles.selectText, { color: theme.textSecondary }]}>
+              <Text
+                style={[styles.selectText, { color: theme.textSecondary }]}
+              >
                 Chọn biểu tượng
               </Text>
-              <MaterialIcons name="chevron-right" size={24} color={theme.textSecondary} />
+              <MaterialIcons
+                name="chevron-right"
+                size={24}
+                color={theme.textSecondary}
+              />
             </TouchableOpacity>
           </View>
 
@@ -242,8 +270,8 @@ const AddCategory: React.FC = () => {
               style={[
                 styles.textInput,
                 {
-                  backgroundColor: isDarkMode ? theme.cardBackground : '#F9FAFB',
-                  borderColor: isDarkMode ? theme.border : '#E5E7EB',
+                  backgroundColor: theme.cardBackground,
+                  borderColor: theme.border,
                   color: theme.textPrimary,
                 },
               ]}
@@ -252,7 +280,9 @@ const AddCategory: React.FC = () => {
               value={name}
               onChangeText={setName}
             />
-            {nameError ? <Text style={styles.errorText}>{nameError}</Text> : null}
+            {nameError ? (
+              <Text style={styles.errorText}>{nameError}</Text>
+            ) : null}
           </View>
 
           <View>
@@ -263,14 +293,10 @@ const AddCategory: React.FC = () => {
               <TouchableOpacity
                 style={[
                   styles.typeChip,
-                  {
-                    backgroundColor: isDarkMode ? theme.cardBackground : '#FFFFFF',
-                    borderColor: isDarkMode ? theme.border : '#E5E7EB',
-                  },
+                  { backgroundColor: theme.cardBackground, borderColor: theme.border },
                   categoryType === 'expense' && styles.typeChipActive,
                 ]}
                 onPress={() => setCategoryType('expense')}
-                activeOpacity={0.7}
               >
                 <Text
                   style={[
@@ -286,14 +312,10 @@ const AddCategory: React.FC = () => {
               <TouchableOpacity
                 style={[
                   styles.typeChip,
-                  {
-                    backgroundColor: isDarkMode ? theme.cardBackground : '#FFFFFF',
-                    borderColor: isDarkMode ? theme.border : '#E5E7EB',
-                  },
+                  { backgroundColor: theme.cardBackground, borderColor: theme.border },
                   categoryType === 'income' && styles.typeChipActive,
                 ]}
                 onPress={() => setCategoryType('income')}
-                activeOpacity={0.7}
               >
                 <Text
                   style={[
@@ -307,7 +329,7 @@ const AddCategory: React.FC = () => {
               </TouchableOpacity>
             </View>
           </View>
-
+  
           <View>
             <Text style={[styles.label, { color: theme.textSecondary }]}>
               Màu sắc danh mục
@@ -317,25 +339,31 @@ const AddCategory: React.FC = () => {
               style={[
                 styles.selectInput,
                 {
-                  backgroundColor: isDarkMode ? theme.cardBackground : '#F9FAFB',
-                  borderColor: isDarkMode ? theme.border : '#E5E7EB',
+                  backgroundColor: theme.cardBackground,
+                  borderColor: theme.border,
                 },
               ]}
-              activeOpacity={0.7}
             >
               <View
                 style={[
                   styles.colorPreview,
                   {
-                    backgroundColor: selectedColor || theme.iconBoxBg,
-                    borderColor: isDarkMode ? theme.border : '#E5E7EB',
+                    backgroundColor:
+                      selectedColor || theme.iconBoxBg,
+                    borderColor: theme.border,
                   },
                 ]}
               />
-              <Text style={[styles.selectText, { color: theme.textSecondary }]}>
+              <Text
+                style={[styles.selectText, { color: theme.textSecondary }]}
+              >
                 Chọn màu sắc
               </Text>
-              <MaterialIcons name="chevron-right" size={24} color={theme.textSecondary} />
+              <MaterialIcons
+                name="chevron-right"
+                size={24}
+                color={theme.textSecondary}
+              />
             </TouchableOpacity>
           </View>
 
@@ -349,8 +377,8 @@ const AddCategory: React.FC = () => {
                   style={[
                     styles.moneyInput,
                     {
-                      backgroundColor: isDarkMode ? theme.cardBackground : '#F9FAFB',
-                      borderColor: isDarkMode ? theme.border : '#E5E7EB',
+                      backgroundColor: theme.cardBackground,
+                      borderColor: theme.border,
                       color: theme.textPrimary,
                     },
                   ]}
@@ -360,26 +388,27 @@ const AddCategory: React.FC = () => {
                   value={budget}
                   onChangeText={setBudget}
                 />
-                <Text style={[styles.currencySymbol, { color: theme.textSecondary }]}>
+                <Text
+                  style={[
+                    styles.currencySymbol,
+                    { color: theme.textSecondary },
+                  ]}
+                >
                   ₫
                 </Text>
               </View>
             </View>
           )}
+
         </View>
 
         <View style={styles.formActions}>
-          <TouchableOpacity 
-            style={styles.primaryButton} 
-            onPress={handleSave}
-            activeOpacity={0.8}
-          >
+          <TouchableOpacity style={styles.primaryButton} onPress={handleSave}>
             <Text style={styles.primaryButtonText}>Lưu danh mục</Text>
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => navigation.goBack()}
             style={styles.textButton}
-            activeOpacity={0.7}
           >
             <Text style={styles.textButtonText}>Hủy</Text>
           </TouchableOpacity>
@@ -390,252 +419,179 @@ const AddCategory: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { 
-    flex: 1, 
-    backgroundColor: '#FFFFFF',
-  },
+  container: { flex: 1, backgroundColor: '#f5f7f8' },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     height: 60,
     paddingHorizontal: 16,
-    backgroundColor: '#FFFFFF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#F1F5F9',
+    backgroundColor: 'rgba(245, 247, 248, 0.9)',
   },
-  headerTitle: { 
-    fontSize: 19, 
-    fontWeight: '700', 
-    color: '#111418',
-    letterSpacing: -0.3,
-  },
+  headerTitle: { fontSize: 18, fontWeight: 'bold', color: '#111418' },
   iconButton: {
-    width: 44,
-    height: 44,
+    width: 40,
+    height: 40,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 22,
   },
-  content: { 
-    padding: 20,
-    paddingBottom: 40,
+  content: { padding: 16 },
+  searchContainer: { padding: 16, paddingBottom: 0 },
+  searchBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#e5e7eb',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    height: 48,
   },
-  gridContent: { 
-    padding: 20, 
-    paddingBottom: 120,
-  },
+  searchIcon: { marginRight: 8 },
+  searchInput: { flex: 1, fontSize: 16 },
+  gridContent: { padding: 16, paddingBottom: 100 },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: '700',
+    fontWeight: 'bold',
     marginBottom: 16,
     color: '#111418',
-    letterSpacing: -0.3,
   },
-  grid: { 
-    flexDirection: 'row', 
-    flexWrap: 'wrap', 
-    gap: 12,
-  },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 16 },
   gridItem: {
     width: '22%',
     aspectRatio: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 14,
-    backgroundColor: '#F9FAFB',
-    borderWidth: 1.5,
-    borderColor: 'transparent',
+    borderRadius: 8,
+    backgroundColor: 'white',
   },
   gridItemActive: {
-    backgroundColor: '#EFF6FF',
+    backgroundColor: 'rgba(60, 131, 246, 0.2)',
+    borderWidth: 1,
     borderColor: '#3c83f6',
-    shadowColor: '#3c83f6',
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 2,
   },
-  colorGrid: { 
-    flexDirection: 'row', 
-    flexWrap: 'wrap', 
-    gap: 16,
-  },
-  colorItem: { 
-    width: 64, 
-    height: 64, 
-    borderRadius: 32,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 2,
-  },
+  colorGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 16 },
+  colorItem: { width: 56, height: 56, borderRadius: 28 },
   colorItemActive: {
     borderWidth: 4,
-    borderColor: '#3c83f6',
-    shadowColor: '#3c83f6',
-    shadowOpacity: 0.3,
+    borderColor: 'rgba(60, 131, 246, 0.3)',
+  },
+  addColorItem: {
+    borderWidth: 1,
+    borderColor: '#9ca3af',
+    borderStyle: 'dashed',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   bottomAction: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-    padding: 20,
-    backgroundColor: '#FFFFFF',
-    borderTopWidth: 1,
-    borderTopColor: '#F1F5F9',
-    shadowColor: '#000',
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: -2 },
-    elevation: 4,
+    padding: 16,
+    backgroundColor: 'rgba(245, 247, 248, 0.95)',
   },
-  form: { 
-    gap: 24,
-  },
+  form: { gap: 24 },
   label: {
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: '500',
     color: '#374151',
     marginBottom: 8,
   },
   selectInput: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F9FAFB',
-    borderWidth: 1.5,
-    borderColor: '#E5E7EB',
-    borderRadius: 12,
-    height: 56,
-    paddingHorizontal: 14,
-    shadowColor: '#000',
-    shadowOpacity: 0.03,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 1,
+    backgroundColor: 'white',
+    borderWidth: 1,
+    borderColor: '#d1d5db',
+    borderRadius: 8,
+    height: 48,
+    paddingHorizontal: 12,
   },
   selectIconBox: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: '#EFF6FF',
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#f3f4f6',
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 12,
   },
-  selectText: { 
-    flex: 1, 
-    color: '#6b7280',
-    fontSize: 15,
-    fontWeight: '500',
-  },
+  selectText: { flex: 1, color: '#6b7280' },
   textInput: {
-    backgroundColor: '#F9FAFB',
-    borderWidth: 1.5,
-    borderColor: '#E5E7EB',
-    borderRadius: 12,
-    height: 56,
+    backgroundColor: 'white',
+    borderWidth: 1,
+    borderColor: '#d1d5db',
+    borderRadius: 8,
+    height: 48,
     paddingHorizontal: 16,
-    fontSize: 15,
+    fontSize: 16,
     color: '#111418',
-    fontWeight: '500',
-    shadowColor: '#000',
-    shadowOpacity: 0.03,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 1,
   },
+  
   typeSelector: {
-    flexDirection: 'row',
-    gap: 12,
+  flexDirection: 'row',
+  gap: 12,
+  marginTop: 8,
   },
   typeChip: {
     flex: 1,
-    height: 48,
-    borderRadius: 12,
-    borderWidth: 1.5,
-    borderColor: '#E5E7EB',
+    height: 40,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#d1d5db',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#FFFFFF',
-    shadowColor: '#000',
-    shadowOpacity: 0.03,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 1,
   },
   typeChipActive: {
     backgroundColor: '#3c83f6',
     borderColor: '#3c83f6',
-    shadowColor: '#3c83f6',
-    shadowOpacity: 0.2,
   },
   typeChipText: {
-    fontSize: 15,
-    fontWeight: '700',
+    fontSize: 14,
+    fontWeight: '500',
     color: '#6b7280',
   },
   typeChipTextActive: {
     color: '#ffffff',
   },
+
   colorPreview: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    borderWidth: 1.5,
-    borderColor: '#E5E7EB',
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
     marginRight: 12,
   },
-  moneyInputWrapper: { 
-    justifyContent: 'center',
-  },
+  moneyInputWrapper: { justifyContent: 'center' },
   moneyInput: {
-    backgroundColor: '#F9FAFB',
-    borderWidth: 1.5,
-    borderColor: '#E5E7EB',
-    borderRadius: 12,
-    height: 56,
-    paddingLeft: 44,
+    backgroundColor: 'white',
+    borderWidth: 1,
+    borderColor: '#d1d5db',
+    borderRadius: 8,
+    height: 48,
+    paddingLeft: 40,
     paddingRight: 16,
-    fontSize: 15,
+    fontSize: 16,
     color: '#111418',
-    fontWeight: '500',
-    shadowColor: '#000',
-    shadowOpacity: 0.03,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 1,
   },
   currencySymbol: {
     position: 'absolute',
     left: 16,
     color: '#6b7280',
     fontSize: 16,
-    fontWeight: '600',
   },
-  formActions: { 
-    marginTop: 32, 
-    gap: 12,
-  },
+  formActions: { marginTop: 32, gap: 12 },
   primaryButton: {
     backgroundColor: '#3c83f6',
-    height: 56,
-    borderRadius: 12,
+    height: 48,
+    borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#3c83f6',
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 4,
   },
   primaryButtonText: {
     color: 'white',
     fontSize: 16,
-    fontWeight: '700',
-    letterSpacing: 0.5,
+    fontWeight: '600',
   },
   textButton: {
     height: 48,
@@ -645,14 +601,9 @@ const styles = StyleSheet.create({
   textButtonText: {
     color: '#3c83f6',
     fontSize: 16,
-    fontWeight: '700',
+    fontWeight: '600',
   },
-  errorText: { 
-    marginTop: 6, 
-    fontSize: 13, 
-    color: '#ef4444',
-    fontWeight: '500',
-  },
+  errorText: { marginTop: 4, fontSize: 12, color: '#ef4444' },
 });
 
 export default AddCategory;
