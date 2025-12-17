@@ -40,7 +40,7 @@ const formatDateDDMMYYYY = (date: Date | any) => {
 /* ================= SCREEN ================= */
 
 const StatisticsScreen: React.FC = () => {
-  const { theme } = useTheme();
+  const { theme, isDarkMode } = useTheme();
 
   const [transactions, setTransactions] = useState<UITransaction[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -88,8 +88,7 @@ const StatisticsScreen: React.FC = () => {
       const txDate = tx.date;
       if (!txDate) return true;
 
-      const diffDays =
-        (today.getTime() - txDate.getTime()) / 86400000;
+      const diffDays = (today.getTime() - txDate.getTime()) / 86400000;
 
       if (filter === "7days") return diffDays <= 7;
       if (filter === "3days") return diffDays <= 3;
@@ -101,9 +100,9 @@ const StatisticsScreen: React.FC = () => {
   /* ================= UI ================= */
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
+    <View style={[styles.container, { backgroundColor: isDarkMode ? theme.background : '#FFFFFF' }]}>
       {/* HEADER */}
-      <View style={styles.header}>
+      <View style={[styles.header, { backgroundColor: isDarkMode ? theme.headerBackground : '#FFFFFF' }]}>
         <Text style={[styles.headerTitle, { color: theme.textPrimary }]}>
           Giao dịch
         </Text>
@@ -115,8 +114,8 @@ const StatisticsScreen: React.FC = () => {
           style={[
             styles.searchBar,
             {
-              backgroundColor: theme.cardBackground,
-              borderColor: theme.border,
+              backgroundColor: isDarkMode ? theme.cardBackground : '#F9FAFB',
+              borderColor: isDarkMode ? theme.border : '#E5E7EB',
             },
           ]}
         >
@@ -124,7 +123,7 @@ const StatisticsScreen: React.FC = () => {
             name="search"
             size={22}
             color={theme.textSecondary}
-            style={{ marginRight: 8 }}
+            style={{ marginRight: 10 }}
           />
           <TextInput
             placeholder="Tìm theo mô tả..."
@@ -133,6 +132,11 @@ const StatisticsScreen: React.FC = () => {
             value={searchTerm}
             onChangeText={setSearchTerm}
           />
+          {searchTerm ? (
+            <TouchableOpacity onPress={() => setSearchTerm("")} activeOpacity={0.7}>
+              <MaterialIcons name="close" size={20} color={theme.textSecondary} />
+            </TouchableOpacity>
+          ) : null}
         </View>
       </View>
 
@@ -153,16 +157,23 @@ const StatisticsScreen: React.FC = () => {
             style={[
               styles.filterChip,
               {
-                backgroundColor:
-                  filter === f.key ? "#3c83f6" : theme.cardBackground,
+                backgroundColor: filter === f.key 
+                  ? "#3c83f6" 
+                  : isDarkMode ? theme.cardBackground : '#F9FAFB',
+                borderColor: filter === f.key
+                  ? "#3c83f6"
+                  : isDarkMode ? theme.border : '#E5E7EB',
               },
             ]}
+            activeOpacity={0.7}
           >
             <Text
-              style={{
-                color: filter === f.key ? "#fff" : theme.textPrimary,
-                fontWeight: "600",
-              }}
+              style={[
+                styles.filterChipText,
+                {
+                  color: filter === f.key ? "#fff" : theme.textPrimary,
+                },
+              ]}
             >
               {f.label}
             </Text>
@@ -171,19 +182,22 @@ const StatisticsScreen: React.FC = () => {
       </ScrollView>
 
       {/* LIST */}
-      <ScrollView contentContainerStyle={styles.listContent}>
+      <ScrollView 
+        contentContainerStyle={styles.listContent}
+        showsVerticalScrollIndicator={false}
+      >
         <Text style={[styles.listTitle, { color: theme.textPrimary }]}>
           Danh sách giao dịch
         </Text>
 
         {filteredTransactions.length === 0 ? (
-          <View style={styles.empty}>
+          <View style={[styles.empty, { backgroundColor: isDarkMode ? theme.cardBackground : '#F9FAFB' }]}>
             <MaterialIcons
               name="receipt-long"
               size={48}
               color={theme.textSecondary}
             />
-            <Text style={{ color: theme.textSecondary, marginTop: 8 }}>
+            <Text style={[styles.emptyText, { color: theme.textSecondary }]}>
               Không có giao dịch
             </Text>
           </View>
@@ -196,7 +210,7 @@ const StatisticsScreen: React.FC = () => {
                 key={tx.id}
                 style={[
                   styles.card,
-                  { backgroundColor: theme.cardBackground },
+                  { backgroundColor: isDarkMode ? theme.cardBackground : '#FFFFFF' },
                 ]}
               >
                 {/* ICON */}
@@ -205,37 +219,30 @@ const StatisticsScreen: React.FC = () => {
                     styles.iconBox,
                     {
                       backgroundColor: isIncome
-                        ? "rgba(34,197,94,0.15)"
-                        : "rgba(239,68,68,0.15)",
+                        ? "#DCFCE7"
+                        : "#FEE2E2",
                     },
                   ]}
                 >
                   <MaterialIcons
-                    name={isIncome ? "arrow-downward" : "arrow-upward"}
-                    size={22}
+                    name={isIncome ? "trending-up" : "trending-down"}
+                    size={24}
                     color={isIncome ? "#22C55E" : "#EF4444"}
                   />
                 </View>
 
                 {/* INFO */}
                 <View style={{ flex: 1 }}>
-                  <Text
-                    style={{ fontWeight: "600", color: theme.textPrimary }}
-                  >
+                  <Text style={[styles.cardTitle, { color: theme.textPrimary }]}>
                     {tx.title}
                   </Text>
 
-                  <Text
-                    style={{
-                      fontSize: 13,
-                      color: theme.textSecondary,
-                    }}
-                  >
+                  <Text style={[styles.cardDate, { color: theme.textSecondary }]}>
                     {formatDateDDMMYYYY(tx.date)}
                   </Text>
 
                   {tx.subtitle ? (
-                    <Text style={{ color: theme.textSecondary }}>
+                    <Text style={[styles.cardSubtitle, { color: theme.textSecondary }]}>
                       {tx.subtitle}
                     </Text>
                   ) : null}
@@ -244,17 +251,33 @@ const StatisticsScreen: React.FC = () => {
                 {/* AMOUNT */}
                 <View style={{ alignItems: "flex-end" }}>
                   <Text
-                    style={{
-                      fontWeight: "bold",
-                      color: isIncome ? "#22C55E" : "#EF4444",
-                    }}
+                    style={[
+                      styles.cardAmount,
+                      { color: isIncome ? "#22C55E" : "#EF4444" },
+                    ]}
                   >
                     {isIncome ? "+" : "-"}
                     {Math.abs(tx.amount).toLocaleString()}₫
                   </Text>
-                  <Text style={{ fontSize: 12, color: theme.textSecondary }}>
-                    {isIncome ? "Thu" : "Chi"}
-                  </Text>
+                  <View
+                    style={[
+                      styles.typeBadge,
+                      {
+                        backgroundColor: isIncome
+                          ? "#DCFCE7"
+                          : "#FEE2E2",
+                      },
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.typeBadgeText,
+                        { color: isIncome ? "#22C55E" : "#EF4444" },
+                      ]}
+                    >
+                      {isIncome ? "Thu" : "Chi"}
+                    </Text>
+                  </View>
                 </View>
               </View>
             );
@@ -272,70 +295,137 @@ export default StatisticsScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#FFFFFF',
   },
   header: {
-    height: 56,
+    height: 60,
     alignItems: "center",
     justifyContent: "center",
+    backgroundColor: '#FFFFFF',
+    borderBottomWidth: 1,
+    borderBottomColor: '#F1F5F9',
   },
   headerTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
+    fontSize: 19,
+    fontWeight: "700",
+    letterSpacing: -0.3,
   },
   searchContainer: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
   },
   searchBar: {
     flexDirection: "row",
     alignItems: "center",
-    height: 48,
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    borderWidth: 1,
+    height: 52,
+    borderRadius: 14,
+    paddingHorizontal: 14,
+    borderWidth: 1.5,
+    backgroundColor: '#F9FAFB',
+    shadowColor: '#000',
+    shadowOpacity: 0.03,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 1,
   },
   searchInput: {
     flex: 1,
-    fontSize: 16,
+    fontSize: 15,
+    fontWeight: '500',
   },
   filterRow: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    gap: 8,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    gap: 10,
   },
   filterChip: {
-    height: 36,
-    paddingHorizontal: 16,
-    borderRadius: 8,
+    height: 40,
+    paddingHorizontal: 18,
+    borderRadius: 12,
     alignItems: "center",
     justifyContent: "center",
+    borderWidth: 1.5,
+    shadowColor: '#000',
+    shadowOpacity: 0.03,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 1,
+  },
+  filterChipText: {
+    fontSize: 14,
+    fontWeight: "700",
   },
   listContent: {
-    padding: 16,
+    padding: 20,
     paddingBottom: 100,
   },
   listTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 12,
+    fontSize: 20,
+    fontWeight: "700",
+    marginBottom: 16,
+    letterSpacing: -0.3,
   },
   card: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 16,
-    borderRadius: 12,
+    padding: 18,
+    borderRadius: 16,
     marginBottom: 12,
-    gap: 16,
+    gap: 14,
+    backgroundColor: '#FFFFFF',
+    shadowColor: '#000',
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: '#F1F5F9',
   },
   iconBox: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 48,
+    height: 48,
+    borderRadius: 14,
     alignItems: "center",
     justifyContent: "center",
   },
+  cardTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    marginBottom: 4,
+  },
+  cardDate: {
+    fontSize: 13,
+    fontWeight: "500",
+    marginBottom: 2,
+  },
+  cardSubtitle: {
+    fontSize: 13,
+    fontWeight: "500",
+    marginTop: 2,
+  },
+  cardAmount: {
+    fontSize: 17,
+    fontWeight: "700",
+    marginBottom: 6,
+  },
+  typeBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  typeBadgeText: {
+    fontSize: 12,
+    fontWeight: "700",
+  },
   empty: {
     alignItems: "center",
-    paddingVertical: 40,
+    paddingVertical: 60,
+    borderRadius: 16,
+    marginTop: 20,
+  },
+  emptyText: {
+    fontSize: 15,
+    fontWeight: "500",
+    marginTop: 12,
   },
 });

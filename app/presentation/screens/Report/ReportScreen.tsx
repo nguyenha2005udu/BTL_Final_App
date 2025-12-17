@@ -182,25 +182,27 @@ const ReportScreen: React.FC = () => {
   const cardBg = isDarkMode ? theme.cardBackground : '#f8f9fa';
 
   return (
-    <View style={[styles.container, { backgroundColor: isDarkMode ? theme.background : '#ffffff' }]}>
-      <View style={[styles.header, { backgroundColor: theme.headerBackground, borderBottomColor: theme.border }]}>
+    <View style={[styles.container, { backgroundColor: isDarkMode ? theme.background : '#FFFFFF' }]}>
+      <View style={[styles.header, { backgroundColor: isDarkMode ? theme.headerBackground : '#FFFFFF', borderBottomColor: isDarkMode ? theme.border : '#F1F5F9' }]}>
         <Text style={[styles.headerTitle, { color: theme.textPrimary }]}>Báo cáo</Text>
       </View>
 
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         {/* Period Selector */}
-        <View style={[styles.periodSelector, { backgroundColor: isDarkMode ? '#374151' : '#e5e7eb' }]}>
+        <View style={[styles.periodSelector, { backgroundColor: isDarkMode ? '#374151' : '#F8FAFC', borderColor: isDarkMode ? theme.border : '#E2E8F0' }]}>
           <TouchableOpacity 
-            style={[styles.periodButton, selectedPeriod === 'week' && [styles.periodButtonActive, { backgroundColor: cardBg }]]}
+            style={[styles.periodButton, selectedPeriod === 'week' && [styles.periodButtonActive, { backgroundColor: isDarkMode ? cardBg : '#FFFFFF' }]]}
             onPress={() => setSelectedPeriod('week')}
+            activeOpacity={0.7}
           >
             <Text style={[styles.periodText, { color: theme.textSecondary }, selectedPeriod === 'week' && styles.periodTextActive]}>
               Tuần này
             </Text>
           </TouchableOpacity>
           <TouchableOpacity 
-            style={[styles.periodButton, selectedPeriod === 'month' && [styles.periodButtonActive, { backgroundColor: cardBg }]]}
+            style={[styles.periodButton, selectedPeriod === 'month' && [styles.periodButtonActive, { backgroundColor: isDarkMode ? cardBg : '#FFFFFF' }]]}
             onPress={() => setSelectedPeriod('month')}
+            activeOpacity={0.7}
           >
             <Text style={[styles.periodText, { color: theme.textSecondary }, selectedPeriod === 'month' && styles.periodTextActive]}>
               Tháng này
@@ -209,7 +211,7 @@ const ReportScreen: React.FC = () => {
         </View>
 
         {/* Summary Card */}
-        <View style={[styles.card, { backgroundColor: cardBg }]}>
+        <View style={[styles.card, { backgroundColor: isDarkMode ? cardBg : '#FFFFFF' }]}>
           <View style={styles.summaryRow}>
             <View style={styles.summaryItem}>
               <Text style={[styles.summaryLabel, { color: theme.textSecondary }]}>Tổng thu</Text>
@@ -220,10 +222,10 @@ const ReportScreen: React.FC = () => {
               <Text style={[styles.summaryValue, { color: '#EF4444' }]}>-{totalExpense.toLocaleString()}₫</Text>
             </View>
           </View>
-          <View style={[styles.divider, { backgroundColor: isDarkMode ? theme.divider : '#e5e7eb' }]} />
+          <View style={[styles.divider, { backgroundColor: isDarkMode ? theme.divider : '#F1F5F9' }]} />
           <View style={styles.balanceItem}>
             <Text style={[styles.summaryLabel, { color: theme.textSecondary }]}>Chênh lệch</Text>
-            <Text style={[styles.summaryValue, { color: '#3c83f6', fontSize: 24 }]}>
+            <Text style={[styles.summaryValue, { color: '#3c83f6', fontSize: 26 }]}>
               {(totalIncome - totalExpense).toLocaleString()}₫
             </Text>
           </View>
@@ -232,25 +234,27 @@ const ReportScreen: React.FC = () => {
         {/* Type Filter & Pie Chart */}
         <View style={styles.typeFilterRow}>
           <TouchableOpacity
-            style={[styles.typeFilterChip, { borderColor: isDarkMode ? theme.border : '#d1d5db' }, filterType === 'expense' && styles.typeFilterChipActive]}
+            style={[styles.typeFilterChip, filterType === 'expense' && styles.typeFilterChipActive]}
             onPress={() => setFilterType('expense')}
+            activeOpacity={0.7}
           >
-            <Text style={[styles.typeFilterText, { color: theme.textSecondary }, filterType === 'expense' && styles.typeFilterTextActive]}>
+            <Text style={[styles.typeFilterText, filterType === 'expense' && styles.typeFilterTextActive]}>
               Chi tiêu
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.typeFilterChip, { borderColor: isDarkMode ? theme.border : '#d1d5db' }, filterType === 'income' && styles.typeFilterChipActive]}
+            style={[styles.typeFilterChip, filterType === 'income' && styles.typeFilterChipActive]}
             onPress={() => setFilterType('income')}
+            activeOpacity={0.7}
           >
-            <Text style={[styles.typeFilterText, { color: theme.textSecondary }, filterType === 'income' && styles.typeFilterTextActive]}>
+            <Text style={[styles.typeFilterText, filterType === 'income' && styles.typeFilterTextActive]}>
               Thu nhập
             </Text>
           </TouchableOpacity>
         </View>
 
         {/* Pie Chart - Dynamic based on filter */}
-        <View style={[styles.card, { backgroundColor: cardBg }]}>
+        <View style={[styles.card, { backgroundColor: isDarkMode ? cardBg : '#FFFFFF' }]}>
           <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>
             Biểu đồ {filterType === 'expense' ? 'Chi tiêu' : 'Thu nhập'}
           </Text>
@@ -396,61 +400,202 @@ const ReportScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-  header: { height: 60, alignItems: 'center', justifyContent: 'center', borderBottomWidth: 1 },
-  headerTitle: { fontSize: 18, fontWeight: 'bold' },
-  content: { padding: 16, paddingBottom: 100 },
-  periodSelector: { flexDirection: 'row', borderRadius: 10, padding: 4, marginBottom: 16, height: 40 },
-  periodButton: { flex: 1, alignItems: 'center', justifyContent: 'center', borderRadius: 8 },
-  periodButtonActive: { shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 2, elevation: 1 },
-  periodText: { fontSize: 13, fontWeight: '500' },
-  periodTextActive: { color: '#3c83f6', fontWeight: '600' },
-  card: { borderRadius: 16, padding: 16, marginBottom: 16, shadowColor: '#000', shadowOpacity: 0.1, shadowOffset: { width: 0, height: 2 }, shadowRadius: 8, elevation: 4 },
+  container: { flex: 1, backgroundColor: '#FFFFFF' },
+  header: { 
+    height: 60, 
+    alignItems: 'center', 
+    justifyContent: 'center', 
+    borderBottomWidth: 1,
+    backgroundColor: '#FFFFFF',
+    borderBottomColor: '#F1F5F9',
+  },
+  headerTitle: { 
+    fontSize: 19, 
+    fontWeight: '700',
+    letterSpacing: -0.3,
+  },
+  content: { padding: 20, paddingBottom: 100 },
+  periodSelector: { 
+    flexDirection: 'row', 
+    borderRadius: 12, 
+    padding: 4, 
+    marginBottom: 20, 
+    height: 44,
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  periodButton: { 
+    flex: 1, 
+    alignItems: 'center', 
+    justifyContent: 'center', 
+    borderRadius: 10,
+  },
+  periodButtonActive: { 
+    backgroundColor: '#FFFFFF',
+    shadowColor: '#000', 
+    shadowOpacity: 0.08, 
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
+  },
+  periodText: { fontSize: 14, fontWeight: '600', color: '#64748B' },
+  periodTextActive: { color: '#3c83f6', fontWeight: '700' },
+  card: { 
+    borderRadius: 18, 
+    padding: 20, 
+    marginBottom: 20, 
+    backgroundColor: '#FFFFFF',
+    shadowColor: '#000', 
+    shadowOpacity: 0.08, 
+    shadowOffset: { width: 0, height: 2 }, 
+    shadowRadius: 12, 
+    elevation: 4,
+    borderWidth: 1,
+    borderColor: '#F1F5F9',
+  },
   summaryRow: { flexDirection: 'row', marginBottom: 16 },
   summaryItem: { flex: 1 },
-  summaryLabel: { fontSize: 14, marginBottom: 4, fontWeight: '500' },
-  summaryValue: { fontSize: 18, fontWeight: 'bold' },
-  divider: { height: 1, marginBottom: 16 },
-  balanceItem: { gap: 4 },
-  sectionTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 16 },
+  summaryLabel: { fontSize: 14, marginBottom: 6, fontWeight: '500' },
+  summaryValue: { fontSize: 20, fontWeight: '700' },
+  divider: { height: 1, marginBottom: 16, backgroundColor: '#F1F5F9' },
+  balanceItem: { gap: 6 },
+  sectionTitle: { 
+    fontSize: 20, 
+    fontWeight: '700', 
+    marginBottom: 16,
+    letterSpacing: -0.3,
+  },
   chartContainer: { alignItems: 'center' },
   emptyChart: { alignItems: 'center', justifyContent: 'center', height: CHART_SIZE },
-  emptyChartText: { fontSize: 14, marginTop: 8 },
-  legend: { width: '100%', marginTop: 16, gap: 8 },
-  legendItem: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  legendDot: { width: 12, height: 12, borderRadius: 6 },
-  legendText: { flex: 1, fontSize: 14, fontWeight: '500' },
-  legendValue: { fontSize: 13, fontWeight: '600' },
-  typeFilterRow: { flexDirection: 'row', gap: 12, marginBottom: 16 },
-  typeFilterChip: { flex: 1, paddingVertical: 10, borderRadius: 10, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
-  typeFilterChipActive: { backgroundColor: '#3c83f6', borderColor: '#3c83f6' },
-  typeFilterText: { fontSize: 14, fontWeight: '600' },
+  emptyChartText: { fontSize: 14, marginTop: 8, fontWeight: '500' },
+  legend: { width: '100%', marginTop: 20, gap: 10 },
+  legendItem: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    gap: 10,
+    paddingVertical: 4,
+  },
+  legendDot: { width: 14, height: 14, borderRadius: 7 },
+  legendText: { flex: 1, fontSize: 15, fontWeight: '600' },
+  legendValue: { fontSize: 14, fontWeight: '700' },
+  typeFilterRow: { flexDirection: 'row', gap: 12, marginBottom: 20 },
+  typeFilterChip: { 
+    flex: 1, 
+    paddingVertical: 12, 
+    borderRadius: 14, 
+    borderWidth: 1.5, 
+    borderColor: '#E2E8F0',
+    alignItems: 'center', 
+    justifyContent: 'center',
+    backgroundColor: '#FFFFFF',
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
+  },
+  typeFilterChipActive: { 
+    backgroundColor: '#3c83f6', 
+    borderColor: '#3c83f6',
+    shadowColor: '#3c83f6',
+    shadowOpacity: 0.2,
+  },
+  typeFilterText: { fontSize: 15, fontWeight: '700', color: '#64748B' },
   typeFilterTextActive: { color: '#ffffff' },
-  categoriesList: { gap: 12 },
-  categoryCard: { borderRadius: 16, padding: 16, shadowColor: '#000', shadowOpacity: 0.1, shadowOffset: { width: 0, height: 2 }, shadowRadius: 8, elevation: 4 },
+  categoriesList: { gap: 16 },
+  categoryCard: { 
+    borderRadius: 16, 
+    padding: 20, 
+    backgroundColor: '#FFFFFF',
+    shadowColor: '#000', 
+    shadowOpacity: 0.08, 
+    shadowOffset: { width: 0, height: 2 }, 
+    shadowRadius: 8, 
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: '#F1F5F9',
+  },
   categoryHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
-  categoryTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  colorDot: { width: 12, height: 12, borderRadius: 6 },
-  categoryName: { fontSize: 16, fontWeight: '600' },
+  categoryTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  colorDot: { width: 14, height: 14, borderRadius: 7 },
+  categoryName: { fontSize: 17, fontWeight: '700' },
   amountRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 },
-  amountLabel: { fontSize: 12, marginBottom: 4 },
-  amountValue: { fontSize: 16, fontWeight: 'bold' },
-  progressBar: { height: 8, borderRadius: 4, overflow: 'hidden', marginBottom: 8 },
-  progressFill: { height: '100%', borderRadius: 4 },
+  amountLabel: { fontSize: 13, marginBottom: 4, fontWeight: '500' },
+  amountValue: { fontSize: 17, fontWeight: '700' },
+  progressBar: { height: 10, borderRadius: 5, overflow: 'hidden', marginBottom: 10 },
+  progressFill: { height: '100%', borderRadius: 5 },
   statsRow: { flexDirection: 'row', justifyContent: 'space-between' },
   statItem: { flex: 1 },
-  statLabel: { fontSize: 11, marginBottom: 2 },
-  statValue: { fontSize: 13, fontWeight: '600' },
-  noBudgetBox: { flexDirection: 'row', alignItems: 'center', gap: 6, padding: 8, borderRadius: 8, marginTop: 8 },
-  noBudgetText: { fontSize: 12 },
-  emptyCard: { borderRadius: 16, padding: 32, alignItems: 'center', shadowColor: '#000', shadowOpacity: 0.1, shadowOffset: { width: 0, height: 2 }, shadowRadius: 8, elevation: 4 },
-  emptyText: { fontSize: 14, marginTop: 12 },
-  addCategoryCard: { borderRadius: 16, padding: 20, flexDirection: 'row', alignItems: 'center', gap: 12, borderWidth: 2, borderStyle: 'dashed' },
-  addIconCircle: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
-  addCategoryText: { fontSize: 16, fontWeight: '600' },
+  statLabel: { fontSize: 12, marginBottom: 4, fontWeight: '500' },
+  statValue: { fontSize: 14, fontWeight: '700' },
+  noBudgetBox: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    gap: 8, 
+    padding: 12, 
+    borderRadius: 10, 
+    marginTop: 10,
+    backgroundColor: '#FEF7E0',
+  },
+  noBudgetText: { fontSize: 13, fontWeight: '500' },
+  emptyCard: { 
+    borderRadius: 16, 
+    padding: 40, 
+    alignItems: 'center', 
+    backgroundColor: '#FFFFFF',
+    shadowColor: '#000', 
+    shadowOpacity: 0.08, 
+    shadowOffset: { width: 0, height: 2 }, 
+    shadowRadius: 8, 
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: '#F1F5F9',
+  },
+  emptyText: { fontSize: 15, marginTop: 12, fontWeight: '500' },
+  addCategoryCard: { 
+    borderRadius: 16, 
+    padding: 20, 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    gap: 12, 
+    borderWidth: 2, 
+    borderStyle: 'dashed',
+    borderColor: '#CBD5E1',
+    backgroundColor: '#F8FAFC',
+  },
+  addIconCircle: { 
+    width: 44, 
+    height: 44, 
+    borderRadius: 22, 
+    alignItems: 'center', 
+    justifyContent: 'center',
+    backgroundColor: '#EFF6FF',
+  },
+  addCategoryText: { fontSize: 16, fontWeight: '700' },
   actionButtons: { flexDirection: 'row', gap: 12, marginTop: 8 },
-  outlineButton: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', height: 48, borderWidth: 1, borderRadius: 10, gap: 8 },
-  outlineButtonText: { fontSize: 14, fontWeight: '600' },
+  outlineButton: { 
+    flex: 1, 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    justifyContent: 'center', 
+    height: 52, 
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
+    borderRadius: 14, 
+    gap: 8,
+    backgroundColor: '#FFFFFF',
+    shadowColor: '#000',
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 3,
+  },
+  outlineButtonText: { 
+    fontSize: 15, 
+    fontWeight: '700',
+    letterSpacing: -0.2,
+  },
 });
 
 export default ReportScreen;

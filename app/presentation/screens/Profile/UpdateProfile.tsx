@@ -131,7 +131,6 @@ const UpdateProfile: React.FC = () => {
         fullName,
         phone,
         birthDate: birthDate ? birthDate.toISOString() : null,
-
       });
       Alert.alert("Thành công", "Cập nhật thông tin thành công");
       navigation.goBack();
@@ -141,11 +140,13 @@ const UpdateProfile: React.FC = () => {
     }
     setLoading(false);
   };
-  const cardBg = isDarkMode ? theme.cardBackground : '#f8f9fa';
 
   return (
-   <View style={[styles.container, { backgroundColor: isDarkMode ? theme.background : '#ffffff' }]}>
-      <View style={[styles.header, { backgroundColor: theme.headerBackground, borderBottomColor: theme.border }]}>
+    <View style={[styles.container, { backgroundColor: isDarkMode ? theme.background : '#FFFFFF' }]}>
+      <View style={[styles.header, { 
+        backgroundColor: isDarkMode ? theme.headerBackground : '#FFFFFF',
+        borderBottomColor: isDarkMode ? theme.border : '#F1F5F9'
+      }]}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.iconButton}>
           <MaterialIcons name="arrow-back" size={24} color={theme.textPrimary} />
         </TouchableOpacity>
@@ -153,60 +154,109 @@ const UpdateProfile: React.FC = () => {
         <View style={{ width: 40 }} />
       </View>
 
-      <ScrollView contentContainerStyle={styles.content}>
-        <View style={styles.avatarContainer}>
+      <ScrollView 
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Avatar Section */}
+        <View style={[styles.avatarCard, { 
+          backgroundColor: isDarkMode ? theme.cardBackground : '#FFFFFF'
+        }]}>
           <View style={styles.avatarWrapper}>
             <Image
               source={{ uri: avatarUrl || "https://via.placeholder.com/150" }}
-              style={[styles.avatar, { borderColor: theme.cardBackground }]}
+              style={styles.avatar}
             />
-            <TouchableOpacity style={styles.editIcon} onPress={handleChangeAvatar} disabled={loading}>
-              <MaterialIcons name={loading ? "hourglass-empty" : "edit"} size={16} color="white" />
+            <TouchableOpacity 
+              style={[styles.editIcon, loading && styles.editIconLoading]} 
+              onPress={handleChangeAvatar} 
+              disabled={loading}
+              activeOpacity={0.7}
+            >
+              <MaterialIcons 
+                name={loading ? "hourglass-empty" : "camera-alt"} 
+                size={20} 
+                color="white" 
+              />
             </TouchableOpacity>
           </View>
+          <Text style={[styles.avatarHint, { color: theme.textSecondary }]}>
+            Nhấn vào biểu tượng camera để thay đổi ảnh
+          </Text>
         </View>
 
-        <View style={styles.form}>
+        {/* Form Card */}
+        <View style={[styles.formCard, { 
+          backgroundColor: isDarkMode ? theme.cardBackground : '#FFFFFF'
+        }]}>
           <View style={styles.inputGroup}>
             <Text style={[styles.label, { color: theme.textSecondary }]}>Họ và Tên</Text>
-            <TextInput
-              style={[styles.input, { backgroundColor: theme.cardBackground, borderColor: theme.border, color: theme.textPrimary }]}
-              placeholder="Nhập họ và tên"
-              placeholderTextColor={theme.textSecondary}
-              value={fullName}
-              onChangeText={setFullName}
-            />
+            <View style={styles.inputWrapper}>
+              <MaterialIcons name="person-outline" size={20} color={theme.textSecondary} style={styles.inputIcon} />
+              <TextInput
+                style={[styles.input, { 
+                  backgroundColor: isDarkMode ? '#1F2937' : '#F8FAFC',
+                  borderColor: isDarkMode ? theme.border : '#E2E8F0',
+                  color: theme.textPrimary 
+                }]}
+                placeholder="Nhập họ và tên"
+                placeholderTextColor={theme.textSecondary}
+                value={fullName}
+                onChangeText={setFullName}
+              />
+            </View>
           </View>
 
           <View style={styles.inputGroup}>
             <Text style={[styles.label, { color: theme.textSecondary }]}>Email</Text>
-            <TextInput
-              style={[styles.input, { backgroundColor: isDarkMode ? "#374151" : "#f3f4f6", borderColor: theme.border, color: theme.textSecondary }]}
-              value={userEmail}
-              editable={false}
-            />
+            <View style={styles.inputWrapper}>
+              <MaterialIcons name="email" size={20} color={theme.textSecondary} style={styles.inputIcon} />
+              <TextInput
+                style={[styles.input, styles.disabledInput, { 
+                  backgroundColor: isDarkMode ? '#374151' : '#F1F5F9',
+                  borderColor: isDarkMode ? theme.border : '#E2E8F0',
+                  color: theme.textSecondary 
+                }]}
+                value={userEmail}
+                editable={false}
+              />
+            </View>
           </View>
 
           <View style={styles.inputGroup}>
             <Text style={[styles.label, { color: theme.textSecondary }]}>Số điện thoại</Text>
-            <TextInput
-              style={[styles.input, { backgroundColor: theme.cardBackground, borderColor: theme.border, color: theme.textPrimary }]}
-              placeholder="Nhập số điện thoại"
-              placeholderTextColor={theme.textSecondary}
-              value={phone}
-              keyboardType="phone-pad"
-              onChangeText={setPhone}
-            />
+            <View style={styles.inputWrapper}>
+              <MaterialIcons name="phone" size={20} color={theme.textSecondary} style={styles.inputIcon} />
+              <TextInput
+                style={[styles.input, { 
+                  backgroundColor: isDarkMode ? '#1F2937' : '#F8FAFC',
+                  borderColor: isDarkMode ? theme.border : '#E2E8F0',
+                  color: theme.textPrimary 
+                }]}
+                placeholder="Nhập số điện thoại"
+                placeholderTextColor={theme.textSecondary}
+                value={phone}
+                keyboardType="phone-pad"
+                onChangeText={setPhone}
+              />
+            </View>
           </View>
 
           <View style={styles.inputGroup}>
             <Text style={[styles.label, { color: theme.textSecondary }]}>Ngày sinh</Text>
             <TouchableOpacity
-              style={[styles.dateInputWrapper, { backgroundColor: theme.cardBackground, borderColor: theme.border }]}
+              style={[styles.dateInputWrapper, { 
+                backgroundColor: isDarkMode ? '#1F2937' : '#F8FAFC',
+                borderColor: isDarkMode ? theme.border : '#E2E8F0'
+              }]}
               onPress={() => setShowDatePicker(true)}
+              activeOpacity={0.7}
             >
-              <Text style={{ color: theme.textPrimary }}>
-                {birthDate ? birthDate.toLocaleDateString() : "DD/MM/YYYY"}
+              <MaterialIcons name="cake" size={20} color={theme.textSecondary} style={styles.inputIcon} />
+              <Text style={[styles.dateText, { 
+                color: birthDate ? theme.textPrimary : theme.textSecondary 
+              }]}>
+                {birthDate ? birthDate.toLocaleDateString('vi-VN') : "Chọn ngày sinh"}
               </Text>
               <MaterialIcons name="calendar-today" size={20} color={theme.textSecondary} />
             </TouchableOpacity>
@@ -222,14 +272,31 @@ const UpdateProfile: React.FC = () => {
             />
           )}
         </View>
+
+        <View style={{ height: 20 }} />
       </ScrollView>
 
-      <View style={[styles.footer, { backgroundColor: theme.cardBackground, borderTopColor: theme.border }]}>
-        <TouchableOpacity style={styles.saveButton} onPress={handleSave} disabled={loading}>
+      {/* Footer Buttons */}
+      <View style={[styles.footer, { 
+        backgroundColor: isDarkMode ? theme.cardBackground : '#FFFFFF',
+        borderTopColor: isDarkMode ? theme.border : '#F1F5F9'
+      }]}>
+        <TouchableOpacity 
+          style={[styles.saveButton, loading && styles.saveButtonDisabled]} 
+          onPress={handleSave} 
+          disabled={loading}
+          activeOpacity={0.8}
+        >
+          {loading && <MaterialIcons name="hourglass-empty" size={20} color="white" style={{ marginRight: 8 }} />}
           <Text style={styles.saveButtonText}>{loading ? "Đang lưu..." : "Lưu thay đổi"}</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.cancelButton} onPress={() => navigation.goBack()}>
-          <Text style={styles.cancelButtonText}>Hủy</Text>
+        
+        <TouchableOpacity 
+          style={[styles.cancelButton, { borderColor: isDarkMode ? theme.border : '#E2E8F0' }]} 
+          onPress={() => navigation.goBack()}
+          activeOpacity={0.7}
+        >
+          <Text style={[styles.cancelButtonText, { color: theme.textSecondary }]}>Hủy</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -239,7 +306,7 @@ const UpdateProfile: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f7f8",
+    backgroundColor: "#FFFFFF",
   },
   header: {
     flexDirection: "row",
@@ -247,14 +314,15 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     height: 60,
     paddingHorizontal: 16,
-    backgroundColor: "rgba(245, 247, 248, 0.9)",
+    backgroundColor: "#FFFFFF",
     borderBottomWidth: 1,
-    borderBottomColor: "#e5e7eb",
+    borderBottomColor: "#F1F5F9",
   },
   headerTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#111418",
+    fontSize: 19,
+    fontWeight: "700",
+    color: "#0F172A",
+    letterSpacing: -0.3,
   },
   iconButton: {
     width: 40,
@@ -263,104 +331,171 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   content: {
-    padding: 16,
+    padding: 20,
   },
-  avatarContainer: {
+  avatarCard: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 18,
+    padding: 24,
     alignItems: "center",
-    marginVertical: 24,
+    marginBottom: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: "#F1F5F9",
   },
   avatarWrapper: {
     position: "relative",
+    marginBottom: 12,
   },
   avatar: {
     width: 120,
     height: 120,
     borderRadius: 60,
     borderWidth: 4,
-    borderColor: "white",
+    borderColor: "#3B82F6",
   },
   editIcon: {
     position: "absolute",
-    bottom: 0,
-    right: 0,
-    backgroundColor: "#3c83f6",
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    bottom: 4,
+    right: 4,
+    backgroundColor: "#3B82F6",
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     alignItems: "center",
     justifyContent: "center",
-    borderWidth: 2,
+    borderWidth: 3,
     borderColor: "white",
+    shadowColor: "#3B82F6",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 4,
   },
-  form: {
-    gap: 20,
+  editIconLoading: {
+    backgroundColor: "#94A3B8",
+  },
+  avatarHint: {
+    fontSize: 13,
+    color: "#64748B",
+    textAlign: "center",
+    fontWeight: "500",
+  },
+  formCard: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 18,
+    padding: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: "#F1F5F9",
   },
   inputGroup: {
-    gap: 8,
+    marginBottom: 20,
   },
   label: {
     fontSize: 14,
-    fontWeight: "500",
-    color: "#374151",
+    fontWeight: "600",
+    color: "#64748B",
+    marginBottom: 8,
+    letterSpacing: 0.2,
+  },
+  inputWrapper: {
+    position: "relative",
+  },
+  inputIcon: {
+    position: "absolute",
+    left: 16,
+    top: 14,
+    zIndex: 1,
   },
   input: {
-    backgroundColor: "white",
+    backgroundColor: "#F8FAFC",
     borderWidth: 1,
-    borderColor: "#d1d5db",
-    borderRadius: 8,
-    height: 48,
-    paddingHorizontal: 16,
-    fontSize: 16,
-    color: "#111418",
+    borderColor: "#E2E8F0",
+    borderRadius: 12,
+    height: 52,
+    paddingLeft: 48,
+    paddingRight: 16,
+    fontSize: 15,
+    color: "#0F172A",
+    fontWeight: "500",
   },
   disabledInput: {
-    backgroundColor: "#f3f4f6",
-    color: "#9ca3af",
+    backgroundColor: "#F1F5F9",
+    color: "#94A3B8",
   },
   dateInputWrapper: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "white",
+    backgroundColor: "#F8FAFC",
     borderWidth: 1,
-    borderColor: "#d1d5db",
-    borderRadius: 8,
-    height: 48,
-    paddingHorizontal: 16,
+    borderColor: "#E2E8F0",
+    borderRadius: 12,
+    height: 52,
+    paddingLeft: 48,
+    paddingRight: 16,
   },
-  dateInput: {
+  dateText: {
     flex: 1,
-    fontSize: 16,
-    color: "#111418",
+    fontSize: 15,
+    color: "#0F172A",
+    fontWeight: "500",
   },
   footer: {
-    padding: 16,
-    backgroundColor: "white",
+    padding: 20,
+    backgroundColor: "#FFFFFF",
     borderTopWidth: 1,
-    borderTopColor: "#e5e7eb",
+    borderTopColor: "#F1F5F9",
     gap: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 4,
   },
   saveButton: {
-    backgroundColor: "#3c83f6",
-    height: 48,
-    borderRadius: 12,
+    backgroundColor: "#3B82F6",
+    height: 52,
+    borderRadius: 14,
     alignItems: "center",
     justifyContent: "center",
+    flexDirection: "row",
+    shadowColor: "#3B82F6",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  saveButtonDisabled: {
+    backgroundColor: "#94A3B8",
+    shadowOpacity: 0.1,
   },
   saveButtonText: {
     color: "white",
     fontSize: 16,
-    fontWeight: "bold",
+    fontWeight: "700",
+    letterSpacing: -0.2,
   },
   cancelButton: {
-    height: 48,
-    borderRadius: 12,
+    height: 52,
+    borderRadius: 14,
     alignItems: "center",
     justifyContent: "center",
+    borderWidth: 1.5,
+    borderColor: "#E2E8F0",
   },
   cancelButtonText: {
-    color: "#3c83f6",
+    color: "#64748B",
     fontSize: 16,
-    fontWeight: "bold",
+    fontWeight: "600",
   },
 });
 
