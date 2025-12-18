@@ -59,10 +59,7 @@ const UpdateTransactionScreen: React.FC = () => {
 
   // Lọc danh mục theo loại thu/chi
   const filteredCategories = useMemo(
-    () =>
-      categories.filter((c: any) =>
-        c.type ? c.type === type : true
-      ),
+    () => categories.filter((c: any) => (c.type ? c.type === type : true)),
     [categories, type]
   );
 
@@ -77,7 +74,10 @@ const UpdateTransactionScreen: React.FC = () => {
       setSelectedCategoryId("");
       return;
     }
-    if (!selectedCategoryId || !filteredCategories.some((c) => c.id === selectedCategoryId)) {
+    if (
+      !selectedCategoryId ||
+      !filteredCategories.some((c) => c.id === selectedCategoryId)
+    ) {
       setSelectedCategoryId(filteredCategories[0].id);
     }
   }, [filteredCategories, selectedCategoryId]);
@@ -102,10 +102,7 @@ const UpdateTransactionScreen: React.FC = () => {
 
         setType(tx.type ?? "expense");
         setMountText(String(typeof tx.amount === "number" ? tx.amount : 0));
-<<<<<<< HEAD
-=======
         setTitle(tx.title ?? "");
->>>>>>> main
         setNote(tx.note ?? "");
         setSelectedCategoryId(tx.categoryId ?? "");
         setDate(tsToDate(tx.date));
@@ -140,14 +137,13 @@ const UpdateTransactionScreen: React.FC = () => {
 
     try {
       await updateTransaction(id, {
-  title: title.trim(),
-  categoryId: selectedCategoryId,
-  amount: mount,   // ✅ ĐÚNG FIELD
-  note: note ?? "",
-  type,
-  date,
-});
-
+        title: title.trim(),
+        categoryId: selectedCategoryId,
+        amount: mount, // ✅ ĐÚNG FIELD
+        note: note ?? "",
+        type,
+        date,
+      });
 
       Alert.alert("Thành công", "Đã cập nhật giao dịch.");
       navigation.goBack();
@@ -178,10 +174,15 @@ const UpdateTransactionScreen: React.FC = () => {
   };
 
   const hasCategoryForType = filteredCategories.length > 0;
-  const cardBg = isDarkMode ? theme.cardBackground : '#f8f9fa';
+  const cardBg = isDarkMode ? theme.cardBackground : "#f8f9fa";
 
   return (
-   <View style={[styles.container, { backgroundColor: isDarkMode ? theme.background : '#ffffff' }]}>
+    <View
+      style={[
+        styles.container,
+        { backgroundColor: isDarkMode ? theme.background : "#ffffff" },
+      ]}
+    >
       <View
         style={[
           styles.header,
@@ -265,23 +266,23 @@ const UpdateTransactionScreen: React.FC = () => {
             {/* Tên giao dịch */}
             <View style={styles.inputGroup}>
               <Text style={[styles.label, { color: theme.textSecondary }]}>
-               Tên giao dịch
+                Tên giao dịch
               </Text>
               <TextInput
-              value={title}
-              onChangeText={setTitle}
-              style={[
-              styles.input,
-              {
-                backgroundColor: theme.cardBackground,
-                borderColor: theme.border,
-                color: theme.textPrimary,
-              },
-            ]}
-            placeholder="VD: Đi tàu, Trà chanh..."
-            placeholderTextColor={theme.textSecondary}
-          />
-        </View>
+                value={title}
+                onChangeText={setTitle}
+                style={[
+                  styles.input,
+                  {
+                    backgroundColor: theme.cardBackground,
+                    borderColor: theme.border,
+                    color: theme.textPrimary,
+                  },
+                ]}
+                placeholder="VD: Đi tàu, Trà chanh..."
+                placeholderTextColor={theme.textSecondary}
+              />
+            </View>
 
             <View style={styles.form}>
               {/* Số tiền */}
@@ -320,7 +321,9 @@ const UpdateTransactionScreen: React.FC = () => {
                       opacity: hasCategoryForType ? 1 : 0.6,
                     },
                   ]}
-                  onPress={() => hasCategoryForType && setCategoryModalOpen(true)}
+                  onPress={() =>
+                    hasCategoryForType && setCategoryModalOpen(true)
+                  }
                   disabled={!hasCategoryForType}
                 >
                   <View style={styles.selectContent}>
@@ -413,7 +416,10 @@ const UpdateTransactionScreen: React.FC = () => {
       <View
         style={[
           styles.footer,
-          { backgroundColor: theme.cardBackground, borderTopColor: theme.border },
+          {
+            backgroundColor: theme.cardBackground,
+            borderTopColor: theme.border,
+          },
         ]}
       >
         <TouchableOpacity style={styles.saveButton} onPress={onUpdate}>
@@ -446,7 +452,10 @@ const UpdateTransactionScreen: React.FC = () => {
           <View
             style={[
               modalStyles.sheet,
-              { backgroundColor: theme.cardBackground, borderColor: theme.border },
+              {
+                backgroundColor: theme.cardBackground,
+                borderColor: theme.border,
+              },
             ]}
           >
             <Text style={[modalStyles.title, { color: theme.textPrimary }]}>
@@ -457,7 +466,10 @@ const UpdateTransactionScreen: React.FC = () => {
               {filteredCategories.map((c) => (
                 <TouchableOpacity
                   key={c.id}
-                  style={[modalStyles.item, { borderBottomColor: theme.border }]}
+                  style={[
+                    modalStyles.item,
+                    { borderBottomColor: theme.border },
+                  ]}
                   onPress={() => {
                     setSelectedCategoryId(c.id);
                     setCategoryModalOpen(false);
@@ -470,7 +482,10 @@ const UpdateTransactionScreen: React.FC = () => {
                       color={theme.textSecondary}
                     />
                     <Text
-                      style={[modalStyles.itemText, { color: theme.textPrimary }]}
+                      style={[
+                        modalStyles.itemText,
+                        { color: theme.textPrimary },
+                      ]}
                     >
                       {c.name}
                     </Text>
@@ -502,7 +517,9 @@ const UpdateTransactionScreen: React.FC = () => {
               onPress={() => setCategoryModalOpen(false)}
               style={modalStyles.closeBtn}
             >
-              <Text style={[modalStyles.closeText, { color: theme.textSecondary }]}>
+              <Text
+                style={[modalStyles.closeText, { color: theme.textSecondary }]}
+              >
                 Đóng
               </Text>
             </TouchableOpacity>
