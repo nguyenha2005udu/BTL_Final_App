@@ -7,8 +7,8 @@ export type ReportCategoryListItem = {
   name: string;
   color: string;
   icon: string;
-  value: number; 
-  budget: number; 
+  value: number;
+  budget: number;
 };
 
 type Props = {
@@ -84,11 +84,20 @@ export const ReportCategoryList: React.FC<Props> = ({
 
         const overspent = hasBudget ? Math.max(0, spent - budget) : 0;
         const remainingAmount = hasBudget ? Math.max(0, budget - spent) : 0;
-        const remainingPercent = hasBudget ? Math.max(0, 100 - Math.max(0, usedPercent)) : 0;
+
+        // ✅ Cảnh báo vượt ngân sách chỉ áp dụng cho CHI TIÊU
+        const isOverBudget = mode === 'expense' && hasBudget && usedPercent > 100;
 
         return (
-          <View key={item.id} style={[styles.card, { backgroundColor: theme.cardBackground }]}>
-            {/* Header: dot + title + chevron */}
+          <View
+            key={item.id}
+            style={[
+              styles.card,
+              { backgroundColor: theme.cardBackground },
+              isOverBudget && styles.cardOverBudget,
+            ]}
+          >
+            {/* Header: icon + title + over badge + chevron */}
             <TouchableOpacity
               style={styles.headerRow}
               onPress={() => onPressItem(item.id)}
@@ -96,26 +105,33 @@ export const ReportCategoryList: React.FC<Props> = ({
             >
               <View style={[styles.iconBox, { backgroundColor: getIconBg(item.color, theme.divider) }]}>
                 <MaterialIcons
-                    name={(item.icon as any) || 'category'}
-                    size={20}
-                    color={item.color}
+                  name={(item.icon as any) || 'category'}
+                  size={20}
+                  color={item.color}
                 />
-                </View>
+              </View>
+
               <Text style={[styles.title, { color: theme.textPrimary }]} numberOfLines={1}>
                 {item.name}
               </Text>
+
+              {isOverBudget && (
+                <View style={styles.overBadge}>
+                  <MaterialIcons name="warning" size={14} color="#EF4444" />
+                  <Text style={styles.overBadgeText}>Vượt 100%</Text>
+                </View>
+              )}
+
               <MaterialIcons name="chevron-right" size={24} color={theme.textSecondary} />
             </TouchableOpacity>
 
-            {/* Row 1: spent/earned vs budget/goal */}
+            {/* Row 1 */}
             <View style={styles.row}>
               <View style={styles.col}>
                 <Text style={[styles.label, { color: theme.textSecondary }]}>
                   {mode === 'expense' ? 'Đã chi' : 'Đã thu'}
                 </Text>
-                <Text style={[styles.bigNumber, { color: mainColor }]}>
-                  {formatMoney(spent)}
-                </Text>
+                <Text style={[styles.bigNumber, { color: mainColor }]}>{formatMoney(spent)}</Text>
               </View>
 
               <View style={[styles.col, styles.colRight]}>
@@ -135,34 +151,41 @@ export const ReportCategoryList: React.FC<Props> = ({
                   styles.progressFill,
                   {
                     width: `${barPercent}%`,
-                    backgroundColor: mainColor,
-                    opacity: 0.35,
+                    backgroundColor: isOverBudget ? '#EF4444' : mainColor,
+                    opacity: isOverBudget ? 0.6 : 0.35,
                   },
                 ]}
               />
             </View>
 
-            {/* Row 2: used vs remaining */}
+            {/* Row 2 */}
             <View style={[styles.row, styles.rowBottom]}>
               <View style={styles.col}>
                 <Text style={[styles.label, { color: theme.textSecondary }]}>Đã dùng</Text>
-                <Text style={[styles.midNumber, { color: theme.textPrimary }]}>
+                <Text style={[styles.midNumber, { color: isOverBudget ? '#EF4444' : theme.textPrimary }]}>
                   {hasBudget ? `${Math.max(0, usedPercent)}%` : '0%'}
                 </Text>
               </View>
 
               <View style={[styles.col, styles.colRight]}>
-                <Text style={[styles.label, { color: theme.textSecondary }]}>
+                <Text style={[styles.label, { color: isOverBudget ? '#EF4444' : theme.textSecondary }]}>
                   {overspent > 0 ? 'Vượt' : 'Còn lại'}
                 </Text>
 
                 {overspent > 0 ? (
-                  <Text style={[styles.midNumber, { color: '#EF4444' }]}>
-                    {formatMoney(overspent)}
-                  </Text>
+                  <>
+                    <Text style={[styles.midNumber, { color: '#EF4444' }]}>
+                      {formatMoney(overspent)}
+                    </Text>
+                    {isOverBudget && (
+                      <Text style={[styles.overHint, { color: theme.textSecondary }]}>
+                        Bạn đã vượt ngân sách danh mục này
+                      </Text>
+                    )}
+                  </>
                 ) : (
                   <Text style={[styles.midNumber, { color: '#22C55E' }]}>
-                    {hasBudget ? `${formatMoney(remainingAmount)}` : '0đ'}
+                    {hasBudget ? formatMoney(remainingAmount) : '0₫'}
                   </Text>
                 )}
               </View>
@@ -200,12 +223,16 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     elevation: 2,
   },
+  cardOverBudget: {
+    borderWidth: 1,
+    borderColor: 'rgba(239, 68, 68, 0.35)',
+  },
 
   headerRow: {
-  flexDirection: 'row',
-  alignItems: 'center',
-  minHeight: 44,
-  paddingVertical: 6,
+    flexDirection: 'row',
+    alignItems: 'center',
+    minHeight: 44,
+    paddingVertical: 6,
   },
   iconBox: {
     width: 36,
@@ -220,7 +247,23 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '800',
   },
-  
+
+  overBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 999,
+    backgroundColor: 'rgba(239, 68, 68, 0.12)',
+    marginRight: 8,
+  },
+  overBadgeText: {
+    marginLeft: 4,
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#EF4444',
+  },
+
   row: { flexDirection: 'row', marginTop: 12 },
   rowBottom: { marginTop: 10 },
   col: { flex: 1 },
@@ -230,6 +273,12 @@ const styles = StyleSheet.create({
 
   bigNumber: { marginTop: 6, fontSize: 20, fontWeight: '800' },
   midNumber: { marginTop: 6, fontSize: 16, fontWeight: '700' },
+
+  overHint: {
+    marginTop: 4,
+    fontSize: 12,
+    fontWeight: '600',
+  },
 
   progressTrack: {
     height: 8,
@@ -269,4 +318,3 @@ const styles = StyleSheet.create({
   },
   addText: { fontSize: 16, fontWeight: '800' },
 });
-
