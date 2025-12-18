@@ -13,6 +13,7 @@ import { SavingGoal } from "../../../type/types";
 import { RootStackParamList } from "../../../RootNavigator";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
+import { useTheme } from "../../../context/ThemeContext";
 
 type SavingGoalsNavProp = StackNavigationProp<
   RootStackParamList,
@@ -25,6 +26,7 @@ export default function SavingGoalsScreen({
   navigation: SavingGoalsNavProp;
 }) {
   const [goals, setGoals] = useState<SavingGoal[]>([]);
+  const { theme, isDarkMode } = useTheme();
 
   useFocusEffect(
     useCallback(() => {
