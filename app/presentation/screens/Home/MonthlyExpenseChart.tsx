@@ -230,7 +230,7 @@ const styles = StyleSheet.create({
     height: 120,
     alignItems: "flex-end",
     justifyContent: "space-between",
-    marginTop: 20,
+    marginTop: 80,
     gap: 8,
   },
   barWrapper: {
