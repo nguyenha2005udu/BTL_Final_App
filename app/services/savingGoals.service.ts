@@ -7,6 +7,8 @@ import {
   updateDoc,
   getDoc,
   serverTimestamp,
+  query,
+  orderBy,
 } from "firebase/firestore";
 import { SavingGoal } from "../type/types";
 
@@ -75,7 +77,52 @@ export const updateSavingGoal = async (
 
   await updateDoc(docRef, data);
 };
+export const addGoalContribution = async (
+  userId: string,
+  goalId: string,
+  amount: number
+) => {
+  const ref = collection(
+    db,
+    "users",
+    userId,
+    "savingGoals",
+    goalId,
+    "contributions"
+  );
 
+  await addDoc(ref, {
+    amount,
+    createdAt: serverTimestamp(),
+  });
+};
+export interface GoalContribution {
+  id: string;
+  amount: number;
+  createdAt: any;
+}
+
+export const getGoalContributions = async (
+  userId: string,
+  goalId: string
+): Promise<GoalContribution[]> => {
+  const ref = collection(
+    db,
+    "users",
+    userId,
+    "savingGoals",
+    goalId,
+    "contributions"
+  );
+
+  const q = query(ref, orderBy("createdAt", "desc"));
+  const snap = await getDocs(q);
+
+  return snap.docs.map((doc) => ({
+    id: doc.id,
+    ...(doc.data() as any),
+  }));
+};
 /**
  * Lấy chi tiết goal
  */
