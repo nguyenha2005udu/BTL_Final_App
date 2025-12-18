@@ -51,10 +51,10 @@ function MainTabs() {
         headerShown: false,
         tabBarIcon: ({ color }) => {
           let iconName: string = "home";
-          if (route.name === "Home") iconName = "home";
-          else if (route.name === "Transactions") iconName = "receipt-long";
-          else if (route.name === "Report") iconName = "bar-chart";
-          else if (route.name === "Profile") iconName = "person";
+          if (route.name === "Trang chủ") iconName = "home";
+          else if (route.name === "Giao dịch") iconName = "receipt-long";
+          else if (route.name === "Báo cáo") iconName = "bar-chart";
+          else if (route.name === "Hồ sơ") iconName = "person";
 
           return <MaterialIcons name={iconName as any} size={28} color={color} />;
         },
@@ -68,12 +68,20 @@ function MainTabs() {
           borderTopWidth: 1,
           borderTopColor: theme.border,
         },
+        tabBarLabelStyle: {
+          fontSize: 12,
+          fontWeight: '600',
+          marginTop: 4,
+        },
+        tabBarIconStyle: {
+          marginTop: 4, 
+        }
       })}
     >
-      <Tab.Screen name="Home" component={Home} />
-      <Tab.Screen name="Transactions" component={TransactionList} />
-      <Tab.Screen name="Report" component={Report} />
-      <Tab.Screen name="Profile" component={Profile} />
+      <Tab.Screen name="Trang chủ" component={Home} />
+      <Tab.Screen name="Giao dịch" component={TransactionList} />
+      <Tab.Screen name="Báo cáo" component={Report} />
+      <Tab.Screen name="Hồ sơ" component={Profile} />
     </Tab.Navigator>
   );
 }
