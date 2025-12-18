@@ -15,6 +15,7 @@ import {
 } from "../../../services/transaction.service";
 import { listenCategories } from "../../../services/category.service";
 import type { Category } from "../../../type/types";
+import { useNavigation } from "@react-navigation/native";
 
 /* ================= TYPES ================= */
 
@@ -49,7 +50,7 @@ const StatisticsScreen: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filter, setFilter] = useState<FilterType>("7days");
   const [rawTransactions, setRawTransactions] = useState<DbTransaction[]>([]);
-  
+  const navigation = useNavigation<any>();
   /* ================= LOAD DATA ================= */
   useEffect(() => {
     const unsub = listenCategories(setCategories);
@@ -241,13 +242,18 @@ const StatisticsScreen: React.FC = () => {
             const isIncome = tx.type === "income";
 
             return (
-              <View
-                key={tx.id}
-                style={[
-                  styles.card,
-                  { backgroundColor: isDarkMode ? theme.cardBackground : '#FFFFFF' },
-                ]}
-              >
+              <TouchableOpacity
+  key={tx.id}
+  style={[
+    styles.card,
+    { backgroundColor: isDarkMode ? theme.cardBackground : '#FFFFFF' },
+  ]}
+  activeOpacity={0.7}
+  onPress={() =>
+    navigation.navigate("UpdateTransaction", { id: tx.id })
+  }
+>
+
                 {/* ICON */}
                 <View
                   style={[
@@ -315,7 +321,7 @@ const StatisticsScreen: React.FC = () => {
                     </Text>
                   </View>
                 </View>
-              </View>
+              </TouchableOpacity>
             );
           })
         )}
