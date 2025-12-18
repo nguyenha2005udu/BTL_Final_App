@@ -13,6 +13,7 @@ import {
 import { RouteProp } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { MaterialIcons } from "@expo/vector-icons";
+import { useTheme } from "../../../context/ThemeContext";
 
 import { SavingGoal } from "../../../type/types";
 import {
@@ -39,6 +40,7 @@ export default function GoalDetail({
   navigation: GoalDetailNavProp;
 }) {
   const { id } = route.params;
+  
 
   const [goal, setGoal] = useState<SavingGoal | null>(null);
   const [newAmount, setNewAmount] = useState("");
