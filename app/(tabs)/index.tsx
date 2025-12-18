@@ -21,6 +21,7 @@ import Profile from "../presentation/screens/Profile/ProfileScreen";
 import GoalList from "../presentation/screens/Goals/SavingGoalsScreen";
 import GoalDetail from "../presentation/screens/Goals/GoalDetail";
 import AddGoal from "../presentation/screens/Goals/AddGoals";
+import EditGoal from "../presentation/screens/Goals/EditGoal";
 
 import AddTransaction from "../presentation/screens/Home/AddTransactionScreen";
 import UpdateTransactionScreen from "../presentation/screens/Home/UpdateTransactionScreen";
@@ -105,6 +106,7 @@ function AppNavigator() {
 
         <Stack.Screen name="GoalList" component={GoalList} />
         <Stack.Screen name="GoalDetail" component={GoalDetail} />
+        <Stack.Screen name="EditGoal" component={EditGoal} />
 
         <Stack.Screen name="AddGoals" component={AddGoal} />
         <Stack.Screen name="AddTransaction" component={AddTransaction} />

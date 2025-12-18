@@ -7,6 +7,7 @@ export type RootStackParamList = {
   GoalList: undefined;
   GoalDetail: { id: string };   // 👈 goal detail có id
   AddGoals: undefined;
+  EditGoal: { id: string };
 
   AddTransaction: undefined;
   AddCategory: undefined;

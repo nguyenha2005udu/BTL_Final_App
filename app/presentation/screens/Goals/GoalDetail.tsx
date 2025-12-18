@@ -1,30 +1,30 @@
-import React, { useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
-  Alert,
-  ScrollView,
-  KeyboardAvoidingView,
-  Platform,
-} from "react-native";
+import { MaterialIcons } from "@expo/vector-icons";
 import { RouteProp } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { MaterialIcons } from "@expo/vector-icons";
-import { useTheme } from "../../../context/ThemeContext";
+import React, { useEffect, useState } from "react";
+import {
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
-import { SavingGoal } from "../../../type/types";
+import { RootStackParamList } from "../../../RootNavigator";
+import { auth } from "../../../services/firebase/firebaseConfig";
 import {
   getGoalDetail,
   updateSavingGoal,
 } from "../../../services/savingGoals.service";
-import { auth } from "../../../services/firebase/firebaseConfig";
+import { SavingGoal } from "../../../type/types";
+import { useFocusEffect } from "@react-navigation/native";
+import { useCallback } from "react";
 
-type RootStackParamList = {
-  GoalDetail: { id: string };
-};
+
 
 type GoalDetailRouteProp = RouteProp<RootStackParamList, "GoalDetail">;
 type GoalDetailNavProp = StackNavigationProp<
@@ -45,9 +45,11 @@ export default function GoalDetail({
   const [goal, setGoal] = useState<SavingGoal | null>(null);
   const [newAmount, setNewAmount] = useState("");
 
-  useEffect(() => {
+  useFocusEffect(
+    useCallback(() => {
     loadGoal();
-  }, []);
+  }, [])
+  );
 
   const loadGoal = async () => {
     const user = auth.currentUser;
@@ -111,15 +113,23 @@ export default function GoalDetail({
       >
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity
-            onPress={() => navigation.goBack()}
-            style={styles.backButton}
-          >
-            <MaterialIcons name="arrow-back" size={24} color="#1F2937" />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Chi tiết mục tiêu</Text>
-          <View style={{ width: 40 }} />
-        </View>
+  <TouchableOpacity
+    onPress={() => navigation.goBack()}
+    style={styles.backButton}
+  >
+    <MaterialIcons name="arrow-back" size={24} color="#1F2937" />
+  </TouchableOpacity>
+
+  <Text style={styles.headerTitle}>Chi tiết mục tiêu</Text>
+
+  <TouchableOpacity
+    onPress={() => navigation.navigate("EditGoal", { id: goal.id })}
+    style={styles.backButton}
+  >
+    <MaterialIcons name="edit" size={22} color="#4C6EF5" />
+  </TouchableOpacity>
+</View>
+
 
         {/* Main Content */}
         <View style={styles.content}>
