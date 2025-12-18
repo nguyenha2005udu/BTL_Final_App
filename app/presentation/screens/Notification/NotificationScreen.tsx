@@ -68,7 +68,13 @@ const NotificationsScreen: React.FC = () => {
   React.useEffect(() => {
     const unsub = listenAppNotifications(
       (n) => {
-        setItems((prev) => [n, ...prev].slice(0, 80));
+        setItems((prev) => {
+          // Thêm notification mới vào đầu và sắp xếp theo thời gian mới nhất
+          const updated = [n, ...prev];
+          return updated
+            .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+            .slice(0, 80);
+        });
       },
       (err) => console.log("listenAppNotifications error", err)
     );
@@ -77,7 +83,9 @@ const NotificationsScreen: React.FC = () => {
   }, []);
 
   const visible = React.useMemo(() => {
-    return filter === "unread" ? items.filter((i) => !i.read) : items;
+    const filtered = filter === "unread" ? items.filter((i) => !i.read) : items;
+    // Đảm bảo sắp xếp theo thời gian mới nhất
+    return filtered.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
   }, [items, filter]);
 
   const sections = React.useMemo(() => buildSections(visible), [visible]);
@@ -92,12 +100,13 @@ const NotificationsScreen: React.FC = () => {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: isDarkMode ? theme.background : '#ffffff' }]}>
-      <View style={[styles.header, { backgroundColor: theme.headerBackground, borderBottomColor: theme.border }]}>
+    <View style={[styles.container, { backgroundColor: isDarkMode ? theme.background : '#FFFFFF' }]}>
+      <View style={[styles.header, { backgroundColor: isDarkMode ? theme.headerBackground : '#FFFFFF', borderBottomColor: isDarkMode ? theme.border : '#F1F5F9' }]}>
         <View style={styles.headerTop}>
           <TouchableOpacity
             onPress={() => navigation.goBack()}
             style={styles.iconButton}
+            activeOpacity={0.7}
           >
             <MaterialIcons
               name="arrow-back"
@@ -110,7 +119,11 @@ const NotificationsScreen: React.FC = () => {
             Thông báo
           </Text>
 
-          <TouchableOpacity style={styles.iconButton} onPress={markAllRead}>
+          <TouchableOpacity 
+            style={styles.iconButton} 
+            onPress={markAllRead}
+            activeOpacity={0.7}
+          >
             <MaterialIcons
               name="mark-chat-read"
               size={24}
@@ -126,12 +139,12 @@ const NotificationsScreen: React.FC = () => {
               filter === "all"
                 ? styles.filterButtonActive
                 : {
-                    backgroundColor: theme.cardBackground,
-                    borderColor: theme.border,
+                    backgroundColor: isDarkMode ? theme.cardBackground : '#FFFFFF',
+                    borderColor: isDarkMode ? theme.border : '#E5E7EB',
                   },
             ]}
             onPress={() => setFilter('all')}
-            activeOpacity={0.85}
+            activeOpacity={0.7}
           >
             <Text style={filter === 'all' ? styles.filterTextActive : [styles.filterText, { color: theme.textSecondary }]}>
               Tất cả
@@ -143,33 +156,13 @@ const NotificationsScreen: React.FC = () => {
               styles.filterButton,
               filter === 'unread'
                 ? styles.filterButtonActive
-                : { backgroundColor: theme.cardBackground, borderColor: theme.border },
-            ]}
-            onPress={() => setFilter('unread')}
-            activeOpacity={0.85}
-          >
-            <Text
-              style={
-                filter === "all"
-                  ? styles.filterTextActive
-                  : [styles.filterText, { color: theme.textSecondary }]
-              }
-            >
-              Tất cả
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[
-              styles.filterButton,
-              filter === "unread"
-                ? styles.filterButtonActive
-                : {
-                    backgroundColor: theme.cardBackground,
-                    borderColor: theme.border,
+                : { 
+                    backgroundColor: isDarkMode ? theme.cardBackground : '#FFFFFF', 
+                    borderColor: isDarkMode ? theme.border : '#E5E7EB' 
                   },
             ]}
-            onPress={() => setFilter("unread")}
-            activeOpacity={0.85}
+            onPress={() => setFilter('unread')}
+            activeOpacity={0.7}
           >
             <Text
               style={
@@ -184,12 +177,18 @@ const NotificationsScreen: React.FC = () => {
         </View>
       </View>
 
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView 
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+      >
         {visible.length === 0 ? (
-          <View style={[styles.emptyWrap, { borderColor: theme.border }]}>
+          <View style={[styles.emptyWrap, { 
+            backgroundColor: isDarkMode ? theme.cardBackground : '#F9FAFB',
+            borderColor: isDarkMode ? theme.border : '#E5E7EB' 
+          }]}>
             <MaterialIcons
               name="notifications-none"
-              size={28}
+              size={48}
               color={theme.textSecondary}
             />
             <Text style={[styles.emptyTitle, { color: theme.textPrimary }]}>
@@ -208,8 +207,8 @@ const NotificationsScreen: React.FC = () => {
                   const cardBg = !item.read
                     ? isDarkMode
                       ? "#1e3a5f"
-                      : "#eff6ff"
-                    : theme.cardBackground;
+                      : "#EFF6FF"
+                    : isDarkMode ? theme.cardBackground : '#FFFFFF';
 
                   const timeColor = item.read ? theme.textSecondary : "#3c83f6";
                   const iconBg = isDarkMode
@@ -219,11 +218,14 @@ const NotificationsScreen: React.FC = () => {
                   return (
                     <TouchableOpacity
                       key={item.id}
-                      activeOpacity={0.8}
+                      activeOpacity={0.7}
                       onPress={() => onPressNotif(item.id)}
                       style={[
                         styles.notificationCard,
-                        { backgroundColor: cardBg },
+                        { 
+                          backgroundColor: cardBg,
+                          borderColor: isDarkMode ? theme.border : '#F1F5F9'
+                        },
                       ]}
                     >
                       <View
@@ -276,73 +278,83 @@ const NotificationsScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#ffffff",
+    backgroundColor: "#FFFFFF",
   },
   header: {
-    backgroundColor: "rgba(245, 247, 248, 0.9)",
-    padding: 16,
-    paddingTop: 8,
+    backgroundColor: "#FFFFFF",
+    padding: 20,
+    paddingTop: 12,
     borderBottomWidth: 1,
-    borderBottomColor: "#e5e7eb",
+    borderBottomColor: "#F1F5F9",
   },
   headerTop: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 16,
-    height: 40,
+    height: 44,
   },
   iconButton: {
-    width: 40,
-    height: 40,
+    width: 44,
+    height: 44,
     alignItems: "center",
     justifyContent: "center",
-    borderRadius: 20,
+    borderRadius: 22,
   },
   headerTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
+    fontSize: 19,
+    fontWeight: "700",
     color: "#111418",
+    letterSpacing: -0.3,
   },
   filterRow: {
     flexDirection: "row",
-    gap: 8,
+    gap: 12,
   },
   filterButton: {
     flex: 1,
-    paddingVertical: 8,
+    paddingVertical: 10,
     paddingHorizontal: 16,
-    borderRadius: 20,
-    backgroundColor: "white",
+    borderRadius: 12,
+    backgroundColor: "#FFFFFF",
     alignItems: "center",
-    borderWidth: 1,
-    borderColor: "#e5e7eb",
+    borderWidth: 1.5,
+    borderColor: "#E5E7EB",
+    shadowColor: '#000',
+    shadowOpacity: 0.03,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 1,
   },
   filterButtonActive: {
     backgroundColor: "#3c83f6",
     borderColor: "#3c83f6",
+    shadowColor: '#3c83f6',
+    shadowOpacity: 0.2,
   },
   filterText: {
     fontSize: 14,
-    fontWeight: "600",
+    fontWeight: "700",
     color: "#6b7280",
   },
   filterTextActive: {
     fontSize: 14,
-    fontWeight: "600",
-    color: "white",
+    fontWeight: "700",
+    color: "#FFFFFF",
   },
   content: {
-    padding: 16,
+    padding: 20,
     gap: 24,
+    paddingBottom: 100,
   },
   section: {
     gap: 12,
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: "bold",
+    fontWeight: "700",
     color: "#111418",
+    letterSpacing: -0.3,
   },
   cardList: {
     gap: 12,
@@ -351,13 +363,20 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "flex-start",
     padding: 16,
-    borderRadius: 12,
-    gap: 16,
+    borderRadius: 16,
+    gap: 14,
+    shadowColor: '#000',
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: '#F1F5F9',
   },
   iconBox: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -365,19 +384,20 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   notifTitle: {
-    fontWeight: "bold",
+    fontWeight: "700",
     fontSize: 16,
     color: "#111418",
-    marginBottom: 2,
+    marginBottom: 4,
   },
   notifBody: {
     fontSize: 14,
     color: "#4b5563",
-    marginBottom: 4,
+    marginBottom: 6,
+    lineHeight: 20,
   },
   notifTime: {
     fontSize: 12,
-    fontWeight: "500",
+    fontWeight: "600",
     color: "#3c83f6",
   },
   dot: {
@@ -388,20 +408,22 @@ const styles = StyleSheet.create({
     marginTop: 6,
   },
   emptyWrap: {
-    padding: 16,
-    borderRadius: 12,
+    padding: 40,
+    borderRadius: 16,
     borderWidth: 1,
     alignItems: "center",
-    gap: 6,
+    gap: 12,
+    marginTop: 20,
   },
   emptyTitle: {
     fontSize: 16,
     fontWeight: "700",
   },
   emptyDesc: {
-    fontSize: 13,
+    fontSize: 14,
     textAlign: "center",
-    lineHeight: 18,
+    lineHeight: 20,
+    fontWeight: "500",
   },
 });
 
