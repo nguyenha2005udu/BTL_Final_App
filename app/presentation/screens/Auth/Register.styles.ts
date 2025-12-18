@@ -29,9 +29,10 @@ const styles = StyleSheet.create({
     color: '#111827',
   },
   content: {
-    padding: 24,
-    paddingTop: 20,
-  },
+    flex: 1,
+    paddingHorizontal: 24,
+    paddingTop: 40,
+},
   title: {
     fontSize: 28,
     fontWeight: '700',
@@ -52,10 +53,11 @@ const styles = StyleSheet.create({
     gap: 20,
   },
   field: {
-    gap: 8,
+    marginBottom: 20,
   },
 
   label: {
+    marginBottom: 8,
     fontSize: 14,
     fontWeight: '600',
     color: '#374151',
@@ -63,14 +65,11 @@ const styles = StyleSheet.create({
 
   inputWrapper: {
     position: 'relative',
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#F9FAFB',
+    justifyContent: 'center',
+    borderRadius: 12,
     borderWidth: 1.5,
     borderColor: '#E5E7EB',
-    borderRadius: 12,
-    height: 52,
-    paddingHorizontal: 14,
+    backgroundColor: '#F9FAFB',
     shadowColor: '#000',
     shadowOpacity: 0.03,
     shadowRadius: 4,
@@ -79,18 +78,24 @@ const styles = StyleSheet.create({
   },
 
   inputIcon: {
-    marginRight: 10,
+    position: 'absolute',
+    left: 14,
+    top: 14,
   },
 
   input: {
-    flex: 1,
+    paddingLeft: 44,
+    paddingRight: 44,
+    paddingVertical: 14,
     fontSize: 15,
     color: '#111827',
     fontWeight: '500',
   },
 
   passwordToggle: {
-    marginLeft: 8,
+    position: 'absolute',
+    right: 12,
+    top: 12,
     padding: 4,
   },
 
@@ -120,17 +125,25 @@ const styles = StyleSheet.create({
     color: PRIMARY,
   },
   submitButton: {
-    backgroundColor: PRIMARY,
-    height: 56,
+    marginTop: 12,
     borderRadius: 12,
+    backgroundColor: PRIMARY,
+    paddingVertical: 16,
     alignItems: 'center',
-    justifyContent: 'center',
     shadowColor: PRIMARY,
     shadowOpacity: 0.3,
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 4 },
     elevation: 4,
   },
+
+  scrollContent: {
+    paddingHorizontal: 24,
+    paddingTop: 20,
+    paddingBottom: 160, // 🔥 QUAN TRỌNG: tránh footer che input
+  },
+
+
   submitButtonText: {
     color: '#FFFFFF',
     fontSize: 16,

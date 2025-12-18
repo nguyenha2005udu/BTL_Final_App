@@ -6,8 +6,10 @@ import {
   TextInput,
   TouchableOpacity,
   ScrollView,
+  KeyboardAvoidingView,
   ActivityIndicator,
   Alert,
+  Platform,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -68,156 +70,176 @@ const Register: React.FC = () => {
   };
 
   return (
-    <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          style={styles.backButton}
-        >
-          <MaterialIcons name="arrow-back" size={24} color="#1f2937" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Đăng ký</Text>
-        <View style={{ width: 40 }} />
-      </View>
-
-      {/* Content */}
-      <ScrollView contentContainerStyle={styles.content}>
-        <Text style={styles.title}>Tạo tài khoản mới</Text>
-        <Text style={styles.subtitle}>
-          Vui lòng nhập thông tin của bạn để đăng ký.
-        </Text>
-
-        {/* Form */}
-        <View style={styles.form}>
-          {/* Họ và Tên */}
-          <View style={styles.field}>
-            <Text style={styles.label}>Họ và Tên</Text>
-            <View style={styles.inputWrapper}>
-              <TextInput
-                style={styles.input}
-                placeholder="Nhập họ và tên của bạn"
-                placeholderTextColor="#9CA3AF"
-                value={fullName}
-                onChangeText={setFullName}
-              />
-            </View>
-          </View>
-
-          {/* Email */}
-          <View style={styles.field}>
-            <Text style={styles.label}>Email</Text>
-            <View style={styles.inputWrapper}>
-              <MaterialIcons
-                name="mail-outline"
-                size={20}
-                color="#9CA3AF"
-                style={styles.inputIcon}
-              />
-              <TextInput
-                style={styles.input}
-                placeholder="Nhập địa chỉ email"
-                placeholderTextColor="#9CA3AF"
-                keyboardType="email-address"
-                autoCapitalize="none"
-                value={email}
-                onChangeText={setEmail}
-              />
-            </View>
-          </View>
-
-          {/* Mật khẩu */}
-          <View style={styles.field}>
-            <Text style={styles.label}>Mật khẩu</Text>
-            <View style={styles.inputWrapper}>
-              <MaterialIcons
-                name="lock-outline"
-                size={20}
-                color="#9CA3AF"
-                style={styles.inputIcon}
-              />
-              <TextInput
-                style={styles.input}
-                placeholder="Nhập mật khẩu"
-                placeholderTextColor="#9CA3AF"
-                secureTextEntry={!passwordVisible}
-                value={password}
-                onChangeText={setPassword}
-              />
-              <TouchableOpacity
-                style={styles.passwordToggle}
-                onPress={() => setPasswordVisible(prev => !prev)}
-                activeOpacity={0.7}
-              >
-                <MaterialIcons
-                  name={passwordVisible ? 'visibility' : 'visibility-off'}
-                  size={20}
-                  color="#6B7280"
-                />
-              </TouchableOpacity>
-            </View>
-            <Text style={styles.helperText}>
-              Mật khẩu phải có ít nhất 8 ký tự
-            </Text>
-          </View>
-
-          {/* Xác nhận mật khẩu */}
-          <View style={styles.field}>
-            <Text style={styles.label}>Xác nhận Mật khẩu</Text>
-            <View style={styles.inputWrapper}>
-              <MaterialIcons
-                name="lock-outline"
-                size={20}
-                color="#9CA3AF"
-                style={styles.inputIcon}
-              />
-              <TextInput
-                style={styles.input}
-                placeholder="Nhập lại mật khẩu"
-                placeholderTextColor="#9CA3AF"
-                secureTextEntry={!confirmPasswordVisible}
-                value={confirmPassword}
-                onChangeText={setConfirmPassword}
-              />
-              <TouchableOpacity
-                style={styles.passwordToggle}
-                onPress={() => setConfirmPasswordVisible(prev => !prev)}
-                activeOpacity={0.7}
-              >
-                <MaterialIcons
-                  name={confirmPasswordVisible ? 'visibility' : 'visibility-off'}
-                  size={20}
-                  color="#6B7280"
-                />
-              </TouchableOpacity>
-            </View>
-          </View>
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
+      <View style={styles.container}>
+        {/* Header */}
+        <View style={styles.header}>
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            style={styles.backButton}
+          >
+            <MaterialIcons name="arrow-back" size={24} color="#1f2937" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Đăng ký</Text>
+          <View style={{ width: 40 }} />
         </View>
-      </ScrollView>
 
-      {/* Footer */}
-      <View style={styles.footer}>
-        <Text style={styles.termsText}>
-          Bằng cách đăng ký, bạn đồng ý với{' '}
-          <Text style={styles.linkText}>
-            Điều khoản &amp; Chính sách bảo mật
-          </Text>
-          .
-        </Text>
-
-        <TouchableOpacity
-          style={styles.submitButton}
-          onPress={handleRegister}
-          disabled={loading}
+        {/* Scrollable Content */}
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
         >
-          {loading ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <Text style={styles.submitButtonText}>Đăng ký</Text>
-          )}
-        </TouchableOpacity>
+          <Text style={styles.title}>Tạo tài khoản mới</Text>
+          <Text style={styles.subtitle}>
+            Vui lòng nhập thông tin của bạn để đăng ký.
+          </Text>
+
+          {/* Form */}
+          <View style={styles.form}>
+            {/* Họ và Tên */}
+            <View style={styles.field}>
+              <Text style={styles.label}>Họ và Tên</Text>
+              <View style={styles.inputWrapper}>
+                <MaterialIcons
+                  name="person"
+                  size={20}
+                  color="#9CA3AF"
+                  style={styles.inputIcon}
+                />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Nhập họ và tên của bạn"
+                  placeholderTextColor="#9CA3AF"
+                  value={fullName}
+                  onChangeText={setFullName}
+                  autoCapitalize="words"
+                />
+              </View>
+            </View>
+
+            {/* Email */}
+            <View style={styles.field}>
+              <Text style={styles.label}>Email</Text>
+              <View style={styles.inputWrapper}>
+                <MaterialIcons
+                  name="mail-outline"
+                  size={20}
+                  color="#9CA3AF"
+                  style={styles.inputIcon}
+                />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Nhập địa chỉ email"
+                  placeholderTextColor="#9CA3AF"
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  value={email}
+                  onChangeText={setEmail}
+                />
+              </View>
+            </View>
+
+            {/* Mật khẩu */}
+            <View style={styles.field}>
+              <Text style={styles.label}>Mật khẩu</Text>
+              <View style={styles.inputWrapper}>
+                <MaterialIcons
+                  name="lock-outline"
+                  size={20}
+                  color="#9CA3AF"
+                  style={styles.inputIcon}
+                />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Nhập mật khẩu"
+                  placeholderTextColor="#9CA3AF"
+                  secureTextEntry={!passwordVisible}
+                  value={password}
+                  onChangeText={setPassword}
+                />
+                <TouchableOpacity
+                  style={styles.passwordToggle}
+                  onPress={() => setPasswordVisible(v => !v)}
+                >
+                  <MaterialIcons
+                    name={passwordVisible ? 'visibility' : 'visibility-off'}
+                    size={20}
+                    color="#6B7280"
+                  />
+                </TouchableOpacity>
+              </View>
+              <Text style={styles.helperText}>
+                Mật khẩu phải có ít nhất 8 ký tự
+              </Text>
+            </View>
+
+            {/* Xác nhận mật khẩu */}
+            <View style={styles.field}>
+              <Text style={styles.label}>Xác nhận mật khẩu</Text>
+              <View style={styles.inputWrapper}>
+                <MaterialIcons
+                  name="lock-outline"
+                  size={20}
+                  color="#9CA3AF"
+                  style={styles.inputIcon}
+                />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Nhập lại mật khẩu"
+                  placeholderTextColor="#9CA3AF"
+                  secureTextEntry={!confirmPasswordVisible}
+                  value={confirmPassword}
+                  onChangeText={setConfirmPassword}
+                />
+                <TouchableOpacity
+                  style={styles.passwordToggle}
+                  onPress={() =>
+                    setConfirmPasswordVisible(v => !v)
+                  }
+                >
+                  <MaterialIcons
+                    name={
+                      confirmPasswordVisible
+                        ? 'visibility'
+                        : 'visibility-off'
+                    }
+                    size={20}
+                    color="#6B7280"
+                  />
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </ScrollView>
+
+        {/* Footer */}
+        <View style={styles.footer}>
+          <Text style={styles.termsText}>
+            Bằng cách đăng ký, bạn đồng ý với{' '}
+            <Text style={styles.linkText}>
+              Điều khoản & Chính sách bảo mật
+            </Text>
+            .
+          </Text>
+
+          <TouchableOpacity
+            style={styles.submitButton}
+            onPress={handleRegister}
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.submitButtonText}>Đăng ký</Text>
+            )}
+          </TouchableOpacity>
+        </View>
       </View>
-    </View>
+    </KeyboardAvoidingView>
   );
 };
 

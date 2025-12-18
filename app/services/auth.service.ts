@@ -1,6 +1,5 @@
 // services/auth.service.ts
 import { emailSignIn, emailSignUp, logout } from './firebase/authProviders';
-import { googleSignIn, linkGoogleToCurrentUser } from './firebase/authProviders';
 import { auth, db } from './firebase/firebaseConfig';
 import {
   doc,
@@ -156,17 +155,3 @@ const upsertUserProfileFromAuth = async (user: User): Promise<void> => {
   }
 };
 
-
-// ✅ Login bằng Google
-export const loginWithGoogle = async (): Promise<User> => {
-  const cred = await googleSignIn();
-  await upsertUserProfileFromAuth(cred.user);
-  return cred.user;
-};
-
-// ✅ “Kết nối” Google vào tài khoản hiện tại (đang login bằng email/password)
-export const connectGoogleToCurrentAccount = async (): Promise<User> => {
-  const cred = await linkGoogleToCurrentUser();
-  await upsertUserProfileFromAuth(cred.user);
-  return cred.user;
-};

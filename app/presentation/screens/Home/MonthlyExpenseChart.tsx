@@ -193,6 +193,18 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 2,
   },
+  reportCard: {
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 16,
+    // subtle shadow / card style
+    shadowColor: '#000',
+    shadowOpacity: 0.06,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 3 },
+    elevation: 3,
+    // default background is provided by component via inline style
+  },
   reportTitle: {
     fontSize: 20,
     fontWeight: "700",
@@ -218,7 +230,7 @@ const styles = StyleSheet.create({
     height: 120,
     alignItems: "flex-end",
     justifyContent: "space-between",
-    marginTop: 20,
+    marginTop: 80,
     gap: 8,
   },
   barWrapper: {
