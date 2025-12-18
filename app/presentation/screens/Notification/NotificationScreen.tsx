@@ -92,21 +92,8 @@ const NotificationsScreen: React.FC = () => {
   };
 
   return (
-    <View
-      style={[
-        styles.container,
-        { backgroundColor: isDarkMode ? theme.background : "#ffffff" },
-      ]}
-    >
-      <View
-        style={[
-          styles.header,
-          {
-            backgroundColor: theme.headerBackground,
-            borderBottomColor: theme.border,
-          },
-        ]}
-      >
+    <View style={[styles.container, { backgroundColor: isDarkMode ? theme.background : '#ffffff' }]}>
+      <View style={[styles.header, { backgroundColor: theme.headerBackground, borderBottomColor: theme.border }]}>
         <View style={styles.headerTop}>
           <TouchableOpacity
             onPress={() => navigation.goBack()}
@@ -143,7 +130,22 @@ const NotificationsScreen: React.FC = () => {
                     borderColor: theme.border,
                   },
             ]}
-            onPress={() => setFilter("all")}
+            onPress={() => setFilter('all')}
+            activeOpacity={0.85}
+          >
+            <Text style={filter === 'all' ? styles.filterTextActive : [styles.filterText, { color: theme.textSecondary }]}>
+              Tất cả
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[
+              styles.filterButton,
+              filter === 'unread'
+                ? styles.filterButtonActive
+                : { backgroundColor: theme.cardBackground, borderColor: theme.border },
+            ]}
+            onPress={() => setFilter('unread')}
             activeOpacity={0.85}
           >
             <Text
@@ -200,9 +202,7 @@ const NotificationsScreen: React.FC = () => {
         ) : (
           sections.map((section) => (
             <View key={section.title} style={styles.section}>
-              <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>
-                {section.title}
-              </Text>
+              <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>{section.title}</Text>
               <View style={styles.cardList}>
                 {section.data.map((item) => {
                   const cardBg = !item.read
