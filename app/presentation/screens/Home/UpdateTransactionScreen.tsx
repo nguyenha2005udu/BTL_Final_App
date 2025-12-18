@@ -13,7 +13,6 @@ import {
 } from "react-native";
 import { useTheme } from "../../../context/ThemeContext";
 
-import { Timestamp } from "firebase/firestore";
 import { listenCategories } from "../../../services/category.service";
 import {
   deleteTransaction,
@@ -102,10 +101,7 @@ const UpdateTransactionScreen: React.FC = () => {
 
         setType(tx.type ?? "expense");
         setMountText(String(typeof tx.amount === "number" ? tx.amount : 0));
-<<<<<<< HEAD
-=======
         setTitle(tx.title ?? "");
->>>>>>> main
         setNote(tx.note ?? "");
         setSelectedCategoryId(tx.categoryId ?? "");
         setDate(tsToDate(tx.date));
