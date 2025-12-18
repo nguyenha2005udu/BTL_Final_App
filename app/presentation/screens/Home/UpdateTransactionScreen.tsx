@@ -136,15 +136,13 @@ const UpdateTransactionScreen: React.FC = () => {
 
     try {
       await updateTransaction(id, {
-  title: title.trim(),
-  categoryId: selectedCategoryId,
-  amount: mount,   // ✅ ĐÚNG FIELD
-  note: note ?? "",
-  type,
-  date,
-});
-
-
+      title: title.trim(),
+      categoryId: selectedCategoryId,
+      amount: mount,   // ✅ ĐÚNG FIELD
+      note: note ?? "",
+      type,
+      date,
+    });
       Alert.alert("Thành công", "Đã cập nhật giao dịch.");
       navigation.goBack();
     } catch (e: any) {

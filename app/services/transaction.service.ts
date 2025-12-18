@@ -8,8 +8,8 @@ import {
   orderBy,
   query,
   serverTimestamp,
-  updateDoc,
   Timestamp,
+  updateDoc,
 } from 'firebase/firestore';
 import { auth, db } from './firebase/firebaseConfig';
 

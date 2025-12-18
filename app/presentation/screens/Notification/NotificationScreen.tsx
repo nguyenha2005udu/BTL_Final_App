@@ -185,7 +185,7 @@ const NotificationsScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#f5f7f8',
   },
   header: {
     backgroundColor: 'rgba(245, 247, 248, 0.9)',
