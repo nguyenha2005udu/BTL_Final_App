@@ -1,34 +1,36 @@
-import { MaterialIcons } from "@expo/vector-icons";
-import { useNavigation, useRoute } from "@react-navigation/native";
 import React, { useEffect, useMemo, useState } from "react";
 import {
-  Alert,
-  Modal,
-  ScrollView,
-  StyleSheet,
+  View,
   Text,
   TextInput,
   TouchableOpacity,
-  View,
+  ScrollView,
+  StyleSheet,
+  Modal,
+  Alert,
+  Platform,
 } from "react-native";
+import { useNavigation, useRoute } from "@react-navigation/native";
+import { MaterialIcons } from "@expo/vector-icons";
 import { useTheme } from "../../../context/ThemeContext";
+import DateTimePicker from '@react-native-community/datetimepicker';
 
+import type { Category } from "../../../type/types";
 import { listenCategories } from "../../../services/category.service";
 import {
-  deleteTransaction,
-  getTransactionById,
   TransactionType,
   updateTransaction,
+  deleteTransaction,
+  getTransactionById,
 } from "../../../services/transaction.service";
-import type { Category } from "../../../type/types";
 
 type RouteParams = { id: string };
 
-const formatDateYYYYMMDD = (d: Date) => {
+const formatDateDDMMYYYY = (d: Date) => {
+  const dd = String(d.getDate()).padStart(2, '0');
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
   const yyyy = d.getFullYear();
-  const mm = String(d.getMonth() + 1).padStart(2, "0");
-  const dd = String(d.getDate()).padStart(2, "0");
-  return `${yyyy}-${mm}-${dd}`;
+  return `${dd}/${mm}/${yyyy}`;
 };
 
 const tsToDate = (ts: any): Date => {
@@ -46,17 +48,16 @@ const UpdateTransactionScreen: React.FC = () => {
 
   const [loading, setLoading] = useState(true);
   const [title, setTitle] = useState("");
-
   const [type, setType] = useState<TransactionType>("expense");
   const [mountText, setMountText] = useState("");
   const [note, setNote] = useState("");
   const [date, setDate] = useState<Date>(new Date());
+  const [showDatePicker, setShowDatePicker] = useState(false);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>("");
 
   const [categories, setCategories] = useState<Category[]>([]);
   const [categoryModalOpen, setCategoryModalOpen] = useState(false);
 
-  // Lọc danh mục theo loại thu/chi
   const filteredCategories = useMemo(
     () => categories.filter((c: any) => (c.type ? c.type === type : true)),
     [categories, type]
@@ -67,16 +68,12 @@ const UpdateTransactionScreen: React.FC = () => {
     [filteredCategories, selectedCategoryId]
   );
 
-  // Khi list category hoặc type thay đổi, đảm bảo selectedCategoryId còn hợp lệ
   useEffect(() => {
     if (!filteredCategories.length) {
       setSelectedCategoryId("");
       return;
     }
-    if (
-      !selectedCategoryId ||
-      !filteredCategories.some((c) => c.id === selectedCategoryId)
-    ) {
+    if (!selectedCategoryId || !filteredCategories.some((c) => c.id === selectedCategoryId)) {
       setSelectedCategoryId(filteredCategories[0].id);
     }
   }, [filteredCategories, selectedCategoryId]);
@@ -118,31 +115,28 @@ const UpdateTransactionScreen: React.FC = () => {
   }, [id, navigation]);
 
   const onUpdate = async () => {
-    const mount = Number(mountText);
+    const amount = Number(mountText);
 
-    if (!selectedCategoryId) {
-      Alert.alert(
-        "Thiếu danh mục",
-        `Vui lòng chọn danh mục ${
-          type === "expense" ? "chi tiêu" : "thu nhập"
-        }.`
-      );
+    if (!title.trim()) {
+      Alert.alert('Thiếu thông tin', 'Vui lòng nhập tên giao dịch.');
       return;
     }
-    if (!mountText || Number.isNaN(mount) || mount <= 0) {
+
+    if (!mountText || Number.isNaN(amount) || amount <= 0) {
       Alert.alert("Số tiền không hợp lệ", "Vui lòng nhập số tiền > 0.");
       return;
     }
 
     try {
       await updateTransaction(id, {
-      title: title.trim(),
-      categoryId: selectedCategoryId,
-      amount: mount,   // ✅ ĐÚNG FIELD
-      note: note ?? "",
-      type,
-      date,
-    });
+        title: title.trim(),
+        categoryId: selectedCategoryId,
+        amount,
+        note: note ?? "",
+        type,
+        date,
+      });
+
       Alert.alert("Thành công", "Đã cập nhật giao dịch.");
       navigation.goBack();
     } catch (e: any) {
@@ -172,355 +166,399 @@ const UpdateTransactionScreen: React.FC = () => {
   };
 
   const hasCategoryForType = filteredCategories.length > 0;
-  const cardBg = isDarkMode ? theme.cardBackground : "#f8f9fa";
 
   return (
-    <View
-      style={[
-        styles.container,
-        { backgroundColor: isDarkMode ? theme.background : "#ffffff" },
-      ]}
-    >
-      <View
-        style={[
-          styles.header,
-          {
-            backgroundColor: theme.headerBackground,
-            borderBottomColor: theme.border,
-          },
-        ]}
-      >
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          style={styles.iconButton}
-        >
-          <MaterialIcons
-            name="arrow-back"
-            size={24}
-            color={theme.textPrimary}
-          />
+    <View style={[styles.container, { backgroundColor: isDarkMode ? theme.background : '#FFFFFF' }]}>
+      {/* HEADER */}
+      <View style={[styles.header, { 
+        backgroundColor: isDarkMode ? theme.headerBackground : '#FFFFFF',
+        borderBottomColor: isDarkMode ? theme.border : '#F1F5F9'
+      }]}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.iconButton}>
+          <MaterialIcons name="arrow-back" size={24} color={theme.textPrimary} />
         </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: theme.textPrimary }]}>
-          Sửa giao dịch
-        </Text>
+        <Text style={[styles.headerTitle, { color: theme.textPrimary }]}>Sửa giao dịch</Text>
         <View style={{ width: 40 }} />
       </View>
 
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView 
+        style={styles.scroll}
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+      >
         {loading ? (
-          <Text style={{ color: theme.textSecondary, padding: 16 }}>
-            Đang tải...
-          </Text>
+          <View style={styles.loadingContainer}>
+            <Text style={[styles.loadingText, { color: theme.textSecondary }]}>
+              Đang tải...
+            </Text>
+          </View>
         ) : (
           <>
-            {/* Toggle Thu / Chi */}
-            <View
-              style={[
-                styles.toggleContainer,
-                { backgroundColor: isDarkMode ? "#374151" : "#e5e7eb" },
-              ]}
-            >
+            {/* TOGGLE CHI TIÊU / THU NHẬP */}
+            <View style={[
+              styles.toggleContainer,
+              { backgroundColor: isDarkMode ? '#374151' : '#F3F4F6' }
+            ]}>
               <TouchableOpacity
                 style={[
                   styles.toggleButton,
-                  type === "expense" && [
+                  type === 'expense' && [
                     styles.toggleActive,
-                    { backgroundColor: theme.cardBackground },
+                    { 
+                      backgroundColor: isDarkMode ? theme.cardBackground : '#FFFFFF',
+                      shadowColor: isDarkMode ? 'transparent' : '#000',
+                    }
                   ],
                 ]}
-                onPress={() => setType("expense")}
+                onPress={() => setType('expense')}
+                activeOpacity={0.7}
               >
-                <Text
-                  style={[
-                    styles.toggleText,
-                    { color: theme.textSecondary },
-                    type === "expense" && styles.toggleTextActive,
-                  ]}
-                >
+                <MaterialIcons 
+                  name="trending-down" 
+                  size={20} 
+                  color={type === 'expense' ? '#EF4444' : theme.textSecondary}
+                  style={{ marginRight: 6 }}
+                />
+                <Text style={[
+                  styles.toggleText,
+                  { color: type === 'expense' ? '#EF4444' : theme.textSecondary }
+                ]}>
                   Chi tiêu
                 </Text>
               </TouchableOpacity>
+
               <TouchableOpacity
                 style={[
                   styles.toggleButton,
-                  type === "income" && [
+                  type === 'income' && [
                     styles.toggleActive,
-                    { backgroundColor: theme.cardBackground },
+                    { 
+                      backgroundColor: isDarkMode ? theme.cardBackground : '#FFFFFF',
+                      shadowColor: isDarkMode ? 'transparent' : '#000',
+                    }
                   ],
                 ]}
-                onPress={() => setType("income")}
+                onPress={() => setType('income')}
+                activeOpacity={0.7}
               >
-                <Text
-                  style={[
-                    styles.toggleText,
-                    { color: theme.textSecondary },
-                    type === "income" && styles.toggleTextActive,
-                  ]}
-                >
+                <MaterialIcons 
+                  name="trending-up" 
+                  size={20} 
+                  color={type === 'income' ? '#22C55E' : theme.textSecondary}
+                  style={{ marginRight: 6 }}
+                />
+                <Text style={[
+                  styles.toggleText,
+                  { color: type === 'income' ? '#22C55E' : theme.textSecondary }
+                ]}>
                   Thu nhập
                 </Text>
               </TouchableOpacity>
             </View>
-            {/* Tên giao dịch */}
-            <View style={styles.inputGroup}>
-              <Text style={[styles.label, { color: theme.textSecondary }]}>
-                Tên giao dịch
-              </Text>
-              <TextInput
-                value={title}
-                onChangeText={setTitle}
-                style={[
-                  styles.input,
-                  {
-                    backgroundColor: theme.cardBackground,
-                    borderColor: theme.border,
-                    color: theme.textPrimary,
-                  },
-                ]}
-                placeholder="VD: Đi tàu, Trà chanh..."
-                placeholderTextColor={theme.textSecondary}
-              />
-            </View>
 
+            {/* FORM */}
             <View style={styles.form}>
-              {/* Số tiền */}
+              {/* TÊN GIAO DỊCH */}
               <View style={styles.inputGroup}>
                 <Text style={[styles.label, { color: theme.textSecondary }]}>
-                  Số tiền
+                  Tên giao dịch <Text style={{ color: '#EF4444' }}>*</Text>
                 </Text>
-                <TextInput
-                  value={mountText}
-                  onChangeText={setMountText}
-                  style={[
-                    styles.input,
-                    {
-                      backgroundColor: theme.cardBackground,
-                      borderColor: theme.border,
-                      color: theme.textPrimary,
-                    },
-                  ]}
-                  placeholder="Nhập số tiền"
-                  placeholderTextColor={theme.textSecondary}
-                  keyboardType="numeric"
-                />
+                <View style={[
+                  styles.inputWrapper,
+                  { 
+                    backgroundColor: isDarkMode ? theme.cardBackground : '#F9FAFB',
+                    borderColor: isDarkMode ? theme.border : '#E5E7EB'
+                  }
+                ]}>
+                  <MaterialIcons 
+                    name="edit" 
+                    size={20} 
+                    color={theme.textSecondary}
+                    style={styles.inputIcon}
+                  />
+                  <TextInput
+                    value={title}
+                    onChangeText={setTitle}
+                    style={[styles.input, { color: theme.textPrimary }]}
+                    placeholder="VD: Lương tháng 12, Mua sắm..."
+                    placeholderTextColor={theme.textSecondary}
+                  />
+                </View>
               </View>
 
-              {/* Danh mục */}
+              {/* SỐ TIỀN */}
               <View style={styles.inputGroup}>
                 <Text style={[styles.label, { color: theme.textSecondary }]}>
-                  Danh mục
+                  Số tiền <Text style={{ color: '#EF4444' }}>*</Text>
+                </Text>
+                <View style={[
+                  styles.inputWrapper,
+                  { 
+                    backgroundColor: isDarkMode ? theme.cardBackground : '#F9FAFB',
+                    borderColor: isDarkMode ? theme.border : '#E5E7EB'
+                  }
+                ]}>
+                  <MaterialIcons 
+                    name="attach-money" 
+                    size={20} 
+                    color={theme.textSecondary}
+                    style={styles.inputIcon}
+                  />
+                  <TextInput
+                    value={mountText}
+                    onChangeText={setMountText}
+                    style={[styles.input, { color: theme.textPrimary }]}
+                    placeholder="0"
+                    placeholderTextColor={theme.textSecondary}
+                    keyboardType="numeric"
+                  />
+                  <Text style={[styles.currency, { color: theme.textSecondary }]}>₫</Text>
+                </View>
+              </View>
+
+              {/* DANH MỤC */}
+              <View style={styles.inputGroup}>
+                <Text style={[styles.label, { color: theme.textSecondary }]}>
+                  Danh mục <Text style={{ color: '#EF4444' }}>*</Text>
                 </Text>
                 <TouchableOpacity
+                  disabled={!hasCategoryForType}
                   style={[
                     styles.selectInput,
                     {
-                      backgroundColor: theme.cardBackground,
-                      borderColor: theme.border,
+                      backgroundColor: isDarkMode ? theme.cardBackground : '#F9FAFB',
+                      borderColor: isDarkMode ? theme.border : '#E5E7EB',
                       opacity: hasCategoryForType ? 1 : 0.6,
                     },
                   ]}
-                  onPress={() =>
-                    hasCategoryForType && setCategoryModalOpen(true)
-                  }
-                  disabled={!hasCategoryForType}
+                  onPress={() => hasCategoryForType && setCategoryModalOpen(true)}
+                  activeOpacity={0.7}
                 >
                   <View style={styles.selectContent}>
-                    <MaterialIcons
-                      name={(selectedCategory?.icon as any) || "category"}
-                      size={20}
-                      color={theme.textSecondary}
-                      style={styles.inputIcon}
-                    />
-                    <Text
-                      style={[styles.selectText, { color: theme.textPrimary }]}
-                    >
+                    <View style={[
+                      styles.categoryIconBox,
+                      { backgroundColor: type === 'income' ? '#DCFCE7' : '#FEE2E2' }
+                    ]}>
+                      <MaterialIcons
+                        name={(selectedCategory?.icon as any) || 'category'}
+                        size={20}
+                        color={type === 'income' ? '#22C55E' : '#EF4444'}
+                      />
+                    </View>
+                    <Text style={[styles.selectText, { color: theme.textPrimary }]}>
                       {selectedCategory?.name ||
                         (hasCategoryForType
-                          ? "Chọn danh mục"
-                          : type === "expense"
-                          ? "Chưa có danh mục chi tiêu"
-                          : "Chưa có danh mục thu nhập")}
+                          ? 'Chọn danh mục'
+                          : type === 'expense'
+                          ? 'Chưa có danh mục chi tiêu'
+                          : 'Chưa có danh mục thu nhập')}
                     </Text>
                   </View>
-                  <MaterialIcons
-                    name="expand-more"
-                    size={24}
-                    color={theme.textSecondary}
-                  />
+                  <MaterialIcons name="expand-more" size={24} color={theme.textSecondary} />
                 </TouchableOpacity>
               </View>
 
-              {/* Ngày */}
+              {/* NGÀY */}
               <View style={styles.inputGroup}>
-                <Text style={[styles.label, { color: theme.textSecondary }]}>
-                  Ngày
-                </Text>
+                <Text style={[styles.label, { color: theme.textSecondary }]}>Ngày</Text>
                 <TouchableOpacity
                   style={[
                     styles.selectInput,
-                    {
-                      backgroundColor: theme.cardBackground,
-                      borderColor: theme.border,
+                    { 
+                      backgroundColor: isDarkMode ? theme.cardBackground : '#F9FAFB',
+                      borderColor: isDarkMode ? theme.border : '#E5E7EB'
                     },
                   ]}
-                  onPress={() => setDate(new Date())} // tạm: bấm để set hôm nay
+                  onPress={() => setShowDatePicker(true)}
+                  activeOpacity={0.7}
                 >
                   <View style={styles.selectContent}>
-                    <MaterialIcons
-                      name="calendar-today"
-                      size={20}
-                      color={theme.textSecondary}
-                      style={styles.inputIcon}
-                    />
-                    <Text
-                      style={[styles.selectText, { color: theme.textPrimary }]}
-                    >
-                      {formatDateYYYYMMDD(date)}
+                    <View style={[styles.dateIconBox, { backgroundColor: '#DBEAFE' }]}>
+                      <MaterialIcons name="calendar-today" size={18} color="#3B82F6" />
+                    </View>
+                    <Text style={[styles.selectText, { color: theme.textPrimary }]}>
+                      {formatDateDDMMYYYY(date)}
                     </Text>
                   </View>
+                  <MaterialIcons name="expand-more" size={24} color={theme.textSecondary} />
                 </TouchableOpacity>
+
+                {showDatePicker && (
+                  <DateTimePicker
+                    value={date}
+                    mode="date"
+                    display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                    onChange={(event, selectedDate) => {
+                      if (Platform.OS === 'android') {
+                        setShowDatePicker(false);
+                      }
+                      if (selectedDate) {
+                        setDate(selectedDate);
+                      }
+                    }}
+                  />
+                )}
               </View>
 
-              {/* Ghi chú */}
+              {/* GHI CHÚ */}
               <View style={styles.inputGroup}>
-                <Text style={[styles.label, { color: theme.textSecondary }]}>
-                  Ghi chú
-                </Text>
-                <TextInput
-                  value={note}
-                  onChangeText={setNote}
-                  style={[
-                    styles.input,
-                    styles.textArea,
-                    {
-                      backgroundColor: theme.cardBackground,
-                      borderColor: theme.border,
-                      color: theme.textPrimary,
-                    },
-                  ]}
-                  placeholder="Nhập ghi chú (không bắt buộc)"
-                  placeholderTextColor={theme.textSecondary}
-                  multiline
-                  numberOfLines={3}
-                  textAlignVertical="top"
-                />
+                <Text style={[styles.label, { color: theme.textSecondary }]}>Ghi chú</Text>
+                <View style={[
+                  styles.textAreaWrapper,
+                  { 
+                    backgroundColor: isDarkMode ? theme.cardBackground : '#F9FAFB',
+                    borderColor: isDarkMode ? theme.border : '#E5E7EB'
+                  }
+                ]}>
+                  <MaterialIcons 
+                    name="notes" 
+                    size={20} 
+                    color={theme.textSecondary}
+                    style={[styles.inputIcon, { alignSelf: 'flex-start', marginTop: 12 }]}
+                  />
+                  <TextInput
+                    value={note}
+                    onChangeText={setNote}
+                    style={[
+                      styles.input,
+                      styles.textArea,
+                      { color: theme.textPrimary }
+                    ]}
+                    placeholder="Thêm ghi chú cho giao dịch này..."
+                    placeholderTextColor={theme.textSecondary}
+                    multiline
+                    numberOfLines={4}
+                    textAlignVertical="top"
+                  />
+                </View>
               </View>
             </View>
           </>
         )}
       </ScrollView>
 
-      {/* Footer */}
-      <View
-        style={[
-          styles.footer,
-          {
-            backgroundColor: theme.cardBackground,
-            borderTopColor: theme.border,
-          },
-        ]}
-      >
-        <TouchableOpacity style={styles.saveButton} onPress={onUpdate}>
+      {/* FOOTER */}
+      <View style={[
+        styles.footer,
+        { 
+          backgroundColor: isDarkMode ? theme.cardBackground : '#FFFFFF',
+          borderTopColor: isDarkMode ? theme.border : '#F1F5F9'
+        },
+      ]}>
+        <TouchableOpacity 
+          style={[styles.saveButton, { 
+            backgroundColor: type === 'income' ? '#22C55E' : '#EF4444'
+          }]} 
+          onPress={onUpdate}
+          activeOpacity={0.8}
+        >
+          <MaterialIcons name="check" size={22} color="#FFFFFF" style={{ marginRight: 8 }} />
           <Text style={styles.saveButtonText}>Cập nhật</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity
-          style={[styles.saveButton, { backgroundColor: "#EF4444" }]}
+        <TouchableOpacity 
+          style={[styles.deleteButton, { 
+            backgroundColor: isDarkMode ? '#7F1D1D' : '#FEE2E2',
+            borderColor: '#EF4444',
+          }]} 
           onPress={onDelete}
+          activeOpacity={0.8}
         >
-          <Text style={styles.saveButtonText}>Xoá</Text>
+          <MaterialIcons 
+            name="delete-outline" 
+            size={22} 
+            color={isDarkMode ? '#FCA5A5' : '#EF4444'} 
+            style={{ marginRight: 8 }} 
+          />
+          <Text style={[styles.deleteButtonText, { 
+            color: isDarkMode ? '#FCA5A5' : '#EF4444' 
+          }]}>Xoá giao dịch</Text>
         </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.cancelButton}
+        
+        <TouchableOpacity 
+          style={[styles.cancelButton, { 
+            backgroundColor: isDarkMode ? '#374151' : '#F3F4F6'
+          }]} 
           onPress={() => navigation.goBack()}
+          activeOpacity={0.7}
         >
-          <Text style={styles.cancelButtonText}>Hủy</Text>
+          <Text style={[styles.cancelButtonText, { color: theme.textPrimary }]}>Huỷ</Text>
         </TouchableOpacity>
       </View>
 
-      {/* Modal chọn danh mục */}
+      {/* MODAL CHỌN DANH MỤC */}
       <Modal
         visible={categoryModalOpen}
         transparent
-        animationType="fade"
+        animationType="slide"
         onRequestClose={() => setCategoryModalOpen(false)}
       >
         <View style={modalStyles.backdrop}>
-          <View
-            style={[
-              modalStyles.sheet,
-              {
-                backgroundColor: theme.cardBackground,
-                borderColor: theme.border,
-              },
-            ]}
-          >
-            <Text style={[modalStyles.title, { color: theme.textPrimary }]}>
-              Chọn danh mục {type === "expense" ? "chi tiêu" : "thu nhập"}
-            </Text>
+          <View style={[
+            modalStyles.sheet,
+            { 
+              backgroundColor: isDarkMode ? theme.cardBackground : '#FFFFFF',
+              borderColor: isDarkMode ? theme.border : '#F1F5F9'
+            },
+          ]}>
+            {/* HEADER */}
+            <View style={modalStyles.header}>
+              <Text style={[modalStyles.title, { color: theme.textPrimary }]}>
+                Chọn danh mục {type === 'expense' ? 'chi tiêu' : 'thu nhập'}
+              </Text>
+              <TouchableOpacity 
+                onPress={() => setCategoryModalOpen(false)}
+                style={modalStyles.closeIcon}
+              >
+                <MaterialIcons name="close" size={24} color={theme.textSecondary} />
+              </TouchableOpacity>
+            </View>
 
-            <ScrollView style={{ maxHeight: 320 }}>
-              {filteredCategories.map((c) => (
+            {/* LIST */}
+            <ScrollView 
+              style={modalStyles.scrollView}
+              showsVerticalScrollIndicator={false}
+            >
+              {filteredCategories.map(c => (
                 <TouchableOpacity
                   key={c.id}
                   style={[
                     modalStyles.item,
-                    { borderBottomColor: theme.border },
+                    { 
+                      borderBottomColor: isDarkMode ? theme.border : '#F1F5F9',
+                      backgroundColor: c.id === selectedCategoryId 
+                        ? (isDarkMode ? '#374151' : '#F9FAFB')
+                        : 'transparent'
+                    }
                   ]}
                   onPress={() => {
                     setSelectedCategoryId(c.id);
                     setCategoryModalOpen(false);
                   }}
+                  activeOpacity={0.7}
                 >
-                  <View style={{ flexDirection: "row", alignItems: "center" }}>
-                    <MaterialIcons
-                      name={(c.icon as any) || "category"}
-                      size={20}
-                      color={theme.textSecondary}
-                    />
-                    <Text
-                      style={[
-                        modalStyles.itemText,
-                        { color: theme.textPrimary },
-                      ]}
-                    >
+                  <View style={modalStyles.itemLeft}>
+                    <View style={[
+                      modalStyles.categoryIcon,
+                      { backgroundColor: type === 'income' ? '#DCFCE7' : '#FEE2E2' }
+                    ]}>
+                      <MaterialIcons
+                        name={(c.icon as any) || 'category'}
+                        size={20}
+                        color={type === 'income' ? '#22C55E' : '#EF4444'}
+                      />
+                    </View>
+                    <Text style={[modalStyles.itemText, { color: theme.textPrimary }]}>
                       {c.name}
                     </Text>
                   </View>
 
-                  {c.id === selectedCategoryId ? (
-                    <MaterialIcons
-                      name="check"
-                      size={20}
-                      color={theme.textSecondary}
-                    />
-                  ) : null}
+                  {c.id === selectedCategoryId && (
+                    <MaterialIcons name="check-circle" size={22} color="#3B82F6" />
+                  )}
                 </TouchableOpacity>
               ))}
-              {!filteredCategories.length && (
-                <Text
-                  style={{
-                    paddingVertical: 12,
-                    textAlign: "center",
-                    color: theme.textSecondary,
-                  }}
-                >
-                  Chưa có danh mục phù hợp.
-                </Text>
-              )}
             </ScrollView>
-
-            <TouchableOpacity
-              onPress={() => setCategoryModalOpen(false)}
-              style={modalStyles.closeBtn}
-            >
-              <Text
-                style={[modalStyles.closeText, { color: theme.textSecondary }]}
-              >
-                Đóng
-              </Text>
-            </TouchableOpacity>
           </View>
         </View>
       </Modal>
@@ -528,128 +566,283 @@ const UpdateTransactionScreen: React.FC = () => {
   );
 };
 
-const modalStyles = StyleSheet.create({
-  backdrop: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.35)",
-    justifyContent: "center",
-    padding: 16,
-  },
-  sheet: {
-    borderRadius: 12,
-    borderWidth: 1,
-    padding: 12,
-  },
-  title: {
-    fontSize: 16,
-    fontWeight: "700",
-    marginBottom: 8,
-  },
-  item: {
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  itemText: {
-    marginLeft: 10,
-    fontSize: 15,
-    fontWeight: "600",
-  },
-  closeBtn: {
-    paddingVertical: 12,
-    alignItems: "center",
-  },
-  closeText: {
-    fontSize: 14,
-    fontWeight: "700",
-  },
-});
+/* ================= STYLES ================= */
 
-// style giữ giống AddTransactionScreen
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#f5f7f8" },
+  container: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+  },
+  scroll: {
+    flex: 1,
+  },
   header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     height: 60,
     paddingHorizontal: 16,
+    backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
+    borderBottomColor: '#F1F5F9',
   },
-  headerTitle: { fontSize: 18, fontWeight: "bold" },
+  headerTitle: {
+    fontSize: 19,
+    fontWeight: '700',
+    letterSpacing: -0.3,
+  },
   iconButton: {
     width: 40,
     height: 40,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  content: { padding: 16 },
+  content: {
+    padding: 20,
+    paddingBottom: 24,
+  },
+  loadingContainer: {
+    padding: 40,
+    alignItems: 'center',
+  },
+  loadingText: {
+    fontSize: 15,
+    fontWeight: '500',
+  },
   toggleContainer: {
-    flexDirection: "row",
-    borderRadius: 10,
+    flexDirection: 'row',
+    backgroundColor: '#F3F4F6',
+    borderRadius: 14,
     padding: 4,
-    marginBottom: 24,
-    height: 48,
+    marginBottom: 28,
+    height: 52,
   },
   toggleButton: {
     flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 10,
   },
   toggleActive: {
-    shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
+    backgroundColor: '#FFFFFF',
+    shadowColor: '#000',
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 3,
   },
-  toggleText: { fontSize: 14, fontWeight: "600" },
-  toggleTextActive: { color: "#3c83f6" },
-  form: { gap: 20 },
-  inputGroup: { gap: 8 },
-  label: { fontSize: 14, fontWeight: "500" },
+  toggleText: {
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  form: {
+    gap: 24,
+  },
+  inputGroup: {
+    gap: 10,
+  },
+  label: {
+    fontSize: 14,
+    fontWeight: '600',
+    letterSpacing: -0.2,
+  },
+  inputWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F9FAFB',
+    borderWidth: 1.5,
+    borderColor: '#E5E7EB',
+    borderRadius: 12,
+    height: 52,
+    paddingHorizontal: 14,
+  },
+  inputIcon: {
+    marginRight: 10,
+  },
   input: {
-    borderWidth: 1,
-    borderRadius: 8,
-    height: 48,
-    paddingHorizontal: 16,
-    fontSize: 16,
+    flex: 1,
+    fontSize: 15,
+    fontWeight: '500',
   },
-  textArea: { height: 100, paddingTop: 12 },
+  currency: {
+    fontSize: 15,
+    fontWeight: '600',
+    marginLeft: 8,
+  },
+  textAreaWrapper: {
+    flexDirection: 'row',
+    backgroundColor: '#F9FAFB',
+    borderWidth: 1.5,
+    borderColor: '#E5E7EB',
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    minHeight: 110,
+  },
+  textArea: {
+    paddingTop: 0,
+    minHeight: 86,
+  },
   selectInput: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    borderWidth: 1,
-    borderRadius: 8,
-    height: 48,
-    paddingHorizontal: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#F9FAFB',
+    borderWidth: 1.5,
+    borderColor: '#E5E7EB',
+    borderRadius: 12,
+    height: 52,
+    paddingHorizontal: 14,
   },
-  selectContent: { flexDirection: "row", alignItems: "center" },
-  inputIcon: { marginRight: 12 },
-  selectText: { fontSize: 16 },
+  selectContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  categoryIconBox: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  dateIconBox: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  selectText: {
+    fontSize: 15,
+    fontWeight: '500',
+  },
   footer: {
-    padding: 16,
+    padding: 20,
+    paddingBottom: Platform.OS === 'ios' ? 34 : 20,
+    backgroundColor: '#FFFFFF',
     borderTopWidth: 1,
+    borderTopColor: '#F1F5F9',
     gap: 12,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: -4 },
+    elevation: 8,
   },
   saveButton: {
-    backgroundColor: "#3c83f6",
+    flexDirection: 'row',
+    backgroundColor: '#EF4444',
+    height: 52,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#EF4444',
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 4,
+  },
+  saveButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  deleteButton: {
+    flexDirection: 'row',
     height: 48,
     borderRadius: 12,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1.5,
   },
-  saveButtonText: { color: "white", fontSize: 16, fontWeight: "bold" },
+  deleteButtonText: {
+    fontSize: 15,
+    fontWeight: '600',
+  },
   cancelButton: {
     height: 48,
     borderRadius: 12,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#F3F4F6',
   },
-  cancelButtonText: { color: "#3c83f6", fontSize: 16, fontWeight: "bold" },
+  cancelButtonText: {
+    fontSize: 15,
+    fontWeight: '600',
+  },
+});
+
+const modalStyles = StyleSheet.create({
+  backdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  sheet: {
+    backgroundColor: '#FFFFFF',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    borderTopWidth: 1,
+    borderLeftWidth: 1,
+    borderRightWidth: 1,
+    maxHeight: '75%',
+    shadowColor: '#000',
+    shadowOpacity: 0.15,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: -4 },
+    elevation: 10,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingVertical: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F1F5F9',
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: '700',
+    letterSpacing: -0.3,
+  },
+  closeIcon: {
+    width: 36,
+    height: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 8,
+  },
+  scrollView: {
+    maxHeight: 420,
+  },
+  item: {
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    borderBottomWidth: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  itemLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  categoryIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  itemText: {
+    fontSize: 15,
+    fontWeight: '600',
+  },
 });
 
 export default UpdateTransactionScreen;
