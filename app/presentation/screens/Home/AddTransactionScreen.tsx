@@ -116,6 +116,7 @@ const AddTransactionScreen: React.FC = () => {
       </View>
 
       <ScrollView 
+        style={styles.scroll}
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
@@ -477,6 +478,10 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#FFFFFF',
   },
+  scroll: {
+    flex: 1,
+  },
+
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -500,7 +505,7 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: 20,
-    paddingBottom: 120,
+    paddingBottom: 24,
   },
   toggleContainer: {
     flexDirection: 'row',
@@ -613,10 +618,6 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   footer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
     padding: 20,
     paddingBottom: Platform.OS === 'ios' ? 34 : 20,
     backgroundColor: '#FFFFFF',

@@ -119,6 +119,9 @@ const MonthlyExpenseChart: React.FC = () => {
         Chi tiêu 3 tháng gần nhất
       </Text>
 
+      <Text style={[styles.currentMonthText, { color: theme.textSecondary }]}>
+        Tháng này đã chi tiêu:
+      </Text>
       <Text style={[styles.reportAmount, { color: theme.textPrimary }]}>
         {currentMonthExpense.toLocaleString("vi-VN")}₫
       </Text>
@@ -234,6 +237,11 @@ const styles = StyleSheet.create({
     fontSize: 12,
     textAlign: "center",
   },
+  currentMonthText: {
+    fontSize: 14,
+    marginTop: 6,
+  },
+
 });
 
 export default MonthlyExpenseChart;
