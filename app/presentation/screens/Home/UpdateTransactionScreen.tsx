@@ -46,6 +46,7 @@ const UpdateTransactionScreen: React.FC = () => {
   const { id } = (route.params || {}) as RouteParams;
 
   const [loading, setLoading] = useState(true);
+  const [title, setTitle] = useState("");
 
   const [type, setType] = useState<TransactionType>("expense");
   const [mountText, setMountText] = useState("");
@@ -101,6 +102,10 @@ const UpdateTransactionScreen: React.FC = () => {
 
         setType(tx.type ?? "expense");
         setMountText(String(typeof tx.amount === "number" ? tx.amount : 0));
+<<<<<<< HEAD
+=======
+        setTitle(tx.title ?? "");
+>>>>>>> main
         setNote(tx.note ?? "");
         setSelectedCategoryId(tx.categoryId ?? "");
         setDate(tsToDate(tx.date));
@@ -135,12 +140,14 @@ const UpdateTransactionScreen: React.FC = () => {
 
     try {
       await updateTransaction(id, {
-        categoryId: selectedCategoryId,
-        mount,
-        note: note ?? "",
-        type,
-        date: Timestamp.fromDate(date), // lưu Timestamp
-      } as any);
+  title: title.trim(),
+  categoryId: selectedCategoryId,
+  amount: mount,   // ✅ ĐÚNG FIELD
+  note: note ?? "",
+  type,
+  date,
+});
+
 
       Alert.alert("Thành công", "Đã cập nhật giao dịch.");
       navigation.goBack();
@@ -255,6 +262,26 @@ const UpdateTransactionScreen: React.FC = () => {
                 </Text>
               </TouchableOpacity>
             </View>
+            {/* Tên giao dịch */}
+            <View style={styles.inputGroup}>
+              <Text style={[styles.label, { color: theme.textSecondary }]}>
+               Tên giao dịch
+              </Text>
+              <TextInput
+              value={title}
+              onChangeText={setTitle}
+              style={[
+              styles.input,
+              {
+                backgroundColor: theme.cardBackground,
+                borderColor: theme.border,
+                color: theme.textPrimary,
+              },
+            ]}
+            placeholder="VD: Đi tàu, Trà chanh..."
+            placeholderTextColor={theme.textSecondary}
+          />
+        </View>
 
             <View style={styles.form}>
               {/* Số tiền */}
