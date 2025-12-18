@@ -86,7 +86,7 @@ export const ReportCategoryList: React.FC<Props> = ({
         const remainingAmount = hasBudget ? Math.max(0, budget - spent) : 0;
 
         // ✅ Cảnh báo vượt ngân sách chỉ áp dụng cho CHI TIÊU
-        const isOverBudget = mode === 'expense' && hasBudget && usedPercent > 100;
+        const isOverBudget = mode === 'expense' && hasBudget && usedPercent > 80;
 
         return (
           <View
@@ -118,7 +118,7 @@ export const ReportCategoryList: React.FC<Props> = ({
               {isOverBudget && (
                 <View style={styles.overBadge}>
                   <MaterialIcons name="warning" size={14} color="#EF4444" />
-                  <Text style={styles.overBadgeText}>Vượt 100%</Text>
+                  <Text style={styles.overBadgeText}>Vượt 80%</Text>
                 </View>
               )}
 
