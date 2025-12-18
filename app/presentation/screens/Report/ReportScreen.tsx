@@ -72,7 +72,11 @@ const ReportScreen: React.FC = () => {
       <View
         style={[
           styles.container,
-          { justifyContent: 'center', alignItems: 'center' },
+          { 
+            backgroundColor: isDarkMode ? theme.background : '#FFFFFF',
+            justifyContent: 'center', 
+            alignItems: 'center' 
+          },
         ]}
       >
         <ActivityIndicator />
@@ -83,17 +87,17 @@ const ReportScreen: React.FC = () => {
   const filteredData = data.filter(item => item.type === filterType);
 
   const pieItems = filteredData
-  .filter(i => i.value > 0)
-  .map(i => ({ id: i.id, name: i.name, value: i.value, color: i.color }));
+    .filter(i => i.value > 0)
+    .map(i => ({ id: i.id, name: i.name, value: i.value, color: i.color }));
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
+    <View style={[styles.container, { backgroundColor: isDarkMode ? theme.background : '#FFFFFF' }]}>
       <View
         style={[
           styles.header,
           {
-            backgroundColor: theme.headerBackground,
-            borderBottomColor: theme.border,
+            backgroundColor: isDarkMode ? theme.headerBackground : '#FFFFFF',
+            borderBottomColor: isDarkMode ? theme.border : '#F1F5F9',
           },
         ]}
       >
@@ -102,7 +106,7 @@ const ReportScreen: React.FC = () => {
         </Text>
       </View>
 
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         {/* Period Selector */}
         <ReportPeriodSelector
           period={period}
@@ -112,7 +116,7 @@ const ReportScreen: React.FC = () => {
         />
 
         {/* Summary Card */}
-        <View style={[styles.card, { backgroundColor: theme.cardBackground }]}>
+        <View style={[styles.card, { backgroundColor: isDarkMode ? theme.cardBackground : '#FFFFFF' }]}>
           <View style={styles.summaryRow}>
             <View style={styles.summaryItem}>
               <Text
@@ -142,7 +146,7 @@ const ReportScreen: React.FC = () => {
             </View>
           </View>
           <View
-            style={[styles.divider, { backgroundColor: theme.divider }]}
+            style={[styles.divider, { backgroundColor: isDarkMode ? theme.divider : '#F1F5F9' }]}
           />
           <View style={styles.balanceItem}>
             <Text
@@ -166,40 +170,56 @@ const ReportScreen: React.FC = () => {
 
         {/* Type Filter */}
         <View style={styles.typeFilterRow}>
-            <TouchableOpacity
+          <TouchableOpacity
+            style={[
+              styles.typeFilterChip,
+              { 
+                backgroundColor: filterType === 'expense' 
+                  ? '#3c83f6' 
+                  : isDarkMode ? theme.cardBackground : '#FFFFFF',
+                borderColor: filterType === 'expense'
+                  ? '#3c83f6'
+                  : isDarkMode ? theme.border : '#E2E8F0',
+              },
+            ]}
+            onPress={() => setFilterType('expense')}
+            activeOpacity={0.7}
+          >
+            <Text
               style={[
-                styles.typeFilterChip,
-                filterType === 'expense' && styles.typeFilterChipActive,
+                styles.typeFilterText,
+                { color: filterType === 'expense' ? '#ffffff' : theme.textPrimary },
               ]}
-              onPress={() => setFilterType('expense')}
             >
-              <Text
-                style={[
-                  styles.typeFilterText,
-                  filterType === 'expense' && styles.typeFilterTextActive,
-                ]}
-              >
-                Chi tiêu
-              </Text>
-            </TouchableOpacity>
+              Chi tiêu
+            </Text>
+          </TouchableOpacity>
 
-            <TouchableOpacity
+          <TouchableOpacity
+            style={[
+              styles.typeFilterChip,
+              {
+                backgroundColor: filterType === 'income'
+                  ? '#3c83f6'
+                  : isDarkMode ? theme.cardBackground : '#FFFFFF',
+                borderColor: filterType === 'income'
+                  ? '#3c83f6'
+                  : isDarkMode ? theme.border : '#E2E8F0',
+              },
+            ]}
+            onPress={() => setFilterType('income')}
+            activeOpacity={0.7}
+          >
+            <Text
               style={[
-                styles.typeFilterChip,
-                filterType === 'income' && styles.typeFilterChipActive,
+                styles.typeFilterText,
+                { color: filterType === 'income' ? '#ffffff' : theme.textPrimary },
               ]}
-              onPress={() => setFilterType('income')}
             >
-              <Text
-                style={[
-                  styles.typeFilterText,
-                  filterType === 'income' && styles.typeFilterTextActive,
-                ]}
-              >
-                Thu nhập
-              </Text>
-            </TouchableOpacity>
-          </View>
+              Thu nhập
+            </Text>
+          </TouchableOpacity>
+        </View>
                 
         <ReportCategoryPieCard
           mode={filterType}
@@ -208,6 +228,7 @@ const ReportScreen: React.FC = () => {
           theme={theme}
           isDarkMode={isDarkMode}
         />
+        
         {/* Legend */}
         <ReportCategoryList
           items={filteredData.map(i => ({
@@ -232,10 +253,11 @@ const ReportScreen: React.FC = () => {
             style={[
               styles.outlineButton,
               {
-                backgroundColor: theme.cardBackground,
-                borderColor: theme.border,
+                backgroundColor: isDarkMode ? theme.cardBackground : '#FFFFFF',
+                borderColor: isDarkMode ? theme.border : '#E2E8F0',
               },
             ]}
+            activeOpacity={0.7}
           >
             <MaterialIcons
               name="download"
@@ -255,10 +277,11 @@ const ReportScreen: React.FC = () => {
             style={[
               styles.outlineButton,
               {
-                backgroundColor: theme.cardBackground,
-                borderColor: theme.border,
+                backgroundColor: isDarkMode ? theme.cardBackground : '#FFFFFF',
+                borderColor: isDarkMode ? theme.border : '#E2E8F0',
               },
             ]}
+            activeOpacity={0.7}
           >
             <MaterialIcons
               name="description"
@@ -283,15 +306,15 @@ const ReportScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f7f8',
+    backgroundColor: '#FFFFFF',
   },
   header: {
     height: 60,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(245, 247, 248, 0.9)',
-    borderBottomWidth: 1,
-    borderBottomColor: '#e5e7eb',
+    backgroundColor: '#FFFFFF',
+    borderBottomWidth: 2,
+    borderBottomColor: '#dddddfff',
   },
   headerTitle: {
     fontSize: 18,
@@ -307,10 +330,11 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 16,
     marginBottom: 16,
-    shadowColor: '#000',
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
+    shadowColor: "#3c83f6",
+    shadowOpacity: 0.15,
+    shadowRadius: 13,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 6,
   },
   summaryRow: {
     flexDirection: 'row',
@@ -338,9 +362,9 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   typeFilterRow: {
-  flexDirection: 'row',
-  gap: 12,
-  marginBottom: 16,
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 16,
   },
   typeFilterChip: {
     flex: 1,
@@ -351,115 +375,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  typeFilterChipActive: {
-    backgroundColor: '#3c83f6',
-    borderColor: '#3c83f6',
-  },
   typeFilterText: {
     fontSize: 12,
     fontWeight: '500',
     color: '#6b7280',
-  },
-  typeFilterTextActive: {
-    color: '#ffffff',
-  },
-  cardTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#111418',
-    marginBottom: 16,
-  },
-  chartArea: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: 200,
-    marginBottom: 24,
-  },
-  piePlaceholder: {
-    width: 160,
-    height: 160,
-    borderRadius: 80,
-    borderWidth: 10,
-    borderColor: '#60A5FA',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#f9fafb',
-  },
-  pieInnerCircle: {
-    alignItems: 'center',
-  },
-  pieLabel: {
-    fontSize: 12,
-    color: '#6b7280',
-  },
-  pieValue: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#111418',
-  },
-  slice: {
-    position: 'absolute',
-    width: '100%',
-    height: '100%',
-    borderRadius: 80,
-    opacity: 0.2, // Just for effect
-  },
-  legendList: {
-    gap: 16,
-  },
-  legendItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  legendIconBox: {
-  width: 28,
-  height: 28,
-  borderRadius: 14,
-  marginRight: 12,
-  alignItems: 'center',
-  justifyContent: 'center',
-  },
-  legendInfo: {
-    flex: 1,
-  },
-  legendName: {
-    fontSize: 15,
-    fontWeight: '500',
-    color: '#111418',
-  },
-  legendValues: {
-    alignItems: 'flex-end',
-  },
-  legendAmount: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: '#111418',
-  },
-  legendPercent: {
-    fontSize: 13,
-    color: '#6b7280',
-  },
-  addCategoryButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingTop: 16,
-    borderTopWidth: 1,
-    borderTopColor: '#f3f4f6',
-    borderStyle: 'dashed',
-  },
-  addIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#f3f4f6',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 12,
-  },
-  addText: {
-    fontSize: 15,
-    fontWeight: '500',
-    color: '#3c83f6',
   },
   actionButtons: {
     flexDirection: 'row',
