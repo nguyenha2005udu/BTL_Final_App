@@ -1,27 +1,27 @@
+import { MaterialIcons } from "@expo/vector-icons";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import React, { useEffect, useMemo, useState } from "react";
 import {
-  View,
+  Alert,
+  Modal,
+  ScrollView,
+  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  ScrollView,
-  StyleSheet,
-  Modal,
-  Alert,
+  View,
 } from "react-native";
-import { useNavigation, useRoute } from "@react-navigation/native";
-import { MaterialIcons } from "@expo/vector-icons";
 import { useTheme } from "../../../context/ThemeContext";
 
-import type { Category } from "../../../type/types";
+import { Timestamp } from "firebase/firestore";
 import { listenCategories } from "../../../services/category.service";
 import {
-  TransactionType,
-  updateTransaction,
   deleteTransaction,
   getTransactionById,
+  TransactionType,
+  updateTransaction,
 } from "../../../services/transaction.service";
-import { Timestamp } from "firebase/firestore";
+import type { Category } from "../../../type/types";
 
 type RouteParams = { id: string };
 
@@ -102,7 +102,10 @@ const UpdateTransactionScreen: React.FC = () => {
 
         setType(tx.type ?? "expense");
         setMountText(String(typeof tx.amount === "number" ? tx.amount : 0));
+<<<<<<< HEAD
+=======
         setTitle(tx.title ?? "");
+>>>>>>> main
         setNote(tx.note ?? "");
         setSelectedCategoryId(tx.categoryId ?? "");
         setDate(tsToDate(tx.date));
