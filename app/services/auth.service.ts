@@ -1,35 +1,38 @@
 // services/auth.service.ts
-import { emailSignIn, emailSignUp, logout } from './firebase/authProviders';
-import { auth, db } from './firebase/firebaseConfig';
-import {
-  doc,
-  setDoc,
-  updateDoc,
-  serverTimestamp,
-  getDoc,
-} from 'firebase/firestore';
 import {
   sendEmailVerification,
   sendPasswordResetEmail,
   type User,
-} from 'firebase/auth';
+} from "firebase/auth";
+import {
+  doc,
+  getDoc,
+  serverTimestamp,
+  setDoc,
+  updateDoc,
+} from "firebase/firestore";
+import { emailSignIn, emailSignUp, logout } from "./firebase/authProviders";
+import { auth, db } from "./firebase/firebaseConfig";
+
+export type UserRole = "admin" | "user";
 
 export interface RegisterPayload {
   fullName?: string;
   email: string;
   password: string;
-  photoUrl?: string; // 👈 thêm
+  photoUrl?: string;
 }
 
 export interface UserProfile {
   id: string;
   email: string;
   fullName?: string;
+  role: UserRole;
   phone?: string;
-  birthDate?: string;
+  birthDate?: string | null;
   amount?: number;
   emailVerified?: boolean;
-  photoUrl?: string; // 👈 thêm
+  photoUrl?: string;
   createdAt?: any;
 }
 
@@ -39,25 +42,22 @@ export const registerWithEmail = async (
 ): Promise<User> => {
   const { email, password, fullName, photoUrl } = payload;
 
-  // 1. Tạo user bằng email & password
   const cred = await emailSignUp(email, password);
   const user = cred.user;
 
-  // 2. Lưu thông tin user vào Firestore
-  await setDoc(doc(db, 'users', user.uid), {
+  await setDoc(doc(db, "users", user.uid), {
     email,
-    fullName: fullName || '',
-    photoUrl: photoUrl || '',     // 👈 lưu kèm photoUrl (có thể rỗng)
+    role: "user",
+    fullName: fullName || "",
+    photoUrl: photoUrl || "",
     createdAt: serverTimestamp(),
     emailVerified: user.emailVerified ?? false,
     amount: 0,
-    phone: '',
+    phone: "",
     birthDate: null,
   });
 
-  // 3. Gửi email xác thực
   await sendEmailVerification(user);
-
   return user;
 };
 
@@ -76,9 +76,7 @@ export const logoutUser = async (): Promise<void> => {
 };
 
 // Gửi email đặt lại mật khẩu
-export const sendResetPasswordEmail = async (
-  email: string,
-): Promise<void> => {
+export const sendResetPasswordEmail = async (email: string): Promise<void> => {
   await sendPasswordResetEmail(auth, email);
 };
 
@@ -87,20 +85,27 @@ export const getCurrentUserProfile = async (): Promise<UserProfile | null> => {
   const user = auth.currentUser;
   if (!user) return null;
 
-  const ref = doc(db, 'users', user.uid);
+  const ref = doc(db, "users", user.uid);
   const snap = await getDoc(ref);
 
   if (!snap.exists()) return null;
 
-  const data = snap.data() as Omit<UserProfile, 'id'>;
+  const data = snap.data() as Omit<UserProfile, "id">;
 
   return {
     id: snap.id,
     ...data,
+    role: (data.role as UserRole) ?? "user",
   };
 };
 
-// 👇 Cập nhật profile user
+// Kiểm tra admin
+export const isCurrentUserAdmin = async (): Promise<boolean> => {
+  const profile = await getCurrentUserProfile();
+  return profile?.role === "admin";
+};
+
+// Cập nhật profile user
 export interface UpdateUserProfilePayload {
   fullName?: string;
   phone?: string;
@@ -108,35 +113,39 @@ export interface UpdateUserProfilePayload {
   photoUrl?: string;
 }
 
-export const updateUserProfile = async (payload: UpdateUserProfilePayload): Promise<void> => {
+export const updateUserProfile = async (
+  payload: UpdateUserProfilePayload,
+): Promise<void> => {
   const user = auth.currentUser;
-  if (!user) throw new Error('No logged-in user');
+  if (!user) throw new Error("No logged-in user");
 
-  const userRef = doc(db, 'users', user.uid);
+  const userRef = doc(db, "users", user.uid);
 
   await updateDoc(userRef, {
     ...payload,
   });
 };
 
-const upsertUserProfileFromAuth = async (user: User): Promise<void> => {
-  const userRef = doc(db, 'users', user.uid);
+// Đồng bộ profile từ auth provider (ví dụ Google)
+export const upsertUserProfileFromAuth = async (user: User): Promise<void> => {
+  const userRef = doc(db, "users", user.uid);
   const snap = await getDoc(userRef);
 
-  const googleName = (user.displayName ?? '').trim();
-  const googlePhoto = user.photoURL ?? '';
+  const googleName = (user.displayName ?? "").trim();
+  const googlePhoto = user.photoURL ?? "";
 
-  // Nếu đã có profile thì ưu tiên giữ fullName user đã đặt,
-  // còn nếu chưa có (hoặc đang rỗng) thì lấy theo Google.
-  const existingFullName =
-    snap.exists() ? String((snap.data() as any)?.fullName ?? '').trim() : '';
+  const existingData = snap.exists() ? (snap.data() as any) : null;
+  const existingFullName = String(existingData?.fullName ?? "").trim();
+  const existingRole: UserRole =
+    existingData?.role === "admin" ? "admin" : "user";
 
   const fullNameToSave = existingFullName || googleName;
 
   const baseData = {
-    email: user.email ?? '',
-    fullName: fullNameToSave,     // ✅ lưu theo tên Google (khi chưa có tên)
-    photoUrl: googlePhoto,        // ✅ avatar Google
+    email: user.email ?? "",
+    role: existingRole,
+    fullName: fullNameToSave,
+    photoUrl: googlePhoto,
     emailVerified: user.emailVerified ?? false,
   };
 
@@ -145,7 +154,7 @@ const upsertUserProfileFromAuth = async (user: User): Promise<void> => {
       ...baseData,
       createdAt: serverTimestamp(),
       amount: 0,
-      phone: '',
+      phone: "",
       birthDate: null,
     });
   } else {
@@ -154,4 +163,3 @@ const upsertUserProfileFromAuth = async (user: User): Promise<void> => {
     });
   }
 };
-
