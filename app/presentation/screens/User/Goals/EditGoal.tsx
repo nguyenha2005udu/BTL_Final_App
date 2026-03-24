@@ -14,13 +14,13 @@ import { RouteProp } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { MaterialIcons } from "@expo/vector-icons";
 
-import { useTheme } from "../../../context/ThemeContext";
+import { useTheme } from "../../../../context/ThemeContext";
 import { SavingGoal } from "../../../type/types";
 import {
   getGoalDetail,
   updateSavingGoal,
-} from "../../../services/savingGoals.service";
-import { auth } from "../../../services/firebase/firebaseConfig";
+} from "../../../../services/savingGoals.service";
+import { auth } from "../../../../services/firebase/firebaseConfig";
 
 /* ---------------- TYPES ---------------- */
 

@@ -1,8 +1,5 @@
 import { MaterialIcons } from "@expo/vector-icons";
-import {
-  RouteProp,
-  useFocusEffect,
-} from "@react-navigation/native";
+import { RouteProp, useFocusEffect } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import React, { useCallback, useState } from "react";
 import {
@@ -17,24 +14,22 @@ import {
   View,
 } from "react-native";
 
-import { RootStackParamList } from "../../../RootNavigator";
-import { auth } from "../../../services/firebase/firebaseConfig";
+import { RootStackParamList } from "../../../navigation/RootNavigator";
+// import { auth } from "../../../../services/firebase/firebaseConfig;
+import { auth } from "../../../../services/firebase/firebaseConfig;
 import {
-  getGoalDetail,
-  updateSavingGoal,
   addGoalContribution,
   getGoalContributions,
+  getGoalDetail,
   GoalContribution,
-} from "../../../services/savingGoals.service";
+  updateSavingGoal,
+} from "../../../../services/savingGoals.service;
 import { SavingGoal } from "../../../type/types";
 
 /* ---------------- TYPES ---------------- */
 
 type GoalDetailRouteProp = RouteProp<RootStackParamList, "GoalDetail">;
-type GoalDetailNavProp = StackNavigationProp<
-  RootStackParamList,
-  "GoalDetail"
->;
+type GoalDetailNavProp = StackNavigationProp<RootStackParamList, "GoalDetail">;
 
 /* ---------------- COMPONENT ---------------- */
 
@@ -73,7 +68,7 @@ export default function GoalDetail({
     useCallback(() => {
       loadGoal();
       loadContributions();
-    }, [])
+    }, []),
   );
 
   if (!goal) {
@@ -105,7 +100,7 @@ export default function GoalDetail({
     if (num > remaining) {
       Alert.alert(
         "Vượt mục tiêu",
-        `Bạn chỉ cần thêm ${remaining.toLocaleString()} đ để hoàn thành`
+        `Bạn chỉ cần thêm ${remaining.toLocaleString()} đ để hoàn thành`,
       );
       return;
     }
@@ -225,10 +220,7 @@ export default function GoalDetail({
             />
 
             <TouchableOpacity
-              style={[
-                styles.button,
-                isCompleted && styles.buttonDisabled,
-              ]}
+              style={[styles.button, isCompleted && styles.buttonDisabled]}
               onPress={handleUpdate}
               disabled={isCompleted}
             >
@@ -242,14 +234,11 @@ export default function GoalDetail({
             <Text style={styles.sectionTitle}>Lịch sử đóng góp</Text>
 
             {contributions.length === 0 ? (
-              <Text style={styles.emptyText}>
-                Chưa có lần đóng góp nào
-              </Text>
+              <Text style={styles.emptyText}>Chưa có lần đóng góp nào</Text>
             ) : (
               contributions.map((item) => {
                 const date =
-                  item.createdAt?.toDate?.() ??
-                  new Date(item.createdAt);
+                  item.createdAt?.toDate?.() ?? new Date(item.createdAt);
 
                 return (
                   <View key={item.id} style={styles.historyItem}>
@@ -261,11 +250,7 @@ export default function GoalDetail({
                         {date.toLocaleDateString("vi-VN")}
                       </Text>
                     </View>
-                    <MaterialIcons
-                      name="savings"
-                      size={20}
-                      color="#4C6EF5"
-                    />
+                    <MaterialIcons name="savings" size={20} color="#4C6EF5" />
                   </View>
                 );
               })

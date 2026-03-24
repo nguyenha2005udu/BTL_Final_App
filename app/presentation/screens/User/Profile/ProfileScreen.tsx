@@ -2,9 +2,9 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
 import { Image, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
-import { useTheme } from '../../../context/ThemeContext';
-import { getCurrentUserProfile } from '../../../services/auth.service';
-import { auth } from '../../../services/firebase/firebaseConfig';
+import { useTheme } from '../../../../context/ThemeContext';
+import { getCurrentUserProfile } from '../../../../services/auth.service';
+import { auth } from '../../../../services/firebase/firebaseConfig';
 
 const DEFAULT_AVATAR =
   'https://lh3.googleusercontent.com/aida-public/AB6AXuA_vMSFQARLvGWesaN0bPwdT0TwBkCjQuK-p1dyFrGdqF-NhAqX3D22UFhPgycZkrUA24cKIcSZEPLOfhmUcNZTvYIXtJBvgXlaRUnPVCaQ5zWzrC0n45kOlTptHz4fEKjcJrTwoasD3u6BnAo6DO1bJ2oe7sNZMz4X8J4ZExMW6HBrFk1JAZloRwzDfjdw4WOSE8HcBg82M53Zk1lZ9igZ6sqHdz0lO3Cvw1h6_YE38kL45oHN1DtJsD26XLF9ECZDyI3c-2ms-qO0';

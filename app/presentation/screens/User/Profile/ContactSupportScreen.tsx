@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Alert, Linking } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { MaterialIcons } from '../../../../components/icon';
-import { useTheme } from '../../../context/ThemeContext';
+import { MaterialIcons } from '../../../../../components/icon';
+import { useTheme } from '../../../../context/ThemeContext';
 
 const ContactSupportScreen: React.FC = () => {
   const navigation = useNavigation();

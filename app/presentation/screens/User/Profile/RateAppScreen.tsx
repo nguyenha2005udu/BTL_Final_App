@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, TextInput, ScrollView, StyleSheet, Alert, Linking, Platform } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { MaterialIcons } from '../../../../components/icon';
-import { useTheme } from '../../../context/ThemeContext';
+import { MaterialIcons } from '../../../../../components/icon';
+import { useTheme } from '../../../../context/ThemeContext';
 
 const RateAppScreen: React.FC = () => {
   const navigation = useNavigation();

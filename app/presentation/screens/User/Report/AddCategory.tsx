@@ -10,9 +10,10 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { COLORS, ICONS } from '../../../../constants/constants';
-import { useCategories } from '../../../../hooks/useCategories';
-import { useTheme } from '../../../context/ThemeContext';
+import { COLORS, ICONS } from '../../../../../constants/constants';
+// import { useCategories } from '../../../../hooks/useCategories';
+import { useCategories } from '../../../../../hooks/useCategories';
+import { useTheme } from '../../../../context/ThemeContext';
 
 const AddCategory: React.FC = () => {
   const navigation = useNavigation<any>();

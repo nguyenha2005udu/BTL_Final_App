@@ -1,24 +1,22 @@
-import React, { useState, useCallback } from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  ScrollView,
-  StyleSheet,
-} from "react-native";
-import { getSavingGoalsByUser } from "../../../services/savingGoals.service";
-import { auth } from "../../../services/firebase/firebaseConfig";
-import { StackNavigationProp } from "@react-navigation/stack";
-import { SavingGoal } from "../../../type/types";
-import { RootStackParamList } from "../../../RootNavigator";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
-import { useTheme } from "../../../context/ThemeContext";
+import { StackNavigationProp } from "@react-navigation/stack";
+import React, { useCallback, useState } from "react";
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+// import { useTheme } from "../../../../context/ThemeContext;
+import { useTheme } from "../../../../context/ThemeContext;
+import { RootStackParamList } from "../../../navigation/RootNavigator";
+import { auth } from "../../../../services/firebase/firebaseConfig";
+import { getSavingGoalsByUser } from "../../../../services/savingGoals.service;
+import { SavingGoal } from "../../../type/types";
 
-type SavingGoalsNavProp = StackNavigationProp<
-  RootStackParamList,
-  "GoalList"
->;
+type SavingGoalsNavProp = StackNavigationProp<RootStackParamList, "GoalList">;
 
 export default function SavingGoalsScreen({
   navigation,
@@ -39,7 +37,7 @@ export default function SavingGoalsScreen({
       };
 
       loadGoals();
-    }, [])
+    }, []),
   );
 
   return (
@@ -57,7 +55,7 @@ export default function SavingGoalsScreen({
       </View>
 
       {/* Content */}
-      <ScrollView 
+      <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
@@ -90,14 +88,17 @@ export default function SavingGoalsScreen({
               <View style={styles.statDivider} />
               <View style={styles.statItem}>
                 <Text style={styles.statValue}>
-                  {goals.filter(g => g.currentAmount >= g.targetAmount).length}
+                  {
+                    goals.filter((g) => g.currentAmount >= g.targetAmount)
+                      .length
+                  }
                 </Text>
                 <Text style={styles.statLabel}>Hoàn thành</Text>
               </View>
               <View style={styles.statDivider} />
               <View style={styles.statItem}>
                 <Text style={styles.statValue}>
-                  {goals.filter(g => g.currentAmount < g.targetAmount).length}
+                  {goals.filter((g) => g.currentAmount < g.targetAmount).length}
                 </Text>
                 <Text style={styles.statLabel}>Đang thực hiện</Text>
               </View>
@@ -105,15 +106,15 @@ export default function SavingGoalsScreen({
 
             {/* Goals List */}
             <Text style={styles.sectionTitle}>Danh sách mục tiêu</Text>
-            
+
             {goals.map((goal) => {
               const progress =
                 goal.targetAmount > 0
                   ? Math.min(
                       Math.round(
-                        (goal.currentAmount / goal.targetAmount) * 100
+                        (goal.currentAmount / goal.targetAmount) * 100,
                       ),
-                      100
+                      100,
                     )
                   : 0;
 
@@ -131,23 +132,35 @@ export default function SavingGoalsScreen({
                   {/* Card Header */}
                   <View style={styles.cardHeader}>
                     <View style={styles.cardTitleContainer}>
-                      <View style={[
-                        styles.goalIcon,
-                        { backgroundColor: isCompleted ? "#DCFCE7" : "#EEF2FF" }
-                      ]}>
-                        <MaterialIcons 
-                          name={isCompleted ? "check-circle" : "savings"} 
-                          size={24} 
-                          color={isCompleted ? "#16A34A" : "#4C6EF5"} 
+                      <View
+                        style={[
+                          styles.goalIcon,
+                          {
+                            backgroundColor: isCompleted
+                              ? "#DCFCE7"
+                              : "#EEF2FF",
+                          },
+                        ]}
+                      >
+                        <MaterialIcons
+                          name={isCompleted ? "check-circle" : "savings"}
+                          size={24}
+                          color={isCompleted ? "#16A34A" : "#4C6EF5"}
                         />
                       </View>
                       <View style={styles.cardTitleContent}>
                         <Text style={styles.cardTitle}>{goal.title}</Text>
                         {goal.deadline && (
                           <View style={styles.deadlineContainer}>
-                            <MaterialIcons name="event" size={14} color="#9CA3AF" />
+                            <MaterialIcons
+                              name="event"
+                              size={14}
+                              color="#9CA3AF"
+                            />
                             <Text style={styles.deadlineText}>
-                              {goal.deadline.toDate().toLocaleDateString("vi-VN")}
+                              {goal.deadline
+                                .toDate()
+                                .toLocaleDateString("vi-VN")}
                             </Text>
                           </View>
                         )}
@@ -185,15 +198,19 @@ export default function SavingGoalsScreen({
                           styles.progressFill,
                           {
                             width: `${progress}%`,
-                            backgroundColor: isCompleted ? "#16A34A" : "#4C6EF5",
+                            backgroundColor: isCompleted
+                              ? "#16A34A"
+                              : "#4C6EF5",
                           },
                         ]}
                       />
                     </View>
-                    <Text style={[
-                      styles.percentText,
-                      { color: isCompleted ? "#16A34A" : "#4C6EF5" }
-                    ]}>
+                    <Text
+                      style={[
+                        styles.percentText,
+                        { color: isCompleted ? "#16A34A" : "#4C6EF5" },
+                      ]}
+                    >
                       {progress}%
                     </Text>
                   </View>

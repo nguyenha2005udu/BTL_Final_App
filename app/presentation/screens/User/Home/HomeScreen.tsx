@@ -11,13 +11,13 @@ import {
   View,
 } from "react-native";
 
-import { useTheme } from "../../../context/ThemeContext";
-import { getCurrentUserProfile } from "../../../services/auth.service";
-import { auth } from "../../../services/firebase/firebaseConfig";
+import { useTheme } from "../../../../context/ThemeContext";
+import { getCurrentUserProfile } from "../../../../services/auth.service";
+import { auth } from "../../../../services/firebase/firebaseConfig";
 
-import { listenCategories } from "../../../services/category.service";
-import { getSavingGoalsByUser } from "../../../services/savingGoals.service";
-import { listenTransactions } from "../../../services/transaction.service";
+import { listenCategories } from "../../../../services/category.service";
+import { getSavingGoalsByUser } from "../../../../services/savingGoals.service";
+import { listenTransactions } from "../../../../services/transaction.service";
 import type {
   Category,
   UITransaction,

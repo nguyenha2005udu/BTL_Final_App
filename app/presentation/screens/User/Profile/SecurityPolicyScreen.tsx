@@ -1,8 +1,8 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { MaterialIcons } from '../../../../components/icon';
-import { useTheme } from '../../../context/ThemeContext';
+import { MaterialIcons } from '../../../../../components/icon';
+import { useTheme } from '../../../../context/ThemeContext';
 
 const SecurityPolicyScreen: React.FC = () => {
   const navigation = useNavigation();

@@ -8,11 +8,11 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { useTheme } from "../../../context/ThemeContext";
+import { useTheme } from "../../../../context/ThemeContext";
 import {
   listenAppNotifications,
   type AppNotification,
-} from "../../../services/notification.service";
+} from "../../../../services/notification.service";
 
 type Filter = "all" | "unread";
 

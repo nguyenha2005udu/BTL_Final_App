@@ -12,17 +12,17 @@ import {
 } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { MaterialIcons } from "@expo/vector-icons";
-import { useTheme } from "../../../context/ThemeContext";
+import { useTheme } from "../../../../context/ThemeContext";
 import DateTimePicker from '@react-native-community/datetimepicker';
 
 import type { Category } from "../../../type/types";
-import { listenCategories } from "../../../services/category.service";
+import { listenCategories } from "../../../../services/category.service";
 import {
   TransactionType,
   updateTransaction,
   deleteTransaction,
   getTransactionById,
-} from "../../../services/transaction.service";
+} from "../../../../services/transaction.service";
 
 type RouteParams = { id: string };
 

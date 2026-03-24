@@ -8,12 +8,12 @@ import {
   StyleSheet,
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
-import { useTheme } from "../../../context/ThemeContext";
+import { useTheme } from "../../../../context/ThemeContext";
 import {
   listenTransactions,
   Transaction as DbTransaction,
-} from "../../../services/transaction.service";
-import { listenCategories } from "../../../services/category.service";
+} from "../../../../services/transaction.service";
+import { listenCategories } from "../../../../services/category.service";
 import type { Category } from "../../../type/types";
 import { useNavigation } from "@react-navigation/native";
 

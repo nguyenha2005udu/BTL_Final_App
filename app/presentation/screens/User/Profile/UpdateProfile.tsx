@@ -11,13 +11,13 @@ import {
   Platform,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { MaterialIcons } from "../../../../components/icon";
-import { useTheme } from "../../../context/ThemeContext";
+import { MaterialIcons } from "../../../../../components/icon";
+import { useTheme } from "../../../../context/ThemeContext";
 import {
   getCurrentUserProfile,
   updateUserProfile,
-} from "../../../services/auth.service";
-import { auth, storage } from "../../../services/firebase/firebaseConfig";
+} from "../../../../services/auth.service";
+import { auth, storage } from "../../../../services/firebase/firebaseConfig";
 import * as ImagePicker from "expo-image-picker";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";

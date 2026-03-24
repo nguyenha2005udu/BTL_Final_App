@@ -1,8 +1,8 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import React, { useEffect, useMemo, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
-import { useTheme } from "../../../context/ThemeContext";
-import { listenTransactions } from "../../../services/transaction.service";
+import { useTheme } from "../../../../context/ThemeContext";
+import { listenTransactions } from "../../../../services/transaction.service";
 
 // Nếu chỗ khác không dùng auth nữa thì có thể xoá import auth
 

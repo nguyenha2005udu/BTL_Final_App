@@ -13,11 +13,11 @@ import {
 
 import { useNavigation } from '@react-navigation/native';
 import { MaterialIcons } from '@expo/vector-icons';
-import { useTheme } from '../../../context/ThemeContext';
+import { useTheme } from '../../../../context/ThemeContext;
 import DateTimePicker from '@react-native-community/datetimepicker';
 
-import { listenCategories } from '../../../services/category.service';
-import { createTransaction, TransactionType } from '../../../services/transaction.service';
+import { listenCategories } from '../../../../services/category.service';
+import { createTransaction, TransactionType } from '../../../../services/transaction.service';
 import type { Category } from '../../../type/types';
 
 const formatDateDDMMYYYY = (d: Date) => {

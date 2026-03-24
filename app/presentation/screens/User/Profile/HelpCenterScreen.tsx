@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Animated } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { MaterialIcons } from '../../../../components/icon';
-import { useTheme } from '../../../context/ThemeContext';
+// import { MaterialIcons } from '../../../../components/icon';
+import { MaterialIcons } from '../../../../../components/icon';
+import { useTheme } from '../../../../context/ThemeContext';
 
 const HelpCenterScreen: React.FC = () => {
   const navigation = useNavigation();

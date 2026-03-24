@@ -14,32 +14,32 @@ import Login from "../presentation/screens/Auth/LoginScreen";
 import Register from "../presentation/screens/Auth/RegisterScreen";
 import Welcome from "../presentation/screens/Auth/WelcomeScreen";
 
-import AddTransaction from "../presentation/screens/Home/AddTransactionScreen";
-import Home from "../presentation/screens/Home/HomeScreen";
-import UpdateTransactionScreen from "../presentation/screens/Home/UpdateTransactionScreen";
+import AddTransaction from "../presentation/screens/User/Home/AddTransactionScreen";
+import Home from "../presentation/screens/User/Home/HomeScreen";
+import UpdateTransactionScreen from "../presentation/screens/User/Home/UpdateTransactionScreen";
 
-import ChangePasswordScreen from "../presentation/screens/Profile/ChangePasswordScreen";
-import ContactSupportScreen from "../presentation/screens/Profile/ContactSupportScreen";
-import HelpCenterScreen from "../presentation/screens/Profile/HelpCenterScreen";
-import Profile from "../presentation/screens/Profile/ProfileScreen";
-import RateAppScreen from "../presentation/screens/Profile/RateAppScreen";
-import SecurityPolicyScreen from "../presentation/screens/Profile/SecurityPolicyScreen";
-import UpdateProfile from "../presentation/screens/Profile/UpdateProfile";
+import ChangePasswordScreen from "../presentation/screens/User/Profile/ChangePasswordScreen";
+import ContactSupportScreen from "../presentation/screens/User/Profile/ContactSupportScreen";
+import HelpCenterScreen from "../presentation/screens/User/Profile/HelpCenterScreen";
+import Profile from "../presentation/screens/User/Profile/ProfileScreen";
+import RateAppScreen from "../presentation/screens/User/Profile/RateAppScreen";
+import SecurityPolicyScreen from "../presentation/screens/User/Profile/SecurityPolicyScreen";
+import UpdateProfile from "../presentation/screens/User/Profile/UpdateProfile";
 
-import AddCategory from "../presentation/screens/Report/AddCategory";
-import CategoryDetail from "../presentation/screens/Report/CategoryDetail";
-import Report from "../presentation/screens/Report/ReportScreen";
+import AddCategory from "../presentation/screens/User/Report/AddCategory";
+import CategoryDetail from "../presentation/screens/User/Report/CategoryDetail";
+import Report from "../presentation/screens/User/Report/ReportScreen";
 
-import TransactionList from "../presentation/screens/Statistics/StatisticsScreen";
+import TransactionList from "../presentation/screens/User/Statistics/StatisticsScreen";
 
-import AddGoal from "../presentation/screens/Goals/AddGoals";
-import EditGoal from "../presentation/screens/Goals/EditGoal";
-import GoalDetail from "../presentation/screens/Goals/GoalDetail";
-import GoalList from "../presentation/screens/Goals/SavingGoalsScreen";
+import AddGoal from "../presentation/screens/User/Goals/AddGoals";
+import EditGoal from "../presentation/screens/User/Goals/EditGoal";
+import GoalDetail from "../presentation/screens/User/Goals/GoalDetail";
+import GoalList from "../presentation/screens/User/Goals/SavingGoalsScreen";
 
-import NotificationScreen from "../presentation/screens/Notification/NotificationScreen";
+import NotificationScreen from "../presentation/screens/User/Notification/NotificationScreen";
 
-import { RootStackParamList } from "../RootNavigator";
+import { RootStackParamList } from "../navigation/RootNavigator";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator();

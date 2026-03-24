@@ -9,10 +9,12 @@ import {
   Alert,
   Platform,
 } from "react-native";
-import { createSavingGoal } from "../../../services/savingGoals.service";
-import { auth } from "../../../services/firebase/firebaseConfig";
+
+// import { createSavingGoal } from "../../../../services/savingGoals.service;
+import { createSavingGoal } from "../../../../services/savingGoals.service;
+import { auth } from "../../../../services/firebase/firebaseConfig;
 import { MaterialIcons } from "@expo/vector-icons";
-import { useTheme } from "../../../context/ThemeContext";
+import { useTheme } from "../../../../context/ThemeContext;
 
 export default function AddGoals({ navigation }: { navigation: any }) {
   const { theme, isDarkMode } = useTheme();
