@@ -7,18 +7,18 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 // import { ThemeProvider, useTheme } from "../context/ThemeContext;
-import { ThemeProvider, useTheme } from "../context/ThemeContext;
-import { AuthProvider, useAuth } from "../providers/AuthProvider;
+import { ThemeProvider, useTheme } from "../context/ThemeContext";
+import { AuthProvider, useAuth } from "../providers/AuthProvider";
 
 // Auth screens
-import ForgotPasswordScreen from "../presentation/screens/Auth/ForgotPasswordScreen;
+import ForgotPasswordScreen from "../presentation/screens/Auth/ForgotPasswordScreen";
 import Login from "../presentation/screens/Auth/LoginScreen";
 import Register from "../presentation/screens/Auth/RegisterScreen";
 import Welcome from "../presentation/screens/Auth/WelcomeScreen";
 
 // Main tab screens
-import AddTransaction from "../presentation/screens/User/Home/AddTransactionScreen;
-import Home from "../presentation/screens/User/Home/HomeScreen;
+import AddTransaction from "../presentation/screens/User/Home/AddTransactionScreen";
+import Home from "../presentation/screens/User/Home/HomeScreen";
 import UpdateTransactionScreen from "../presentation/screens/User/Home/UpdateTransactionScreen";
 import NotificationScreen from "../presentation/screens/User/Notification/NotificationScreen";
 import ChangePasswordScreen from "../presentation/screens/User/Profile/ChangePasswordScreen";
@@ -34,10 +34,10 @@ import Report from "../presentation/screens/User/Report/ReportScreen";
 import TransactionList from "../presentation/screens/User/Statistics/StatisticsScreen";
 
 // Goal screens
-import AddGoal from "../presentation/screens/User/Goals/AddGoals;
-import EditGoal from "../presentation/screens/User/Goals/EditGoal;
-import GoalDetail from "../presentation/screens/User/Goals/GoalDetail;
-import GoalList from "../presentation/screens/User/Goals/SavingGoalsScreen;
+import AddGoal from "../presentation/screens/User/Goals/AddGoals";
+import EditGoal from "../presentation/screens/User/Goals/EditGoal";
+import GoalDetail from "../presentation/screens/User/Goals/GoalDetail";
+import GoalList from "../presentation/screens/User/Goals/SavingGoalsScreen";
 
 //Admin
 import AdminTabs from "./adminTabs";

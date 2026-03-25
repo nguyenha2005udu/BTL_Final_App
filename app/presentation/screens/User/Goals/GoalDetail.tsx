@@ -14,17 +14,17 @@ import {
   View,
 } from "react-native";
 
-import { RootStackParamList } from "../../../navigation/RootNavigator";
+import { RootStackParamList } from "../../../../navigation/RootNavigator";
 // import { auth } from "../../../../services/firebase/firebaseConfig;
-import { auth } from "../../../../services/firebase/firebaseConfig;
+import { auth } from "../../../../services/firebase/firebaseConfig";
 import {
   addGoalContribution,
   getGoalContributions,
   getGoalDetail,
   GoalContribution,
   updateSavingGoal,
-} from "../../../../services/savingGoals.service;
-import { SavingGoal } from "../../../type/types";
+} from "../../../../services/savingGoals.service";
+import { SavingGoal } from "../../../../type/types";
 
 /* ---------------- TYPES ---------------- */
 

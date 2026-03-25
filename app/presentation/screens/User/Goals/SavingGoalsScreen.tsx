@@ -10,11 +10,11 @@ import {
   View,
 } from "react-native";
 // import { useTheme } from "../../../../context/ThemeContext;
-import { useTheme } from "../../../../context/ThemeContext;
-import { RootStackParamList } from "../../../navigation/RootNavigator";
+import { useTheme } from "../../../../context/ThemeContext";
+import { RootStackParamList } from "../../../../navigation/RootNavigator";
 import { auth } from "../../../../services/firebase/firebaseConfig";
-import { getSavingGoalsByUser } from "../../../../services/savingGoals.service;
-import { SavingGoal } from "../../../type/types";
+import { getSavingGoalsByUser } from "../../../../services/savingGoals.service";
+import { SavingGoal } from "../../../../type/types";
 
 type SavingGoalsNavProp = StackNavigationProp<RootStackParamList, "GoalList">;
 
