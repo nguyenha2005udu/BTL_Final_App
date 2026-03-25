@@ -1,6 +1,6 @@
-import { MaterialIcons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
-import React from 'react';
+import { MaterialIcons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
+import React from "react";
 import {
   ActivityIndicator,
   ScrollView,
@@ -8,28 +8,31 @@ import {
   Text,
   TouchableOpacity,
   View,
-} from 'react-native';
-import { ReportCategoryList } from '../../../../../components/report/ReportCategoryList';
-import { ReportCategoryPieCard } from '../../../../../components/report/ReportCategoryPieCard';
-import { ReportPeriodSelector } from '../../../../../components/report/ReportPeriodSelector';
-import { useCategories } from '../../../../../hooks/useCategories';
-import { useReportTotals } from '../../../../../hooks/useReportTotals';
-import { useTransactions } from '../../../../../hooks/useTransactions';
-import { useTheme } from '../../../../context/ThemeContext';
+} from "react-native";
+import { ReportCategoryList } from "../../../../../components/report/ReportCategoryList";
+import { ReportCategoryPieCard } from "../../../../../components/report/ReportCategoryPieCard";
+import { ReportPeriodSelector } from "../../../../../components/report/ReportPeriodSelector";
+import { useCategories } from "../../../../../hooks/useCategories";
+import { useReportTotals } from "../../../../../hooks/useReportTotals";
+import { useTransactions } from "../../../../../hooks/useTransactions";
+import { useTheme } from "../../../../context/ThemeContext";
 
 const ReportScreen: React.FC = () => {
   const navigation = useNavigation<any>();
   const { theme, isDarkMode } = useTheme();
   const { categories, loading } = useCategories();
   const { transactions, loading: txLoading } = useTransactions();
-  const { period, setPeriod, totalIncome, totalExpense, balance, txInRange } = useReportTotals(transactions);
-  const [filterType, setFilterType] = React.useState<'expense' | 'income'>('expense');
+  const { period, setPeriod, totalIncome, totalExpense, balance, txInRange } =
+    useReportTotals(transactions);
+  const [filterType, setFilterType] = React.useState<"expense" | "income">(
+    "expense",
+  );
 
   const amountByCategory = React.useMemo(() => {
-    const typeById = new Map(categories.map(c => [c.id, c.type]));
+    const typeById = new Map(categories.map((c) => [c.id, c.type]));
     const map = new Map<string, number>();
 
-    for (const tx of (txInRange ?? [])) {
+    for (const tx of txInRange ?? []) {
       const catId = tx.categoryId;
       if (!catId) continue;
 
@@ -37,11 +40,11 @@ const ReportScreen: React.FC = () => {
       if (catType && catType !== tx.type) continue;
 
       const raw =
-        typeof (tx as any).mount === 'number'
+        typeof (tx as any).mount === "number"
           ? (tx as any).mount
-          : typeof (tx as any).amount === 'number'
-          ? (tx as any).amount
-          : Number((tx as any).mount ?? (tx as any).amount ?? 0);
+          : typeof (tx as any).amount === "number"
+            ? (tx as any).amount
+            : Number((tx as any).mount ?? (tx as any).amount ?? 0);
 
       if (!Number.isFinite(raw)) continue;
 
@@ -50,21 +53,24 @@ const ReportScreen: React.FC = () => {
     }
     return map;
   }, [categories, txInRange]);
-  
+
   // Map Category -> data cho phần "Chi tiêu theo danh mục"
-  const rawData = categories.map(cat => ({
-    id : cat.id,
+  const rawData = categories.map((cat) => ({
+    id: cat.id,
     name: cat.name,
-    type : cat.type,
-    value: amountByCategory.get(cat.id) ?? 0, 
-    budget: cat.budget ?? 0,                 
-    color: cat.color || '#60A5FA',
-    icon: cat.icon || 'category',
+    type: cat.type,
+    value: amountByCategory.get(cat.id) ?? 0,
+    budget: cat.budget ?? 0,
+    color: cat.color || "#60A5FA",
+    icon: cat.icon || "category",
   }));
 
-  const data = rawData.map(item => {
-    const denom = item.type === 'income' ? totalIncome : totalExpense;
-    return { ...item, percentage: denom > 0 ? Math.round((item.value / denom) * 100) : 0 };
+  const data = rawData.map((item) => {
+    const denom = item.type === "income" ? totalIncome : totalExpense;
+    return {
+      ...item,
+      percentage: denom > 0 ? Math.round((item.value / denom) * 100) : 0,
+    };
   });
 
   if (loading || txLoading) {
@@ -72,10 +78,10 @@ const ReportScreen: React.FC = () => {
       <View
         style={[
           styles.container,
-          { 
-            backgroundColor: isDarkMode ? theme.background : '#FFFFFF',
-            justifyContent: 'center', 
-            alignItems: 'center' 
+          {
+            backgroundColor: isDarkMode ? theme.background : "#FFFFFF",
+            justifyContent: "center",
+            alignItems: "center",
           },
         ]}
       >
@@ -84,20 +90,25 @@ const ReportScreen: React.FC = () => {
     );
   }
 
-  const filteredData = data.filter(item => item.type === filterType);
+  const filteredData = data.filter((item) => item.type === filterType);
 
   const pieItems = filteredData
-    .filter(i => i.value > 0)
-    .map(i => ({ id: i.id, name: i.name, value: i.value, color: i.color }));
+    .filter((i) => i.value > 0)
+    .map((i) => ({ id: i.id, name: i.name, value: i.value, color: i.color }));
 
   return (
-    <View style={[styles.container, { backgroundColor: isDarkMode ? theme.background : '#FFFFFF' }]}>
+    <View
+      style={[
+        styles.container,
+        { backgroundColor: isDarkMode ? theme.background : "#FFFFFF" },
+      ]}
+    >
       <View
         style={[
           styles.header,
           {
-            backgroundColor: isDarkMode ? theme.headerBackground : '#FFFFFF',
-            borderBottomColor: isDarkMode ? theme.border : '#F1F5F9',
+            backgroundColor: isDarkMode ? theme.headerBackground : "#FFFFFF",
+            borderBottomColor: isDarkMode ? theme.border : "#F1F5F9",
           },
         ]}
       >
@@ -106,7 +117,10 @@ const ReportScreen: React.FC = () => {
         </Text>
       </View>
 
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+      >
         {/* Period Selector */}
         <ReportPeriodSelector
           period={period}
@@ -116,54 +130,51 @@ const ReportScreen: React.FC = () => {
         />
 
         {/* Summary Card */}
-        <View style={[styles.card, { backgroundColor: isDarkMode ? theme.cardBackground : '#FFFFFF' }]}>
+        <View
+          style={[
+            styles.card,
+            { backgroundColor: isDarkMode ? theme.cardBackground : "#FFFFFF" },
+          ]}
+        >
           <View style={styles.summaryRow}>
             <View style={styles.summaryItem}>
               <Text
-                style={[
-                  styles.summaryLabel,
-                  { color: theme.textSecondary },
-                ]}
+                style={[styles.summaryLabel, { color: theme.textSecondary }]}
               >
                 Tổng thu
               </Text>
-              <Text style={[styles.summaryValue, { color: '#22C55E' }]}>
-                {totalIncome.toLocaleString('vi-VN')}₫
-              </Text> 
+              <Text style={[styles.summaryValue, { color: "#22C55E" }]}>
+                {totalIncome.toLocaleString("vi-VN")}₫
+              </Text>
             </View>
             <View style={styles.summaryItem}>
               <Text
-                style={[
-                  styles.summaryLabel,
-                  { color: theme.textSecondary },
-                ]}
+                style={[styles.summaryLabel, { color: theme.textSecondary }]}
               >
                 Tổng chi
               </Text>
-              <Text style={[styles.summaryValue, { color: '#EF4444' }]}>
-                {totalExpense.toLocaleString('vi-VN')}₫
+              <Text style={[styles.summaryValue, { color: "#EF4444" }]}>
+                {totalExpense.toLocaleString("vi-VN")}₫
               </Text>
             </View>
           </View>
           <View
-            style={[styles.divider, { backgroundColor: isDarkMode ? theme.divider : '#F1F5F9' }]}
+            style={[
+              styles.divider,
+              { backgroundColor: isDarkMode ? theme.divider : "#F1F5F9" },
+            ]}
           />
           <View style={styles.balanceItem}>
-            <Text
-              style={[
-                styles.summaryLabel,
-                { color: theme.textSecondary },
-              ]}
-            >
+            <Text style={[styles.summaryLabel, { color: theme.textSecondary }]}>
               Chênh lệch
             </Text>
             <Text
               style={[
                 styles.summaryValue,
-                { color: balance >= 0 ? '#22C55E' : '#EF4444', fontSize: 24 },
+                { color: balance >= 0 ? "#22C55E" : "#EF4444", fontSize: 24 },
               ]}
             >
-              {balance.toLocaleString('vi-VN')}₫
+              {balance.toLocaleString("vi-VN")}₫
             </Text>
           </View>
         </View>
@@ -173,22 +184,31 @@ const ReportScreen: React.FC = () => {
           <TouchableOpacity
             style={[
               styles.typeFilterChip,
-              { 
-                backgroundColor: filterType === 'expense' 
-                  ? '#3c83f6' 
-                  : isDarkMode ? theme.cardBackground : '#FFFFFF',
-                borderColor: filterType === 'expense'
-                  ? '#3c83f6'
-                  : isDarkMode ? theme.border : '#E2E8F0',
+              {
+                backgroundColor:
+                  filterType === "expense"
+                    ? "#3c83f6"
+                    : isDarkMode
+                      ? theme.cardBackground
+                      : "#FFFFFF",
+                borderColor:
+                  filterType === "expense"
+                    ? "#3c83f6"
+                    : isDarkMode
+                      ? theme.border
+                      : "#E2E8F0",
               },
             ]}
-            onPress={() => setFilterType('expense')}
+            onPress={() => setFilterType("expense")}
             activeOpacity={0.7}
           >
             <Text
               style={[
                 styles.typeFilterText,
-                { color: filterType === 'expense' ? '#ffffff' : theme.textPrimary },
+                {
+                  color:
+                    filterType === "expense" ? "#ffffff" : theme.textPrimary,
+                },
               ]}
             >
               Chi tiêu
@@ -199,39 +219,48 @@ const ReportScreen: React.FC = () => {
             style={[
               styles.typeFilterChip,
               {
-                backgroundColor: filterType === 'income'
-                  ? '#3c83f6'
-                  : isDarkMode ? theme.cardBackground : '#FFFFFF',
-                borderColor: filterType === 'income'
-                  ? '#3c83f6'
-                  : isDarkMode ? theme.border : '#E2E8F0',
+                backgroundColor:
+                  filterType === "income"
+                    ? "#3c83f6"
+                    : isDarkMode
+                      ? theme.cardBackground
+                      : "#FFFFFF",
+                borderColor:
+                  filterType === "income"
+                    ? "#3c83f6"
+                    : isDarkMode
+                      ? theme.border
+                      : "#E2E8F0",
               },
             ]}
-            onPress={() => setFilterType('income')}
+            onPress={() => setFilterType("income")}
             activeOpacity={0.7}
           >
             <Text
               style={[
                 styles.typeFilterText,
-                { color: filterType === 'income' ? '#ffffff' : theme.textPrimary },
+                {
+                  color:
+                    filterType === "income" ? "#ffffff" : theme.textPrimary,
+                },
               ]}
             >
               Thu nhập
             </Text>
           </TouchableOpacity>
         </View>
-                
+
         <ReportCategoryPieCard
           mode={filterType}
           items={pieItems}
-          total={filterType === 'expense' ? totalExpense : totalIncome}
+          total={filterType === "expense" ? totalExpense : totalIncome}
           theme={theme}
           isDarkMode={isDarkMode}
         />
-        
+
         {/* Legend */}
         <ReportCategoryList
-          items={filteredData.map(i => ({
+          items={filteredData.map((i) => ({
             id: i.id,
             name: i.name,
             color: i.color,
@@ -242,19 +271,20 @@ const ReportScreen: React.FC = () => {
           mode={filterType}
           theme={theme}
           onPressItem={(id) => {
-            const fullCategory = categories.find(cat => cat.id === id);
-            if (fullCategory) navigation.navigate('CategoryDetail', { category: fullCategory });
+            const fullCategory = categories.find((cat) => cat.id === id);
+            if (fullCategory)
+              navigation.navigate("CategoryDetail", { category: fullCategory });
           }}
-          onAddCategory={() => navigation.navigate('AddCategory' as never)}
+          onAddCategory={() => navigation.navigate("AddCategory" as never)}
         />
-      
+
         <View style={styles.actionButtons}>
           <TouchableOpacity
             style={[
               styles.outlineButton,
               {
-                backgroundColor: isDarkMode ? theme.cardBackground : '#FFFFFF',
-                borderColor: isDarkMode ? theme.border : '#E2E8F0',
+                backgroundColor: isDarkMode ? theme.cardBackground : "#FFFFFF",
+                borderColor: isDarkMode ? theme.border : "#E2E8F0",
               },
             ]}
             activeOpacity={0.7}
@@ -265,10 +295,7 @@ const ReportScreen: React.FC = () => {
               color={theme.textPrimary}
             />
             <Text
-              style={[
-                styles.outlineButtonText,
-                { color: theme.textPrimary },
-              ]}
+              style={[styles.outlineButtonText, { color: theme.textPrimary }]}
             >
               Xuất CSV
             </Text>
@@ -277,8 +304,8 @@ const ReportScreen: React.FC = () => {
             style={[
               styles.outlineButton,
               {
-                backgroundColor: isDarkMode ? theme.cardBackground : '#FFFFFF',
-                borderColor: isDarkMode ? theme.border : '#E2E8F0',
+                backgroundColor: isDarkMode ? theme.cardBackground : "#FFFFFF",
+                borderColor: isDarkMode ? theme.border : "#E2E8F0",
               },
             ]}
             activeOpacity={0.7}
@@ -289,10 +316,7 @@ const ReportScreen: React.FC = () => {
               color={theme.textPrimary}
             />
             <Text
-              style={[
-                styles.outlineButtonText,
-                { color: theme.textPrimary },
-              ]}
+              style={[styles.outlineButtonText, { color: theme.textPrimary }]}
             >
               Xuất PDF
             </Text>
@@ -306,27 +330,27 @@ const ReportScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: "#FFFFFF",
   },
   header: {
     height: 60,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#FFFFFF',
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#FFFFFF",
     borderBottomWidth: 2,
-    borderBottomColor: '#dddddfff',
+    borderBottomColor: "#dddddfff",
   },
   headerTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
-    color: '#111418',
+    fontWeight: "bold",
+    color: "#111418",
   },
   content: {
     padding: 16,
     paddingBottom: 100,
   },
   card: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderRadius: 16,
     padding: 16,
     marginBottom: 16,
@@ -337,7 +361,7 @@ const styles = StyleSheet.create({
     elevation: 6,
   },
   summaryRow: {
-    flexDirection: 'row',
+    flexDirection: "row",
     marginBottom: 16,
   },
   summaryItem: {
@@ -345,24 +369,24 @@ const styles = StyleSheet.create({
   },
   summaryLabel: {
     fontSize: 14,
-    color: '#6b7280',
+    color: "#6b7280",
     marginBottom: 4,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   summaryValue: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   divider: {
     height: 1,
-    backgroundColor: '#f3f4f6',
+    backgroundColor: "#f3f4f6",
     marginBottom: 16,
   },
   balanceItem: {
     gap: 4,
   },
   typeFilterRow: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 12,
     marginBottom: 16,
   },
@@ -371,35 +395,35 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: '#d1d5db',
-    alignItems: 'center',
-    justifyContent: 'center',
+    borderColor: "#d1d5db",
+    alignItems: "center",
+    justifyContent: "center",
   },
   typeFilterText: {
     fontSize: 12,
-    fontWeight: '500',
-    color: '#6b7280',
+    fontWeight: "500",
+    color: "#6b7280",
   },
   actionButtons: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 12,
   },
   outlineButton: {
     flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     height: 48,
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderWidth: 1,
-    borderColor: '#d1d5db',
+    borderColor: "#d1d5db",
     borderRadius: 10,
     gap: 8,
   },
   outlineButtonText: {
     fontSize: 14,
-    fontWeight: '600',
-    color: '#111418',
+    fontWeight: "600",
+    color: "#111418",
   },
 });
 

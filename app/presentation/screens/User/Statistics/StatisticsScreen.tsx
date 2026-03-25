@@ -17,8 +17,6 @@ import { listenCategories } from "../../../../services/category.service";
 import type { Category } from "../../../type/types";
 import { useNavigation } from "@react-navigation/native";
 
-/* ================= TYPES ================= */
-
 type FilterType = "all" | "7days" | "3days";
 
 interface UITransaction {
@@ -62,7 +60,7 @@ const StatisticsScreen: React.FC = () => {
       (list: DbTransaction[]) => {
         setRawTransactions(list);
       },
-      (err) => console.log("listenTransactions error", err)
+      (err) => console.log("listenTransactions error", err),
     );
 
     return () => unsub?.();
@@ -75,7 +73,7 @@ const StatisticsScreen: React.FC = () => {
     }
 
     const mapped: UITransaction[] = rawTransactions.map((tx) => {
-      const category = categories.find(c => c.id === tx.categoryId);
+      const category = categories.find((c) => c.id === tx.categoryId);
 
       // TITLE = TÊN GIAO DỊCH (hiển thị rõ ràng)
       const title = tx.title || "Không có tiêu đề";
@@ -134,9 +132,19 @@ const StatisticsScreen: React.FC = () => {
   /* ================= UI ================= */
 
   return (
-    <View style={[styles.container, { backgroundColor: isDarkMode ? theme.background : '#FFFFFF' }]}>
+    <View
+      style={[
+        styles.container,
+        { backgroundColor: isDarkMode ? theme.background : "#FFFFFF" },
+      ]}
+    >
       {/* HEADER */}
-      <View style={[styles.header, { backgroundColor: isDarkMode ? theme.headerBackground : '#FFFFFF' }]}>
+      <View
+        style={[
+          styles.header,
+          { backgroundColor: isDarkMode ? theme.headerBackground : "#FFFFFF" },
+        ]}
+      >
         <Text style={[styles.headerTitle, { color: theme.textPrimary }]}>
           Giao dịch
         </Text>
@@ -148,8 +156,8 @@ const StatisticsScreen: React.FC = () => {
           style={[
             styles.searchBar,
             {
-              backgroundColor: isDarkMode ? theme.cardBackground : '#F9FAFB',
-              borderColor: isDarkMode ? theme.border : '#E5E7EB',
+              backgroundColor: isDarkMode ? theme.cardBackground : "#F9FAFB",
+              borderColor: isDarkMode ? theme.border : "#E5E7EB",
             },
           ]}
         >
@@ -167,8 +175,15 @@ const StatisticsScreen: React.FC = () => {
             onChangeText={setSearchTerm}
           />
           {searchTerm ? (
-            <TouchableOpacity onPress={() => setSearchTerm("")} activeOpacity={0.7}>
-              <MaterialIcons name="close" size={20} color={theme.textSecondary} />
+            <TouchableOpacity
+              onPress={() => setSearchTerm("")}
+              activeOpacity={0.7}
+            >
+              <MaterialIcons
+                name="close"
+                size={20}
+                color={theme.textSecondary}
+              />
             </TouchableOpacity>
           ) : null}
         </View>
@@ -192,12 +207,18 @@ const StatisticsScreen: React.FC = () => {
               style={[
                 styles.filterChip,
                 {
-                  backgroundColor: filter === f.key 
-                    ? "#3c83f6" 
-                    : isDarkMode ? theme.cardBackground : '#F9FAFB',
-                  borderColor: filter === f.key
-                    ? "#3c83f6"
-                    : isDarkMode ? theme.border : '#E5E7EB',
+                  backgroundColor:
+                    filter === f.key
+                      ? "#3c83f6"
+                      : isDarkMode
+                        ? theme.cardBackground
+                        : "#F9FAFB",
+                  borderColor:
+                    filter === f.key
+                      ? "#3c83f6"
+                      : isDarkMode
+                        ? theme.border
+                        : "#E5E7EB",
                 },
               ]}
               activeOpacity={0.7}
@@ -218,7 +239,7 @@ const StatisticsScreen: React.FC = () => {
       </View>
 
       {/* LIST - CHỈ PHẦN NÀY SCROLL */}
-      <ScrollView 
+      <ScrollView
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
       >
@@ -227,7 +248,14 @@ const StatisticsScreen: React.FC = () => {
         </Text>
 
         {filteredTransactions.length === 0 ? (
-          <View style={[styles.empty, { backgroundColor: isDarkMode ? theme.cardBackground : '#F9FAFB' }]}>
+          <View
+            style={[
+              styles.empty,
+              {
+                backgroundColor: isDarkMode ? theme.cardBackground : "#F9FAFB",
+              },
+            ]}
+          >
             <MaterialIcons
               name="receipt-long"
               size={48}
@@ -243,25 +271,26 @@ const StatisticsScreen: React.FC = () => {
 
             return (
               <TouchableOpacity
-  key={tx.id}
-  style={[
-    styles.card,
-    { backgroundColor: isDarkMode ? theme.cardBackground : '#FFFFFF' },
-  ]}
-  activeOpacity={0.7}
-  onPress={() =>
-    navigation.navigate("UpdateTransaction", { id: tx.id })
-  }
->
-
+                key={tx.id}
+                style={[
+                  styles.card,
+                  {
+                    backgroundColor: isDarkMode
+                      ? theme.cardBackground
+                      : "#FFFFFF",
+                  },
+                ]}
+                activeOpacity={0.7}
+                onPress={() =>
+                  navigation.navigate("UpdateTransaction", { id: tx.id })
+                }
+              >
                 {/* ICON */}
                 <View
                   style={[
                     styles.iconBox,
                     {
-                      backgroundColor: isIncome
-                        ? "#DCFCE7"
-                        : "#FEE2E2",
+                      backgroundColor: isIncome ? "#DCFCE7" : "#FEE2E2",
                     },
                   ]}
                 >
@@ -275,17 +304,26 @@ const StatisticsScreen: React.FC = () => {
                 {/* INFO */}
                 <View style={{ flex: 1 }}>
                   {/* TÊN GIAO DỊCH */}
-                  <Text style={[styles.cardTitle, { color: theme.textPrimary }]}>
+                  <Text
+                    style={[styles.cardTitle, { color: theme.textPrimary }]}
+                  >
                     {tx.title}
                   </Text>
 
                   {/* DANH MỤC */}
-                  <Text style={[styles.cardSubtitle, { color: theme.textSecondary }]}>
+                  <Text
+                    style={[
+                      styles.cardSubtitle,
+                      { color: theme.textSecondary },
+                    ]}
+                  >
                     {tx.subtitle}
                   </Text>
 
                   {/* NGÀY */}
-                  <Text style={[styles.cardDate, { color: theme.textSecondary }]}>
+                  <Text
+                    style={[styles.cardDate, { color: theme.textSecondary }]}
+                  >
                     {formatDateDDMMYYYY(tx.date)}
                   </Text>
                 </View>
@@ -305,9 +343,7 @@ const StatisticsScreen: React.FC = () => {
                     style={[
                       styles.typeBadge,
                       {
-                        backgroundColor: isIncome
-                          ? "#DCFCE7"
-                          : "#FEE2E2",
+                        backgroundColor: isIncome ? "#DCFCE7" : "#FEE2E2",
                       },
                     ]}
                   >
@@ -337,15 +373,15 @@ export default StatisticsScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: "#FFFFFF",
   },
   header: {
     height: 60,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: '#FFFFFF',
+    backgroundColor: "#FFFFFF",
     borderBottomWidth: 1,
-    borderBottomColor: '#F1F5F9',
+    borderBottomColor: "#F1F5F9",
   },
   headerTitle: {
     fontSize: 19,
@@ -356,7 +392,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 12,
     paddingBottom: 8,
-    backgroundColor: 'transparent', // Đảm bảo không bị che
+    backgroundColor: "transparent", // Đảm bảo không bị che
   },
   searchBar: {
     flexDirection: "row",
@@ -365,8 +401,8 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     paddingHorizontal: 14,
     borderWidth: 1.5,
-    backgroundColor: '#F9FAFB',
-    shadowColor: '#000',
+    backgroundColor: "#F9FAFB",
+    shadowColor: "#000",
     shadowOpacity: 0.03,
     shadowRadius: 4,
     shadowOffset: { width: 0, height: 2 },
@@ -375,11 +411,11 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     fontSize: 15,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   filterContainer: {
     paddingBottom: 12,
-    backgroundColor: 'transparent', // Đảm bảo không bị che
+    backgroundColor: "transparent", // Đảm bảo không bị che
   },
   filterRow: {
     paddingHorizontal: 20,
@@ -392,7 +428,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1.5,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOpacity: 0.03,
     shadowRadius: 4,
     shadowOffset: { width: 0, height: 2 },
@@ -419,14 +455,14 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     marginBottom: 12,
     gap: 14,
-    backgroundColor: '#FFFFFF',
-    shadowColor: '#000',
+    backgroundColor: "#FFFFFF",
+    shadowColor: "#000",
     shadowOpacity: 0.08,
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 2 },
     elevation: 3,
     borderWidth: 1,
-    borderColor: '#F1F5F9',
+    borderColor: "#F1F5F9",
   },
   iconBox: {
     width: 48,

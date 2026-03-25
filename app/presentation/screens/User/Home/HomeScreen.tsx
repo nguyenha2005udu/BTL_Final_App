@@ -18,10 +18,7 @@ import { auth } from "../../../../services/firebase/firebaseConfig";
 import { listenCategories } from "../../../../services/category.service";
 import { getSavingGoalsByUser } from "../../../../services/savingGoals.service";
 import { listenTransactions } from "../../../../services/transaction.service";
-import type {
-  Category,
-  UITransaction,
-} from "../../../type/types";
+import type { Category, UITransaction } from "../../../type/types";
 import { SavingGoal } from "../../../type/types";
 import MonthlyExpenseChart from "../Home/MonthlyExpenseChart";
 const DEFAULT_AVATAR =
@@ -40,19 +37,17 @@ const HomeScreen: React.FC = () => {
 
   const [categories, setCategories] = useState<Category[]>([]);
   const [recentTransactions, setRecentTransactions] = useState<UITransaction[]>(
-    []
+    [],
   );
   const [goals, setGoals] = useState<SavingGoal[]>([]);
 
   const [transactions, setTransactions] = useState<any[]>([]);
 
-  // 1) Load profile (tên + avatar)
   useEffect(() => {
     const fetchProfile = async () => {
       try {
         const profile = await getCurrentUserProfile();
 
-        // TÊN
         if (profile?.fullName) {
           setDisplayName(profile.fullName);
         } else if (auth.currentUser?.email) {
@@ -61,7 +56,6 @@ const HomeScreen: React.FC = () => {
           setDisplayName("Người dùng");
         }
 
-        // AVATAR
         if (profile?.photoUrl && profile.photoUrl.trim() !== "") {
           setAvatarUrl(profile.photoUrl);
         } else if (auth.currentUser?.photoURL) {
@@ -93,7 +87,7 @@ const HomeScreen: React.FC = () => {
       },
       (err) => {
         console.log("listenTransactions error", err);
-      }
+      },
     );
 
     return () => unsubTx?.();
@@ -105,14 +99,13 @@ const HomeScreen: React.FC = () => {
         if (!user) return;
 
         const data = await getSavingGoalsByUser(user.uid);
-        setGoals(data.slice(0, 3)); // chỉ lấy 3 mục tiêu
+        setGoals(data.slice(0, 3));
       };
 
       loadGoals();
-    }, [])
+    }, []),
   );
 
-  // 2c) Tính tổng thu/chi/số dư + map giao dịch gần đây
   useEffect(() => {
     if (!transactions) return;
 
@@ -125,8 +118,8 @@ const HomeScreen: React.FC = () => {
         typeof tx.amount === "number"
           ? tx.amount
           : typeof tx.amount === "number"
-          ? tx.amount
-          : 0;
+            ? tx.amount
+            : 0;
 
       if (tx.type === "income") {
         income += rawAmount;
@@ -155,61 +148,64 @@ const HomeScreen: React.FC = () => {
 
     // Map sang UITransaction
     const mapped: UITransaction[] = latest.map((tx: any) => {
-  const category = categories.find(c => c.id === tx.categoryId);
+      const category = categories.find((c) => c.id === tx.categoryId);
 
-  // 👉 TITLE = DANH MỤC
-  const title = category?.name || "Khác";
+      // 👉 TITLE = DANH MỤC
+      const title = category?.name || "Khác";
 
-  // 👉 SUBTITLE = TÊN GIAO DỊCH + NGÀY
-  const subtitleParts: string[] = [];
+      // 👉 SUBTITLE = TÊN GIAO DỊCH + NGÀY
+      const subtitleParts: string[] = [];
 
-  if (tx.title) {
-    subtitleParts.push(tx.title);
-  }
+      if (tx.title) {
+        subtitleParts.push(tx.title);
+      }
 
-  // 👉 PARSE DATE (BẮT BUỘC cho UITransaction)
-  const v = tx.date || tx.createdAt;
-  let date: Date = new Date();
+      // 👉 PARSE DATE (BẮT BUỘC cho UITransaction)
+      const v = tx.date || tx.createdAt;
+      let date: Date = new Date();
 
-  if (v) {
-    if (typeof v.toDate === "function") {
-      date = v.toDate();
-    } else {
-      const tmp = new Date(v);
-      if (!isNaN(tmp.getTime())) date = tmp;
-    }
-  }
+      if (v) {
+        if (typeof v.toDate === "function") {
+          date = v.toDate();
+        } else {
+          const tmp = new Date(v);
+          if (!isNaN(tmp.getTime())) date = tmp;
+        }
+      }
 
-  const day = String(date.getDate()).padStart(2, "0");
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const year = date.getFullYear();
-  subtitleParts.push(`${day}/${month}/${year}`);
+      const day = String(date.getDate()).padStart(2, "0");
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const year = date.getFullYear();
+      subtitleParts.push(`${day}/${month}/${year}`);
 
-  return {
-    id: tx.id,
-    type: tx.type,
-    amount: tx.type === "income" ? tx.amount : -tx.amount,
-    icon:
-      (category?.icon as keyof typeof MaterialIcons.glyphMap) ??
-      (tx.type === "income" ? "trending-up" : "trending-down"),
+      return {
+        id: tx.id,
+        type: tx.type,
+        amount: tx.type === "income" ? tx.amount : -tx.amount,
+        icon:
+          (category?.icon as keyof typeof MaterialIcons.glyphMap) ??
+          (tx.type === "income" ? "trending-up" : "trending-down"),
 
-    colorClass: category?.color || "#60A5FA",
-    title,                               // 👈 DANH MỤC
-    subtitle: subtitleParts.join(" • "), // 👈 TÊN GIAO DỊCH
-    date,                                // ✅ BẮT BUỘC – FIX LỖI TYPESCRIPT
-  };
-});
+        colorClass: category?.color || "#60A5FA",
+        title,
+        subtitle: subtitleParts.join(" • "),
+        date,
+      };
+    });
 
-
-setRecentTransactions(mapped);
-
+    setRecentTransactions(mapped);
 
     setRecentTransactions(mapped);
   }, [transactions, categories]);
 
   return (
-<View style={[styles.container, { backgroundColor: isDarkMode ? theme.background : '#FFFFFF' }]}>
-      <ScrollView 
+    <View
+      style={[
+        styles.container,
+        { backgroundColor: isDarkMode ? theme.background : "#FFFFFF" },
+      ]}
+    >
+      <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
@@ -235,7 +231,10 @@ setRecentTransactions(mapped);
           <TouchableOpacity
             style={[
               styles.notificationButton,
-              { backgroundColor: isDarkMode ? theme.cardBackground : '#F8FAFC', borderColor: isDarkMode ? theme.border : '#E2E8F0' },
+              {
+                backgroundColor: isDarkMode ? theme.cardBackground : "#F8FAFC",
+                borderColor: isDarkMode ? theme.border : "#E2E8F0",
+              },
             ]}
             onPress={() => navigation.navigate("Notifications")}
           >
@@ -249,7 +248,12 @@ setRecentTransactions(mapped);
         </View>
 
         {/* Balance Card */}
-        <View style={[styles.balanceCard, { backgroundColor: isDarkMode ? theme.cardBackground : '#FFFFFF' }]}>
+        <View
+          style={[
+            styles.balanceCard,
+            { backgroundColor: isDarkMode ? theme.cardBackground : "#FFFFFF" },
+          ]}
+        >
           <Text style={[styles.balanceLabel, { color: theme.textSecondary }]}>
             Tổng số dư
           </Text>
@@ -294,55 +298,86 @@ setRecentTransactions(mapped);
             <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>
               Giao dịch gần đây
             </Text>
-            <TouchableOpacity onPress={() => navigation.navigate("Transactions")}>
+            <TouchableOpacity
+              onPress={() => navigation.navigate("Transactions")}
+            >
               <Text style={styles.linkText}>Xem tất cả</Text>
             </TouchableOpacity>
           </View>
 
-          <View style={[styles.cardList, { backgroundColor: isDarkMode ? theme.cardBackground : '#FFFFFF' }]}>
-            {(recentTransactions.length ? recentTransactions : []).map((tx, index) => (
-              <TouchableOpacity
-                key={tx.id}
-                style={[
-                  styles.transactionItem,
-                  index < recentTransactions.length - 1 && styles.transactionItemBorder
-                ]}
-                onPress={() => navigation.navigate("UpdateTransaction", { id: tx.id })}
-              >
-                <View
-                  style={[styles.iconBox, { backgroundColor: tx.colorClass + '20' }]}>
-                  <MaterialIcons
-                    name={tx.icon as any}
-                    size={24}
-                    color={tx.colorClass}
-                  />
-                </View>
-
-                <View style={styles.txInfo}>
-                  <Text style={[styles.txTitle, { color: theme.textPrimary }]}>
-                    {tx.title}
-                  </Text>
-                  <Text style={[styles.txSubtitle, { color: theme.textSecondary }]}>
-                    {tx.subtitle}
-                  </Text>
-                </View>
-
-                <Text
+          <View
+            style={[
+              styles.cardList,
+              {
+                backgroundColor: isDarkMode ? theme.cardBackground : "#FFFFFF",
+              },
+            ]}
+          >
+            {(recentTransactions.length ? recentTransactions : []).map(
+              (tx, index) => (
+                <TouchableOpacity
+                  key={tx.id}
                   style={[
-                    styles.txAmount,
-                    { color: tx.type === "income" ? "#22C55E" : "#EF4444" },
+                    styles.transactionItem,
+                    index < recentTransactions.length - 1 &&
+                      styles.transactionItemBorder,
                   ]}
+                  onPress={() =>
+                    navigation.navigate("UpdateTransaction", { id: tx.id })
+                  }
                 >
-                  {tx.amount >= 0 ? "+" : "-"}
-                  {Math.abs(tx.amount).toLocaleString("vi-VN")}₫
-                </Text>
-              </TouchableOpacity>
-            ))}
+                  <View
+                    style={[
+                      styles.iconBox,
+                      { backgroundColor: tx.colorClass + "20" },
+                    ]}
+                  >
+                    <MaterialIcons
+                      name={tx.icon as any}
+                      size={24}
+                      color={tx.colorClass}
+                    />
+                  </View>
+
+                  <View style={styles.txInfo}>
+                    <Text
+                      style={[styles.txTitle, { color: theme.textPrimary }]}
+                    >
+                      {tx.title}
+                    </Text>
+                    <Text
+                      style={[
+                        styles.txSubtitle,
+                        { color: theme.textSecondary },
+                      ]}
+                    >
+                      {tx.subtitle}
+                    </Text>
+                  </View>
+
+                  <Text
+                    style={[
+                      styles.txAmount,
+                      { color: tx.type === "income" ? "#22C55E" : "#EF4444" },
+                    ]}
+                  >
+                    {tx.amount >= 0 ? "+" : "-"}
+                    {Math.abs(tx.amount).toLocaleString("vi-VN")}₫
+                  </Text>
+                </TouchableOpacity>
+              ),
+            )}
 
             {!recentTransactions.length ? (
               <View style={styles.emptyState}>
-                <MaterialIcons name="receipt-long" size={48} color={theme.textSecondary} />
-                <Text style={[styles.emptyText, { color: theme.textSecondary }]}>
+                <MaterialIcons
+                  name="receipt-long"
+                  size={48}
+                  color={theme.textSecondary}
+                />
+                <Text
+                  style={[styles.emptyText, { color: theme.textSecondary }]}
+                >
                   Chưa có giao dịch nào
                 </Text>
               </View>

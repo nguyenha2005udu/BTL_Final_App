@@ -40,7 +40,7 @@ const buildSections = (list: AppNotification[]) => {
     0,
     0,
     0,
-    0
+    0,
   );
 
   const today: AppNotification[] = [];
@@ -76,7 +76,7 @@ const NotificationsScreen: React.FC = () => {
             .slice(0, 80);
         });
       },
-      (err) => console.log("listenAppNotifications error", err)
+      (err) => console.log("listenAppNotifications error", err),
     );
 
     return () => unsub?.();
@@ -85,7 +85,9 @@ const NotificationsScreen: React.FC = () => {
   const visible = React.useMemo(() => {
     const filtered = filter === "unread" ? items.filter((i) => !i.read) : items;
     // Đảm bảo sắp xếp theo thời gian mới nhất
-    return filtered.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+    return filtered.sort(
+      (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
+    );
   }, [items, filter]);
 
   const sections = React.useMemo(() => buildSections(visible), [visible]);
@@ -95,13 +97,26 @@ const NotificationsScreen: React.FC = () => {
 
   const onPressNotif = (id: string) => {
     setItems((prev) =>
-      prev.map((i) => (i.id === id ? { ...i, read: true } : i))
+      prev.map((i) => (i.id === id ? { ...i, read: true } : i)),
     );
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: isDarkMode ? theme.background : '#FFFFFF' }]}>
-      <View style={[styles.header, { backgroundColor: isDarkMode ? theme.headerBackground : '#FFFFFF', borderBottomColor: isDarkMode ? theme.border : '#F1F5F9' }]}>
+    <View
+      style={[
+        styles.container,
+        { backgroundColor: isDarkMode ? theme.background : "#FFFFFF" },
+      ]}
+    >
+      <View
+        style={[
+          styles.header,
+          {
+            backgroundColor: isDarkMode ? theme.headerBackground : "#FFFFFF",
+            borderBottomColor: isDarkMode ? theme.border : "#F1F5F9",
+          },
+        ]}
+      >
         <View style={styles.headerTop}>
           <TouchableOpacity
             onPress={() => navigation.goBack()}
@@ -119,8 +134,8 @@ const NotificationsScreen: React.FC = () => {
             Thông báo
           </Text>
 
-          <TouchableOpacity 
-            style={styles.iconButton} 
+          <TouchableOpacity
+            style={styles.iconButton}
             onPress={markAllRead}
             activeOpacity={0.7}
           >
@@ -139,14 +154,22 @@ const NotificationsScreen: React.FC = () => {
               filter === "all"
                 ? styles.filterButtonActive
                 : {
-                    backgroundColor: isDarkMode ? theme.cardBackground : '#FFFFFF',
-                    borderColor: isDarkMode ? theme.border : '#E5E7EB',
+                    backgroundColor: isDarkMode
+                      ? theme.cardBackground
+                      : "#FFFFFF",
+                    borderColor: isDarkMode ? theme.border : "#E5E7EB",
                   },
             ]}
-            onPress={() => setFilter('all')}
+            onPress={() => setFilter("all")}
             activeOpacity={0.7}
           >
-            <Text style={filter === 'all' ? styles.filterTextActive : [styles.filterText, { color: theme.textSecondary }]}>
+            <Text
+              style={
+                filter === "all"
+                  ? styles.filterTextActive
+                  : [styles.filterText, { color: theme.textSecondary }]
+              }
+            >
               Tất cả
             </Text>
           </TouchableOpacity>
@@ -154,14 +177,16 @@ const NotificationsScreen: React.FC = () => {
           <TouchableOpacity
             style={[
               styles.filterButton,
-              filter === 'unread'
+              filter === "unread"
                 ? styles.filterButtonActive
-                : { 
-                    backgroundColor: isDarkMode ? theme.cardBackground : '#FFFFFF', 
-                    borderColor: isDarkMode ? theme.border : '#E5E7EB' 
+                : {
+                    backgroundColor: isDarkMode
+                      ? theme.cardBackground
+                      : "#FFFFFF",
+                    borderColor: isDarkMode ? theme.border : "#E5E7EB",
                   },
             ]}
-            onPress={() => setFilter('unread')}
+            onPress={() => setFilter("unread")}
             activeOpacity={0.7}
           >
             <Text
@@ -177,15 +202,20 @@ const NotificationsScreen: React.FC = () => {
         </View>
       </View>
 
-      <ScrollView 
+      <ScrollView
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
         {visible.length === 0 ? (
-          <View style={[styles.emptyWrap, { 
-            backgroundColor: isDarkMode ? theme.cardBackground : '#F9FAFB',
-            borderColor: isDarkMode ? theme.border : '#E5E7EB' 
-          }]}>
+          <View
+            style={[
+              styles.emptyWrap,
+              {
+                backgroundColor: isDarkMode ? theme.cardBackground : "#F9FAFB",
+                borderColor: isDarkMode ? theme.border : "#E5E7EB",
+              },
+            ]}
+          >
             <MaterialIcons
               name="notifications-none"
               size={48}
@@ -201,14 +231,18 @@ const NotificationsScreen: React.FC = () => {
         ) : (
           sections.map((section) => (
             <View key={section.title} style={styles.section}>
-              <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>{section.title}</Text>
+              <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>
+                {section.title}
+              </Text>
               <View style={styles.cardList}>
                 {section.data.map((item) => {
                   const cardBg = !item.read
                     ? isDarkMode
                       ? "#1e3a5f"
                       : "#EFF6FF"
-                    : isDarkMode ? theme.cardBackground : '#FFFFFF';
+                    : isDarkMode
+                      ? theme.cardBackground
+                      : "#FFFFFF";
 
                   const timeColor = item.read ? theme.textSecondary : "#3c83f6";
                   const iconBg = isDarkMode
@@ -222,9 +256,9 @@ const NotificationsScreen: React.FC = () => {
                       onPress={() => onPressNotif(item.id)}
                       style={[
                         styles.notificationCard,
-                        { 
+                        {
                           backgroundColor: cardBg,
-                          borderColor: isDarkMode ? theme.border : '#F1F5F9'
+                          borderColor: isDarkMode ? theme.border : "#F1F5F9",
                         },
                       ]}
                     >
@@ -320,7 +354,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderWidth: 1.5,
     borderColor: "#E5E7EB",
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOpacity: 0.03,
     shadowRadius: 4,
     shadowOffset: { width: 0, height: 2 },
@@ -329,7 +363,7 @@ const styles = StyleSheet.create({
   filterButtonActive: {
     backgroundColor: "#3c83f6",
     borderColor: "#3c83f6",
-    shadowColor: '#3c83f6',
+    shadowColor: "#3c83f6",
     shadowOpacity: 0.2,
   },
   filterText: {
@@ -365,13 +399,13 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 16,
     gap: 14,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOpacity: 0.08,
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 2 },
     elevation: 3,
     borderWidth: 1,
-    borderColor: '#F1F5F9',
+    borderColor: "#F1F5F9",
   },
   iconBox: {
     width: 44,

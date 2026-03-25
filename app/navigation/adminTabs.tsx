@@ -1,5 +1,3 @@
-// navigation/AdminTabs.tsx
-
 import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import DashboardScreen from "../presentation/screens/Admin/DashboardScreen";

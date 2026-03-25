@@ -53,8 +53,10 @@ const UpdateProfile: React.FC = () => {
   }, []);
 
   const handleChangeAvatar = async () => {
-    const { status: cameraStatus } = await ImagePicker.requestCameraPermissionsAsync();
-    const { status: mediaStatus } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    const { status: cameraStatus } =
+      await ImagePicker.requestCameraPermissionsAsync();
+    const { status: mediaStatus } =
+      await ImagePicker.requestMediaLibraryPermissionsAsync();
 
     if (cameraStatus !== "granted" || mediaStatus !== "granted") {
       Alert.alert("Cần quyền truy cập Camera và Thư viện ảnh");
@@ -66,12 +68,12 @@ const UpdateProfile: React.FC = () => {
         text: "Camera",
         onPress: async () => {
           const result = await ImagePicker.launchCameraAsync({
-            mediaTypes: ['images'],
+            mediaTypes: ["images"],
             quality: 0.7,
             allowsEditing: true,
             aspect: [1, 1],
           });
-          
+
           if (!result.canceled && result.assets && result.assets[0]) {
             await uploadAvatar(result.assets[0].uri);
           }
@@ -81,12 +83,12 @@ const UpdateProfile: React.FC = () => {
         text: "Thư viện",
         onPress: async () => {
           const result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ['images'],
+            mediaTypes: ["images"],
             quality: 0.7,
             allowsEditing: true,
             aspect: [1, 1],
           });
-          
+
           if (!result.canceled && result.assets && result.assets[0]) {
             await uploadAvatar(result.assets[0].uri);
           }
@@ -100,20 +102,26 @@ const UpdateProfile: React.FC = () => {
     setLoading(true);
     try {
       console.log("Starting upload for URI:", uri);
-      
+
       const response = await fetch(uri);
       const blob = await response.blob();
 
-      const fileRef = ref(storage, `avatars/${auth.currentUser?.uid}_${Date.now()}.jpg`);
+      const fileRef = ref(
+        storage,
+        `avatars/${auth.currentUser?.uid}_${Date.now()}.jpg`,
+      );
       await uploadBytes(fileRef, blob);
       const downloadUrl = await getDownloadURL(fileRef);
-      
+
       console.log("Upload successful:", downloadUrl);
       setAvatarUrl(downloadUrl);
       Alert.alert("Thành công", "Đã tải ảnh lên thành công");
     } catch (error) {
       console.error("UPLOAD AVATAR ERROR >>>", error);
-      Alert.alert("Lỗi", "Không thể tải ảnh lên. Kiểm tra quyền và kết nối mạng.");
+      Alert.alert(
+        "Lỗi",
+        "Không thể tải ảnh lên. Kiểm tra quyền và kết nối mạng.",
+      );
     } finally {
       setLoading(false);
     }
@@ -142,41 +150,65 @@ const UpdateProfile: React.FC = () => {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: isDarkMode ? theme.background : '#FFFFFF' }]}>
-      <View style={[styles.header, { 
-        backgroundColor: isDarkMode ? theme.headerBackground : '#FFFFFF',
-        borderBottomColor: isDarkMode ? theme.border : '#F1F5F9'
-      }]}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.iconButton}>
-          <MaterialIcons name="arrow-back" size={24} color={theme.textPrimary} />
+    <View
+      style={[
+        styles.container,
+        { backgroundColor: isDarkMode ? theme.background : "#FFFFFF" },
+      ]}
+    >
+      <View
+        style={[
+          styles.header,
+          {
+            backgroundColor: isDarkMode ? theme.headerBackground : "#FFFFFF",
+            borderBottomColor: isDarkMode ? theme.border : "#F1F5F9",
+          },
+        ]}
+      >
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={styles.iconButton}
+        >
+          <MaterialIcons
+            name="arrow-back"
+            size={24}
+            color={theme.textPrimary}
+          />
         </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: theme.textPrimary }]}>Cập nhật thông tin</Text>
+        <Text style={[styles.headerTitle, { color: theme.textPrimary }]}>
+          Cập nhật thông tin
+        </Text>
         <View style={{ width: 40 }} />
       </View>
 
-      <ScrollView 
+      <ScrollView
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
         {/* Avatar Section */}
-        <View style={[styles.avatarCard, { 
-          backgroundColor: isDarkMode ? theme.cardBackground : '#FFFFFF'
-        }]}>
+        <View
+          style={[
+            styles.avatarCard,
+            {
+              backgroundColor: isDarkMode ? theme.cardBackground : "#FFFFFF",
+            },
+          ]}
+        >
           <View style={styles.avatarWrapper}>
             <Image
               source={{ uri: avatarUrl || "https://via.placeholder.com/150" }}
               style={styles.avatar}
             />
-            <TouchableOpacity 
-              style={[styles.editIcon, loading && styles.editIconLoading]} 
-              onPress={handleChangeAvatar} 
+            <TouchableOpacity
+              style={[styles.editIcon, loading && styles.editIconLoading]}
+              onPress={handleChangeAvatar}
               disabled={loading}
               activeOpacity={0.7}
             >
-              <MaterialIcons 
-                name={loading ? "hourglass-empty" : "camera-alt"} 
-                size={20} 
-                color="white" 
+              <MaterialIcons
+                name={loading ? "hourglass-empty" : "camera-alt"}
+                size={20}
+                color="white"
               />
             </TouchableOpacity>
           </View>
@@ -186,19 +218,34 @@ const UpdateProfile: React.FC = () => {
         </View>
 
         {/* Form Card */}
-        <View style={[styles.formCard, { 
-          backgroundColor: isDarkMode ? theme.cardBackground : '#FFFFFF'
-        }]}>
+        <View
+          style={[
+            styles.formCard,
+            {
+              backgroundColor: isDarkMode ? theme.cardBackground : "#FFFFFF",
+            },
+          ]}
+        >
           <View style={styles.inputGroup}>
-            <Text style={[styles.label, { color: theme.textSecondary }]}>Họ và Tên</Text>
+            <Text style={[styles.label, { color: theme.textSecondary }]}>
+              Họ và Tên
+            </Text>
             <View style={styles.inputWrapper}>
-              <MaterialIcons name="person-outline" size={20} color={theme.textSecondary} style={styles.inputIcon} />
+              <MaterialIcons
+                name="person-outline"
+                size={20}
+                color={theme.textSecondary}
+                style={styles.inputIcon}
+              />
               <TextInput
-                style={[styles.input, { 
-                  backgroundColor: isDarkMode ? '#1F2937' : '#F8FAFC',
-                  borderColor: isDarkMode ? theme.border : '#E2E8F0',
-                  color: theme.textPrimary 
-                }]}
+                style={[
+                  styles.input,
+                  {
+                    backgroundColor: isDarkMode ? "#1F2937" : "#F8FAFC",
+                    borderColor: isDarkMode ? theme.border : "#E2E8F0",
+                    color: theme.textPrimary,
+                  },
+                ]}
                 placeholder="Nhập họ và tên"
                 placeholderTextColor={theme.textSecondary}
                 value={fullName}
@@ -208,15 +255,26 @@ const UpdateProfile: React.FC = () => {
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={[styles.label, { color: theme.textSecondary }]}>Email</Text>
+            <Text style={[styles.label, { color: theme.textSecondary }]}>
+              Email
+            </Text>
             <View style={styles.inputWrapper}>
-              <MaterialIcons name="email" size={20} color={theme.textSecondary} style={styles.inputIcon} />
+              <MaterialIcons
+                name="email"
+                size={20}
+                color={theme.textSecondary}
+                style={styles.inputIcon}
+              />
               <TextInput
-                style={[styles.input, styles.disabledInput, { 
-                  backgroundColor: isDarkMode ? '#374151' : '#F1F5F9',
-                  borderColor: isDarkMode ? theme.border : '#E2E8F0',
-                  color: theme.textSecondary 
-                }]}
+                style={[
+                  styles.input,
+                  styles.disabledInput,
+                  {
+                    backgroundColor: isDarkMode ? "#374151" : "#F1F5F9",
+                    borderColor: isDarkMode ? theme.border : "#E2E8F0",
+                    color: theme.textSecondary,
+                  },
+                ]}
                 value={userEmail}
                 editable={false}
               />
@@ -224,15 +282,25 @@ const UpdateProfile: React.FC = () => {
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={[styles.label, { color: theme.textSecondary }]}>Số điện thoại</Text>
+            <Text style={[styles.label, { color: theme.textSecondary }]}>
+              Số điện thoại
+            </Text>
             <View style={styles.inputWrapper}>
-              <MaterialIcons name="phone" size={20} color={theme.textSecondary} style={styles.inputIcon} />
+              <MaterialIcons
+                name="phone"
+                size={20}
+                color={theme.textSecondary}
+                style={styles.inputIcon}
+              />
               <TextInput
-                style={[styles.input, { 
-                  backgroundColor: isDarkMode ? '#1F2937' : '#F8FAFC',
-                  borderColor: isDarkMode ? theme.border : '#E2E8F0',
-                  color: theme.textPrimary 
-                }]}
+                style={[
+                  styles.input,
+                  {
+                    backgroundColor: isDarkMode ? "#1F2937" : "#F8FAFC",
+                    borderColor: isDarkMode ? theme.border : "#E2E8F0",
+                    color: theme.textPrimary,
+                  },
+                ]}
                 placeholder="Nhập số điện thoại"
                 placeholderTextColor={theme.textSecondary}
                 value={phone}
@@ -243,22 +311,43 @@ const UpdateProfile: React.FC = () => {
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={[styles.label, { color: theme.textSecondary }]}>Ngày sinh</Text>
+            <Text style={[styles.label, { color: theme.textSecondary }]}>
+              Ngày sinh
+            </Text>
             <TouchableOpacity
-              style={[styles.dateInputWrapper, { 
-                backgroundColor: isDarkMode ? '#1F2937' : '#F8FAFC',
-                borderColor: isDarkMode ? theme.border : '#E2E8F0'
-              }]}
+              style={[
+                styles.dateInputWrapper,
+                {
+                  backgroundColor: isDarkMode ? "#1F2937" : "#F8FAFC",
+                  borderColor: isDarkMode ? theme.border : "#E2E8F0",
+                },
+              ]}
               onPress={() => setShowDatePicker(true)}
               activeOpacity={0.7}
             >
-              <MaterialIcons name="cake" size={20} color={theme.textSecondary} style={styles.inputIcon} />
-              <Text style={[styles.dateText, { 
-                color: birthDate ? theme.textPrimary : theme.textSecondary 
-              }]}>
-                {birthDate ? birthDate.toLocaleDateString('vi-VN') : "Chọn ngày sinh"}
+              <MaterialIcons
+                name="cake"
+                size={20}
+                color={theme.textSecondary}
+                style={styles.inputIcon}
+              />
+              <Text
+                style={[
+                  styles.dateText,
+                  {
+                    color: birthDate ? theme.textPrimary : theme.textSecondary,
+                  },
+                ]}
+              >
+                {birthDate
+                  ? birthDate.toLocaleDateString("vi-VN")
+                  : "Chọn ngày sinh"}
               </Text>
-              <MaterialIcons name="calendar-today" size={20} color={theme.textSecondary} />
+              <MaterialIcons
+                name="calendar-today"
+                size={20}
+                color={theme.textSecondary}
+              />
             </TouchableOpacity>
           </View>
 
@@ -277,26 +366,47 @@ const UpdateProfile: React.FC = () => {
       </ScrollView>
 
       {/* Footer Buttons */}
-      <View style={[styles.footer, { 
-        backgroundColor: isDarkMode ? theme.cardBackground : '#FFFFFF',
-        borderTopColor: isDarkMode ? theme.border : '#F1F5F9'
-      }]}>
-        <TouchableOpacity 
-          style={[styles.saveButton, loading && styles.saveButtonDisabled]} 
-          onPress={handleSave} 
+      <View
+        style={[
+          styles.footer,
+          {
+            backgroundColor: isDarkMode ? theme.cardBackground : "#FFFFFF",
+            borderTopColor: isDarkMode ? theme.border : "#F1F5F9",
+          },
+        ]}
+      >
+        <TouchableOpacity
+          style={[styles.saveButton, loading && styles.saveButtonDisabled]}
+          onPress={handleSave}
           disabled={loading}
           activeOpacity={0.8}
         >
-          {loading && <MaterialIcons name="hourglass-empty" size={20} color="white" style={{ marginRight: 8 }} />}
-          <Text style={styles.saveButtonText}>{loading ? "Đang lưu..." : "Lưu thay đổi"}</Text>
+          {loading && (
+            <MaterialIcons
+              name="hourglass-empty"
+              size={20}
+              color="white"
+              style={{ marginRight: 8 }}
+            />
+          )}
+          <Text style={styles.saveButtonText}>
+            {loading ? "Đang lưu..." : "Lưu thay đổi"}
+          </Text>
         </TouchableOpacity>
-        
-        <TouchableOpacity 
-          style={[styles.cancelButton, { borderColor: isDarkMode ? theme.border : '#E2E8F0' }]} 
+
+        <TouchableOpacity
+          style={[
+            styles.cancelButton,
+            { borderColor: isDarkMode ? theme.border : "#E2E8F0" },
+          ]}
           onPress={() => navigation.goBack()}
           activeOpacity={0.7}
         >
-          <Text style={[styles.cancelButtonText, { color: theme.textSecondary }]}>Hủy</Text>
+          <Text
+            style={[styles.cancelButtonText, { color: theme.textSecondary }]}
+          >
+            Hủy
+          </Text>
         </TouchableOpacity>
       </View>
     </View>

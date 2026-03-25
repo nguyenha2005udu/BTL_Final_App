@@ -4,17 +4,12 @@ import { StyleSheet, Text, View } from "react-native";
 import { useTheme } from "../../../../context/ThemeContext";
 import { listenTransactions } from "../../../../services/transaction.service";
 
-// Nếu chỗ khác không dùng auth nữa thì có thể xoá import auth
-
 const MonthlyExpenseChart: React.FC = () => {
   const { theme, isDarkMode } = useTheme();
-
-  // [2 tháng trước, tháng trước, tháng hiện tại]
   const [monthlyExpenses, setMonthlyExpenses] = useState<number[]>([0, 0, 0]);
   const [monthLabels, setMonthLabels] = useState<string[]>(["", "", ""]);
   const [transactions, setTransactions] = useState<any[]>([]);
 
-  // 🔹 Lắng nghe danh sách giao dịch (thu/chi) của user
   useEffect(() => {
     const unsub = listenTransactions(
       (list: any[]) => {
@@ -22,7 +17,7 @@ const MonthlyExpenseChart: React.FC = () => {
       },
       (err) => {
         console.log("listenTransactions error in chart", err);
-      }
+      },
     );
 
     return () => {
@@ -30,11 +25,9 @@ const MonthlyExpenseChart: React.FC = () => {
     };
   }, []);
 
-  // 🔹 Tính chi tiêu 3 tháng gần nhất từ danh sách transactions đã load
   useEffect(() => {
     const now = new Date();
 
-    // Tính ra 3 tháng: 2 tháng trước, tháng trước, tháng hiện tại (cũ -> mới)
     const monthInfos: { year: number; month: number; label: string }[] = [];
     for (let i = 2; i >= 0; i--) {
       const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
@@ -78,7 +71,7 @@ const MonthlyExpenseChart: React.FC = () => {
 
       // tìm xem thuộc tháng nào trong 3 tháng gần nhất
       const idx = monthInfos.findIndex(
-        (info) => info.month === m && info.year === y
+        (info) => info.month === m && info.year === y,
       );
       if (idx === -1) return;
 
@@ -87,8 +80,8 @@ const MonthlyExpenseChart: React.FC = () => {
         typeof tx.mount === "number"
           ? tx.mount
           : typeof tx.amount === "number"
-          ? tx.amount
-          : Number(tx.mount ?? tx.amount ?? 0);
+            ? tx.amount
+            : Number(tx.mount ?? tx.amount ?? 0);
 
       if (!Number.isNaN(mount)) {
         totals[idx] += mount;
@@ -114,7 +107,12 @@ const MonthlyExpenseChart: React.FC = () => {
   }, [monthlyExpenses]);
 
   return (
-    <View style={[styles.reportCard, { backgroundColor: isDarkMode ? theme.background : '#ffffff' }]}>
+    <View
+      style={[
+        styles.reportCard,
+        { backgroundColor: isDarkMode ? theme.background : "#ffffff" },
+      ]}
+    >
       <Text style={[styles.reportTitle, { color: theme.textPrimary }]}>
         Chi tiêu 3 tháng gần nhất
       </Text>
@@ -133,8 +131,8 @@ const MonthlyExpenseChart: React.FC = () => {
               ? changePercent > 0
                 ? "arrow-upward"
                 : changePercent < 0
-                ? "arrow-downward"
-                : "horizontal-rule"
+                  ? "arrow-downward"
+                  : "horizontal-rule"
               : "horizontal-rule"
           }
           size={16}
@@ -143,8 +141,8 @@ const MonthlyExpenseChart: React.FC = () => {
               ? changePercent > 0
                 ? "#EF4444"
                 : changePercent < 0
-                ? "#22C55E"
-                : theme.textSecondary
+                  ? "#22C55E"
+                  : theme.textSecondary
               : theme.textSecondary
           }
         />
@@ -167,14 +165,12 @@ const MonthlyExpenseChart: React.FC = () => {
                     index === monthlyBars.length - 1
                       ? "#3c83f6" // tháng hiện tại
                       : isDarkMode
-                      ? "rgba(60, 131, 246, 0.3)"
-                      : "rgba(60, 131, 246, 0.2)",
+                        ? "rgba(60, 131, 246, 0.3)"
+                        : "rgba(60, 131, 246, 0.2)",
                 },
               ]}
             />
-            <Text
-              style={[styles.monthLabel, { color: theme.textSecondary }]}
-            >
+            <Text style={[styles.monthLabel, { color: theme.textSecondary }]}>
               {monthLabels[index] || ""}
             </Text>
           </View>
@@ -198,7 +194,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     marginBottom: 16,
     // subtle shadow / card style
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOpacity: 0.06,
     shadowRadius: 6,
     shadowOffset: { width: 0, height: 3 },
@@ -253,7 +249,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginTop: 6,
   },
-
 });
 
 export default MonthlyExpenseChart;

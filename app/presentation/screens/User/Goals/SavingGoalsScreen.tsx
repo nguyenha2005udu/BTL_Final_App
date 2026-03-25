@@ -9,7 +9,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-// import { useTheme } from "../../../../context/ThemeContext;
 import { useTheme } from "../../../../context/ThemeContext";
 import { RootStackParamList } from "../../../../navigation/RootNavigator";
 import { auth } from "../../../../services/firebase/firebaseConfig";
@@ -221,7 +220,6 @@ export default function SavingGoalsScreen({
         )}
       </ScrollView>
 
-      {/* Add Goal FAB */}
       {goals.length > 0 && (
         <TouchableOpacity
           style={styles.fab}

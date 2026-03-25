@@ -6,7 +6,6 @@ import { ActivityIndicator, StatusBar, Text, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
-// import { ThemeProvider, useTheme } from "../context/ThemeContext;
 import { ThemeProvider, useTheme } from "../context/ThemeContext";
 import { AuthProvider, useAuth } from "../providers/AuthProvider";
 

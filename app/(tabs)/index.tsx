@@ -40,6 +40,7 @@ import GoalList from "../presentation/screens/User/Goals/SavingGoalsScreen";
 import NotificationScreen from "../presentation/screens/User/Notification/NotificationScreen";
 
 import { RootStackParamList } from "../navigation/RootNavigator";
+import AdminTabs from "../navigation/adminTabs";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator();
@@ -121,63 +122,6 @@ function MainTabs() {
   );
 }
 
-function AdminDemoScreen() {
-  const { theme } = useTheme();
-
-  return (
-    <View
-      style={{
-        flex: 1,
-        backgroundColor: theme.background,
-        justifyContent: "center",
-        alignItems: "center",
-        paddingHorizontal: 24,
-      }}
-    >
-      <View
-        style={{
-          width: "100%",
-          maxWidth: 360,
-          backgroundColor: theme.cardBackground,
-          borderRadius: 20,
-          padding: 24,
-          borderWidth: 1,
-          borderColor: theme.border,
-          alignItems: "center",
-        }}
-      >
-        <MaterialIcons name="admin-panel-settings" size={64} color="#3c83f6" />
-
-        <Text
-          style={{
-            marginTop: 16,
-            fontSize: 24,
-            fontWeight: "700",
-            color: theme.textPrimary,
-            textAlign: "center",
-          }}
-        >
-          Màn demo Admin
-        </Text>
-
-        <Text
-          style={{
-            marginTop: 10,
-            fontSize: 15,
-            color: theme.textSecondary,
-            textAlign: "center",
-            lineHeight: 22,
-          }}
-        >
-          Tài khoản này đang có role là admin.
-          {"\n"}
-          Đây là màn hình demo để bạn test phân quyền.
-        </Text>
-      </View>
-    </View>
-  );
-}
-
 function AppNavigator() {
   const { theme, isDarkMode } = useTheme();
   const { user, loading, isAdmin } = useAuth();
@@ -208,7 +152,7 @@ function AppNavigator() {
           <>
             <Stack.Screen
               name="App"
-              component={isAdmin ? AdminDemoScreen : MainTabs}
+              component={isAdmin ? AdminTabs : MainTabs}
             />
 
             <Stack.Screen name="GoalList" component={GoalList} />

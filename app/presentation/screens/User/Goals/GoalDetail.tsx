@@ -15,7 +15,6 @@ import {
 } from "react-native";
 
 import { RootStackParamList } from "../../../../navigation/RootNavigator";
-// import { auth } from "../../../../services/firebase/firebaseConfig;
 import { auth } from "../../../../services/firebase/firebaseConfig";
 import {
   addGoalContribution,
@@ -26,12 +25,8 @@ import {
 } from "../../../../services/savingGoals.service";
 import { SavingGoal } from "../../../../type/types";
 
-/* ---------------- TYPES ---------------- */
-
 type GoalDetailRouteProp = RouteProp<RootStackParamList, "GoalDetail">;
 type GoalDetailNavProp = StackNavigationProp<RootStackParamList, "GoalDetail">;
-
-/* ---------------- COMPONENT ---------------- */
 
 export default function GoalDetail({
   route,
@@ -45,8 +40,6 @@ export default function GoalDetail({
   const [goal, setGoal] = useState<SavingGoal | null>(null);
   const [newAmount, setNewAmount] = useState("");
   const [contributions, setContributions] = useState<GoalContribution[]>([]);
-
-  /* ---------------- LOAD DATA ---------------- */
 
   const loadGoal = async () => {
     const user = auth.currentUser;
@@ -79,14 +72,10 @@ export default function GoalDetail({
     );
   }
 
-  /* ---------------- COMPUTED ---------------- */
-
   const progress = goal.currentAmount / goal.targetAmount;
   const percentage = Math.min(progress * 100, 100).toFixed(1);
   const isCompleted = goal.currentAmount >= goal.targetAmount;
   const remaining = Math.max(goal.targetAmount - goal.currentAmount, 0);
-
-  /* ---------------- UPDATE ---------------- */
 
   const handleUpdate = async () => {
     if (isCompleted) return;
@@ -118,8 +107,6 @@ export default function GoalDetail({
     loadGoal();
     loadContributions();
   };
-
-  /* ---------------- UI ---------------- */
 
   return (
     <KeyboardAvoidingView
@@ -261,8 +248,6 @@ export default function GoalDetail({
     </KeyboardAvoidingView>
   );
 }
-
-/* ---------------- STYLES ---------------- */
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#fff" },

@@ -22,19 +22,12 @@ import {
 } from "../../../../services/savingGoals.service";
 import { auth } from "../../../../services/firebase/firebaseConfig";
 
-/* ---------------- TYPES ---------------- */
-
 type RootStackParamList = {
   EditGoal: { id: string };
 };
 
 type EditGoalRouteProp = RouteProp<RootStackParamList, "EditGoal">;
-type EditGoalNavProp = StackNavigationProp<
-  RootStackParamList,
-  "EditGoal"
->;
-
-/* ---------------- COMPONENT ---------------- */
+type EditGoalNavProp = StackNavigationProp<RootStackParamList, "EditGoal">;
 
 export default function EditGoal({
   route,
@@ -51,8 +44,6 @@ export default function EditGoal({
 
   const [title, setTitle] = useState("");
   const [targetAmount, setTargetAmount] = useState("");
-
-  /* ---------------- LOAD DATA ---------------- */
 
   useEffect(() => {
     const loadGoal = async () => {
@@ -79,8 +70,6 @@ export default function EditGoal({
     );
   }
 
-  /* ---------------- SAVE ---------------- */
-
   const handleSave = async () => {
     const user = auth.currentUser;
     if (!user) return;
@@ -100,7 +89,7 @@ export default function EditGoal({
     if (target < goal.currentAmount) {
       Alert.alert(
         "Không hợp lệ",
-        `Mục tiêu mới phải ≥ ${goal.currentAmount.toLocaleString()} đ`
+        `Mục tiêu mới phải ≥ ${goal.currentAmount.toLocaleString()} đ`,
       );
       return;
     }
@@ -114,8 +103,6 @@ export default function EditGoal({
       { text: "OK", onPress: () => navigation.goBack() },
     ]);
   };
-
-  /* ---------------- UI ---------------- */
 
   return (
     <KeyboardAvoidingView
@@ -185,8 +172,6 @@ export default function EditGoal({
     </KeyboardAvoidingView>
   );
 }
-
-/* ---------------- STYLES ---------------- */
 
 const styles = StyleSheet.create({
   container: {
