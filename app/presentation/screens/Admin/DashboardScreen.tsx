@@ -1,200 +1,157 @@
-// presentation/screens/Admin/DashboardScreen.tsx
-
-import React, { useState, useRef, useEffect } from 'react';
+import React from "react";
 import {
-  View, Text, TextInput, TouchableOpacity,
-  ScrollView, StyleSheet, SafeAreaView,
-  StatusBar, Animated, Dimensions,
-} from 'react-native';
-import Svg, {
-  Rect, Circle, Path, Defs, LinearGradient, Stop,
-} from 'react-native-svg';
+  Alert,
+  SafeAreaView,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 
-const { width: SW } = Dimensions.get('window');
-const GREEN = '#1db87a';
-const GREEN_LIGHT = '#b7f5d8';
-const GREEN_DARK = '#0e9e62';
-const RED = '#e63946';
+type Trend = {
+  value: string;
+  isPositive: boolean;
+};
 
-// ─── Bar Chart ────────────────────────────────────────────────────────────────
-const BAR_DATA = [
-  { label: 'JAN', value: 35 },
-  { label: 'FEB', value: 55 },
-  { label: 'MAR', value: 48 },
-  { label: 'APR', value: 68 },
-  { label: 'MAY', value: 80 },
-  { label: 'JUN', value: 95 },
+type StatCardProps = {
+  label: string;
+  value: string;
+  trend?: Trend;
+  subtext?: string;
+  warning?: string;
+  progress?: number;
+};
+
+const lineData = [
+  { name: "T1", value: 120 },
+  { name: "T2", value: 110 },
+  { name: "T3", value: 80 },
+  { name: "T4", value: 60 },
+  { name: "T5", value: 90 },
+  { name: "T6", value: 40 },
 ];
 
-const BarChart = () => {
-  const anims = useRef(BAR_DATA.map(() => new Animated.Value(0))).current;
-  useEffect(() => {
-    Animated.stagger(80, anims.map(a =>
-      Animated.spring(a, { toValue: 1, useNativeDriver: false, tension: 60, friction: 8 })
-    )).start();
-  }, []);
+const pieData = [
+  { name: "Hoạt động", value: 95, color: "#064E3B" },
+  { name: "Bị khóa", value: 5, color: "#EF4444" },
+];
 
-  const W = SW - 64;
-  const H = 180;
-  const barW = (W / BAR_DATA.length) * 0.55;
-  const maxVal = Math.max(...BAR_DATA.map(d => d.value));
+const categories = [
+  { name: "Ăn uống", value: 42, color: "#064E3B" },
+  { name: "Di chuyển", value: 28, color: "#3B82F6" },
+  { name: "Mua sắm", value: 15, color: "#F59E0B" },
+];
 
-  return (
-    <View style={{ height: H + 24 }}>
-      <View style={{ flexDirection: 'row', alignItems: 'flex-end', height: H, width: W }}>
-        {BAR_DATA.map((d, i) => {
-          const isLast = i === BAR_DATA.length - 1;
-          const pct = d.value / maxVal;
-          const barH = anims[i].interpolate({ inputRange: [0, 1], outputRange: [0, H * pct] });
-          const slotW = W / BAR_DATA.length;
-          return (
-            <View key={d.label} style={{ width: slotW, alignItems: 'center', justifyContent: 'flex-end', height: H }}>
-              <Animated.View style={{
-                width: barW, height: barH, borderRadius: 6,
-                backgroundColor: isLast ? GREEN_DARK : i >= 4 ? GREEN : GREEN_LIGHT,
-                overflow: 'hidden',
-              }} />
-            </View>
-          );
-        })}
-      </View>
-      <View style={{ flexDirection: 'row', width: W, marginTop: 6 }}>
-        {BAR_DATA.map((d) => (
-          <View key={d.label} style={{ flex: 1, alignItems: 'center' }}>
-            <Text style={styles.barLabel}>{d.label}</Text>
-          </View>
-        ))}
-      </View>
-    </View>
-  );
-};
-
-// ─── Donut Chart ──────────────────────────────────────────────────────────────
-const DonutChart = () => {
-  const SIZE = 160;
-  const R = 60;
-  const STROKE = 20;
-  const cx = SIZE / 2, cy = SIZE / 2;
-  const circ = 2 * Math.PI * R;
-  const activePct = 0.85;
-
-  return (
-    <View style={{ alignItems: 'center' }}>
-      <View style={{ width: SIZE, height: SIZE }}>
-        <Svg width={SIZE} height={SIZE}>
-          {/* track */}
-          <Circle cx={cx} cy={cy} r={R} fill="none" stroke="#eee" strokeWidth={STROKE} />
-          {/* locked red */}
-          <Circle cx={cx} cy={cy} r={R} fill="none" stroke={RED}
-            strokeWidth={STROKE}
-            strokeDasharray={`${circ * 0.15} ${circ * 0.85}`}
-            strokeDashoffset={-(circ * activePct)}
-            strokeLinecap="round"
-            rotation="-90" origin={`${cx},${cy}`}
-          />
-          {/* active green */}
-          <Circle cx={cx} cy={cy} r={R} fill="none" stroke={GREEN}
-            strokeWidth={STROKE}
-            strokeDasharray={`${circ * activePct} ${circ * 0.15}`}
-            strokeLinecap="round"
-            rotation="-90" origin={`${cx},${cy}`}
-          />
-        </Svg>
-        <View style={StyleSheet.absoluteFill}>
-          <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-            <Text style={styles.donutValue}>1.2k</Text>
-            <Text style={styles.donutSub}>USERS</Text>
-          </View>
-        </View>
-      </View>
-    </View>
-  );
-};
-
-// ─── Stat Card ────────────────────────────────────────────────────────────────
-const StatCard = ({ icon, iconBg, label, value }) => (
-  <View style={styles.statCard}>
-    <View style={[styles.iconBox, { backgroundColor: iconBg }]}>
-      <Text style={styles.iconText}>{icon}</Text>
-    </View>
-    <View style={{ marginLeft: 14 }}>
-      <Text style={styles.statLabel}>{label}</Text>
-      <Text style={styles.statValue}>{value}</Text>
-    </View>
-  </View>
-);
-
-// ─── Main ─────────────────────────────────────────────────────────────────────
 export default function DashboardScreen() {
-  const [period, setPeriod] = useState('Last 6 Months');
+  const total = pieData.reduce((sum, item) => sum + item.value, 0);
 
   return (
-    <SafeAreaView style={styles.safe}>
-      <StatusBar barStyle="dark-content" backgroundColor="#f4f5f7" />
+    <SafeAreaView style={styles.safeArea}>
+      <StatusBar barStyle="light-content" backgroundColor="#0F172A" />
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={styles.contentContainer}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.topBar}>
+          <View>
+            <Text style={styles.topBarTitle}>Thống kê Hệ thống</Text>
+            <Text style={styles.topBarSubtitle}>Admin Dashboard - Expense Tracker</Text>
+          </View>
+          <TouchableOpacity
+            style={styles.topBarButton}
+            onPress={() => Alert.alert("Thông báo", "Mở khu vực thông báo")}
+          >
+            <Ionicons name="notifications-outline" size={20} color="#FFFFFF" />
+          </TouchableOpacity>
+        </View>
 
-      {/* Top Bar */}
-      <View style={styles.topBar}>
-        <TouchableOpacity style={styles.menuBtn}>
-          <Text style={{ fontSize: 20, color: '#444' }}>☰</Text>
-        </TouchableOpacity>
-
-        <View style={styles.searchBox}>
-          <Text style={styles.searchIcon}>🔍</Text>
-          <TextInput
-            placeholder="Search users, logs..."
-            placeholderTextColor="#bbb"
-            style={styles.searchInput}
+        <View style={styles.grid}>
+          <StatCard
+            label="Tổng người dùng"
+            value="1,284"
+            trend={{ value: "+5% tháng này", isPositive: true }}
           />
+          <StatCard label="Người dùng mới" value="156" subtext="Tháng này" />
+          <StatCard label="Tỷ lệ hoạt động" value="85%" progress={85} />
+          <StatCard label="Tài khoản bị khóa" value="12" warning="Cần kiểm tra" />
         </View>
 
-        <TouchableOpacity style={styles.bellBtn}>
-          <Text style={{ fontSize: 20 }}>🔔</Text>
-          <View style={styles.bellDot} />
-        </TouchableOpacity>
-
-        <View style={styles.avatar}>
-          <Text style={{ fontSize: 18 }}>👤</Text>
-        </View>
-      </View>
-
-      <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-
-        {/* Stat Cards */}
-        <StatCard icon="👥" iconBg="#eaf0fb" label="Total Users" value="1,284" />
-        <StatCard icon="✅" iconBg="#e6faf2" label="Active Users" value="1,120" />
-        <StatCard icon="🔒" iconBg="#fde8e8" label="Locked Users" value="164" />
-        <StatCard icon="🏷️" iconBg="#fff4e6" label="Total Categories" value="42" />
-
-        {/* Bar Chart Card */}
         <View style={styles.card}>
-          <View style={styles.chartHeader}>
-            <Text style={styles.cardTitle}>User Growth by{'\n'}Month</Text>
-            <TouchableOpacity style={styles.periodBtn}>
-              <Text style={styles.periodText}>{period}  ▾</Text>
-            </TouchableOpacity>
+          <View style={styles.cardHeader}>
+            <Text style={styles.cardTitle}>Tăng trưởng người dùng</Text>
+            <Text style={styles.cardMeta}>6 tháng qua</Text>
           </View>
-          <View style={{ marginTop: 16 }}>
-            <BarChart />
+
+          <View style={styles.chartWrapper}>
+            <View style={styles.lineChartArea}>
+              {lineData.map((item) => (
+                <View key={item.name} style={styles.lineBarItem}>
+                  <View style={styles.lineBarTrack}>
+                    <View
+                      style={[
+                        styles.lineBarFill,
+                        { height: Math.max(18, item.value * 0.55) },
+                      ]}
+                    />
+                  </View>
+                  <Text style={styles.lineBarLabel}>{item.name}</Text>
+                </View>
+              ))}
+            </View>
           </View>
         </View>
 
-        {/* Donut Card */}
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>Account Status Distribution</Text>
-          <View style={{ marginTop: 20, alignItems: 'center' }}>
-            <DonutChart />
+          <Text style={styles.cardTitle}>Trạng thái tài khoản</Text>
+
+          <View style={styles.pieLegendList}>
+            {pieData.map((item) => (
+              <View key={item.name} style={styles.legendRow}>
+                <View style={[styles.legendDot, { backgroundColor: item.color }]} />
+                <Text style={styles.legendText}>
+                  {item.name}: {item.value}%
+                </Text>
+              </View>
+            ))}
           </View>
-          <View style={styles.legendBox}>
-            <View style={styles.legendRow}>
-              <View style={[styles.legendDot, { backgroundColor: GREEN }]} />
-              <Text style={styles.legendLabel}>Active Accounts</Text>
-              <Text style={styles.legendPct}>85%</Text>
+
+          <View style={styles.progressRingCard}>
+            <Text style={styles.progressMainText}>{total}%</Text>
+            <Text style={styles.progressSubText}>Tổng trạng thái</Text>
+
+            <View style={styles.progressBarBackground}>
+              <View style={[styles.progressBarFill, { width: `${pieData[0].value}%` }]} />
             </View>
-            <View style={styles.legendRow}>
-              <View style={[styles.legendDot, { backgroundColor: RED }]} />
-              <Text style={styles.legendLabel}>Locked Accounts</Text>
-              <Text style={styles.legendPct}>15%</Text>
-            </View>
+          </View>
+        </View>
+
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Danh mục hoạt động nhất</Text>
+
+          <View style={styles.categoryList}>
+            {categories.map((cat) => (
+              <View key={cat.name} style={styles.categoryItem}>
+                <View style={styles.categoryHeader}>
+                  <Text style={styles.categoryName}>{cat.name}</Text>
+                  <Text style={styles.categoryPercent}>{cat.value}%</Text>
+                </View>
+                <View style={styles.categoryTrack}>
+                  <View
+                    style={[
+                      styles.categoryFill,
+                      {
+                        backgroundColor: cat.color,
+                        width: `${cat.value}%`,
+                      },
+                    ]}
+                  />
+                </View>
+              </View>
+            ))}
           </View>
         </View>
 
@@ -203,74 +160,341 @@ export default function DashboardScreen() {
   );
 }
 
+function StatCard({ label, value, trend, subtext, warning, progress }: StatCardProps) {
+  return (
+    <View style={styles.statCard}>
+      <Text style={styles.statLabel}>{label}</Text>
+      <Text style={styles.statValue}>{value}</Text>
+
+      {trend && (
+        <View style={styles.trendRow}>
+          <Ionicons
+            name={trend.isPositive ? "trending-up-outline" : "trending-down-outline"}
+            size={14}
+            color={trend.isPositive ? "#059669" : "#DC2626"}
+          />
+          <Text
+            style={[
+              styles.trendText,
+              { color: trend.isPositive ? "#059669" : "#DC2626" },
+            ]}
+          >
+            {trend.value}
+          </Text>
+        </View>
+      )}
+
+      {subtext ? <Text style={styles.subtext}>{subtext}</Text> : null}
+
+      {typeof progress === "number" ? (
+        <View style={styles.miniProgressTrack}>
+          <View style={[styles.miniProgressFill, { width: `${progress}%` }]} />
+        </View>
+      ) : null}
+
+      {warning ? (
+        <View style={styles.warningRow}>
+          <Ionicons name="warning-outline" size={14} color="#EF4444" />
+          <Text style={styles.warningText}>{warning}</Text>
+        </View>
+      ) : null}
+    </View>
+  );
+}
+
+function NavItem({
+  icon,
+  label,
+  active = false,
+}: {
+  icon: keyof typeof Ionicons.glyphMap;
+  label: string;
+  active?: boolean;
+}) {
+  return (
+    <TouchableOpacity style={styles.navItem}>
+      <Ionicons
+        name={icon}
+        size={20}
+        color={active ? "#064E3B" : "#64748B"}
+      />
+      <Text style={[styles.navText, active && styles.navTextActive]}>{label}</Text>
+    </TouchableOpacity>
+  );
+}
+
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#f4f5f7' },
-
+  safeArea: {
+    flex: 1,
+    backgroundColor: "#F8FAFC",
+  },
+  container: {
+    flex: 1,
+  },
+  contentContainer: {
+    padding: 16,
+    paddingBottom: 32,
+  },
   topBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    backgroundColor: '#f4f5f7',
-    gap: 10,
+    backgroundColor: "#0F172A",
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 18,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 16,
   },
-  menuBtn: { padding: 4 },
-  searchBox: {
-    flex: 1, flexDirection: 'row', alignItems: 'center',
-    backgroundColor: '#fff', borderRadius: 10,
-    paddingHorizontal: 10, paddingVertical: 7,
-    shadowColor: '#000', shadowOpacity: 0.04, shadowRadius: 4, elevation: 2,
+  topBarTitle: {
+    color: "#FFFFFF",
+    fontSize: 20,
+    fontWeight: "700",
   },
-  searchIcon: { fontSize: 14, marginRight: 6 },
-  searchInput: { flex: 1, fontSize: 13, color: '#333' },
-  bellBtn: { position: 'relative', padding: 4 },
-  bellDot: {
-    position: 'absolute', top: 2, right: 2,
-    width: 8, height: 8, borderRadius: 4,
-    backgroundColor: RED, borderWidth: 1.5, borderColor: '#f4f5f7',
+  topBarSubtitle: {
+    color: "#CBD5E1",
+    fontSize: 12,
+    marginTop: 4,
   },
-  avatar: {
-    width: 36, height: 36, borderRadius: 18,
-    backgroundColor: '#e0c9a6', alignItems: 'center', justifyContent: 'center',
-    overflow: 'hidden',
+  topBarButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "rgba(255,255,255,0.12)",
+    justifyContent: "center",
+    alignItems: "center",
   },
-
-  scroll: { paddingHorizontal: 16, paddingBottom: 28, gap: 12 },
-
+  grid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    marginBottom: 16,
+  },
   statCard: {
-    flexDirection: 'row', alignItems: 'center',
-    backgroundColor: '#fff', borderRadius: 16, padding: 16,
-    shadowColor: '#000', shadowOpacity: 0.04, shadowRadius: 6, elevation: 2,
+    width: "48.5%",
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    padding: 14,
+    marginBottom: 12,
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
   },
-  iconBox: {
-    width: 46, height: 46, borderRadius: 12,
-    alignItems: 'center', justifyContent: 'center',
+  statLabel: {
+    fontSize: 11,
+    fontWeight: "600",
+    color: "#64748B",
+    textTransform: "uppercase",
+    marginBottom: 8,
   },
-  iconText: { fontSize: 22 },
-  statLabel: { fontSize: 12, color: '#999', marginBottom: 3 },
-  statValue: { fontSize: 26, fontWeight: '800', color: '#1a1a1a' },
-
+  statValue: {
+    fontSize: 24,
+    fontWeight: "700",
+    color: "#0F172A",
+  },
+  trendRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 10,
+  },
+  trendText: {
+    marginLeft: 4,
+    fontSize: 12,
+    fontWeight: "700",
+  },
+  subtext: {
+    marginTop: 10,
+    color: "#94A3B8",
+    fontSize: 12,
+    fontWeight: "500",
+  },
+  miniProgressTrack: {
+    width: "100%",
+    height: 6,
+    borderRadius: 999,
+    backgroundColor: "#E2E8F0",
+    marginTop: 12,
+    overflow: "hidden",
+  },
+  miniProgressFill: {
+    height: "100%",
+    backgroundColor: "#065F46",
+    borderRadius: 999,
+  },
+  warningRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 10,
+  },
+  warningText: {
+    marginLeft: 4,
+    color: "#EF4444",
+    fontSize: 12,
+    fontWeight: "700",
+  },
   card: {
-    backgroundColor: '#fff', borderRadius: 16, padding: 18,
-    shadowColor: '#000', shadowOpacity: 0.04, shadowRadius: 6, elevation: 2,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 18,
+    padding: 16,
+    marginBottom: 16,
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
   },
-  chartHeader: {
-    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start',
+  cardHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 14,
+    alignItems: "center",
   },
-  cardTitle: { fontSize: 16, fontWeight: '700', color: '#1a1a1a', lineHeight: 22 },
-  periodBtn: {
-    borderWidth: 1, borderColor: '#ddd', borderRadius: 8,
-    paddingHorizontal: 10, paddingVertical: 6, backgroundColor: '#fafafa',
+  cardTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#0F172A",
   },
-  periodText: { fontSize: 12, color: '#555', fontWeight: '500' },
-  barLabel: { fontSize: 10, color: '#aaa', fontWeight: '600' },
-
-  donutValue: { fontSize: 26, fontWeight: '800', color: '#1a1a1a' },
-  donutSub: { fontSize: 10, color: '#aaa', fontWeight: '700', letterSpacing: 1 },
-
-  legendBox: { marginTop: 20, gap: 12 },
-  legendRow: { flexDirection: 'row', alignItems: 'center' },
-  legendDot: { width: 11, height: 11, borderRadius: 6, marginRight: 10 },
-  legendLabel: { flex: 1, fontSize: 14, color: '#444' },
-  legendPct: { fontSize: 14, fontWeight: '700', color: '#1a1a1a' },
+  cardMeta: {
+    fontSize: 12,
+    color: "#94A3B8",
+  },
+  chartWrapper: {
+    marginTop: 8,
+  },
+  lineChartArea: {
+    height: 180,
+    flexDirection: "row",
+    alignItems: "flex-end",
+    justifyContent: "space-between",
+    paddingHorizontal: 4,
+  },
+  lineBarItem: {
+    alignItems: "center",
+    flex: 1,
+  },
+  lineBarTrack: {
+    width: 22,
+    height: 120,
+    backgroundColor: "#E2E8F0",
+    borderRadius: 999,
+    justifyContent: "flex-end",
+    overflow: "hidden",
+  },
+  lineBarFill: {
+    width: "100%",
+    backgroundColor: "#064E3B",
+    borderRadius: 999,
+  },
+  lineBarLabel: {
+    marginTop: 8,
+    fontSize: 11,
+    color: "#64748B",
+    fontWeight: "600",
+  },
+  pieLegendList: {
+    marginTop: 10,
+  },
+  legendRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  legendDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    marginRight: 8,
+  },
+  legendText: {
+    fontSize: 13,
+    color: "#334155",
+    fontWeight: "500",
+  },
+  progressRingCard: {
+    marginTop: 8,
+  },
+  progressMainText: {
+    fontSize: 28,
+    fontWeight: "800",
+    color: "#0F172A",
+    marginBottom: 4,
+  },
+  progressSubText: {
+    fontSize: 12,
+    color: "#94A3B8",
+    marginBottom: 12,
+  },
+  progressBarBackground: {
+    width: "100%",
+    height: 10,
+    backgroundColor: "#E2E8F0",
+    borderRadius: 999,
+    overflow: "hidden",
+  },
+  progressBarFill: {
+    height: "100%",
+    backgroundColor: "#064E3B",
+    borderRadius: 999,
+  },
+  categoryList: {
+    marginTop: 8,
+  },
+  categoryItem: {
+    marginBottom: 14,
+  },
+  categoryHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 6,
+  },
+  categoryName: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: "#475569",
+    textTransform: "uppercase",
+  },
+  categoryPercent: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: "#475569",
+  },
+  categoryTrack: {
+    width: "100%",
+    height: 10,
+    borderRadius: 999,
+    backgroundColor: "#E2E8F0",
+    overflow: "hidden",
+  },
+  categoryFill: {
+    height: "100%",
+    borderRadius: 999,
+  },
+  bottomNav: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 18,
+    paddingVertical: 14,
+    paddingHorizontal: 10,
+    flexDirection: "row",
+    justifyContent: "space-around",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: -1 },
+    elevation: 2,
+  },
+  navItem: {
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  navText: {
+    marginTop: 4,
+    fontSize: 11,
+    color: "#64748B",
+    fontWeight: "600",
+  },
+  navTextActive: {
+    color: "#064E3B",
+  },
 });

@@ -1,100 +1,179 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from "react";
 import {
-  View,
+  Alert,
+  FlatList,
+  Image,
+  SafeAreaView,
+  StatusBar,
+  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  FlatList,
-  StyleSheet,
-  SafeAreaView,
-  StatusBar,
-  Image,
-} from 'react-native';
+  View,
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 
-const USERS = [
+type UserRole = "admin" | "user";
+type UserStatus = "active" | "locked";
+type FilterType = "all" | "active" | "locked";
+
+interface UserItem {
+  id: string;
+  fullName: string;
+  email: string;
+  role: UserRole;
+  status: UserStatus;
+  createdAt: string;
+  avatarUrl: string;
+}
+
+const mockUsers: UserItem[] = [
   {
-    id: '1',
-    name: 'Nguyễn Văn A',
-    email: 'nguyenvana@example.com',
-    status: 'active',
-    createdAt: '20/05/2023',
-    avatar: 'https://i.pravatar.cc/150?img=11',
+    id: "1",
+    fullName: "Nguyễn Văn A",
+    email: "nguyenvana@example.com",
+    role: "admin",
+    status: "active",
+    createdAt: "20/05/2023",
+    avatarUrl: "https://picsum.photos/seed/user1/200",
   },
   {
-    id: '2',
-    name: 'Trần Thị B',
-    email: 'tranthib@example.com',
-    status: 'locked',
-    createdAt: '18/06/2023',
-    avatar: 'https://i.pravatar.cc/150?img=47',
+    id: "2",
+    fullName: "Trần Thị B",
+    email: "tranthib@example.com",
+    role: "user",
+    status: "locked",
+    createdAt: "18/06/2023",
+    avatarUrl: "https://picsum.photos/seed/user2/200",
   },
   {
-    id: '3',
-    name: 'Lê Hoàng C',
-    email: 'lehoangc@example.com',
-    status: 'active',
-    createdAt: '12/07/2023',
-    avatar: 'https://i.pravatar.cc/150?img=45',
+    id: "3",
+    fullName: "Lê Hoàng C",
+    email: "lehoangc@example.com",
+    role: "user",
+    status: "active",
+    createdAt: "12/07/2023",
+    avatarUrl: "https://picsum.photos/seed/user3/200",
   },
 ];
 
-const TABS = [
-  { key: 'all', label: 'Tất cả' },
-  { key: 'active', label: 'Hoạt động' },
-  { key: 'locked', label: 'Bị khóa' },
-];
+export default function UsersScreen() {
+  const [filter, setFilter] = useState<FilterType>("all");
+  const [search, setSearch] = useState("");
 
-const NAV_ITEMS = [
-  { key: 'overview', label: 'Tổng quan', icon: '⊞' },
-  { key: 'users', label: 'Người dùng', icon: '👥' },
-  { key: 'stats', label: 'Thống kê', icon: '📊' },
-  { key: 'settings', label: 'Cài đặt', icon: '⚙️' },
-];
+  const filteredUsers = useMemo(() => {
+    return mockUsers.filter((user) => {
+      const matchesFilter = filter === "all" || user.status === filter;
+      const q = search.trim().toLowerCase();
+      const matchesSearch =
+        user.fullName.toLowerCase().includes(q) ||
+        user.email.toLowerCase().includes(q);
 
-export default function UserManagementScreen() {
-  const [activeTab, setActiveTab] = useState('all');
-  const [searchText, setSearchText] = useState('');
-  const [activeNav, setActiveNav] = useState('users');
+      return matchesFilter && matchesSearch;
+    });
+  }, [filter, search]);
 
-  const filteredUsers = USERS.filter((user) => {
-    const matchTab =
-      activeTab === 'all' ||
-      (activeTab === 'active' && user.status === 'active') ||
-      (activeTab === 'locked' && user.status === 'locked');
-    const matchSearch =
-      user.name.toLowerCase().includes(searchText.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchText.toLowerCase());
-    return matchTab && matchSearch;
-  });
+const handleAddUser = () => {
+  navigation.navigate("UserForm");
+};
 
-  const renderUser = ({ item }) => {
-    const isLocked = item.status === 'locked';
+  const handleEditUser = (user: UserItem) => {
+    Alert.alert("Chỉnh sửa", `Chỉnh sửa người dùng: ${user.fullName}`);
+  };
+
+  const handleToggleLock = (user: UserItem) => {
+    const nextAction = user.status === "active" ? "khóa" : "mở khóa";
+    Alert.alert(
+      "Xác nhận",
+      `Bạn có chắc muốn ${nextAction} tài khoản "${user.fullName}" không?`,
+      [
+        { text: "Hủy", style: "cancel" },
+        {
+          text: "Đồng ý",
+          onPress: () =>
+            Alert.alert("Thành công", `${nextAction} tài khoản: ${user.fullName}`),
+        },
+      ]
+    );
+  };
+
+  const renderFilterButton = (value: FilterType, label: string) => {
+    const active = filter === value;
+    return (
+      <TouchableOpacity
+        key={value}
+        onPress={() => setFilter(value)}
+        style={[styles.filterButton, active && styles.filterButtonActive]}
+      >
+        <Text style={[styles.filterButtonText, active && styles.filterButtonTextActive]}>
+          {label}
+        </Text>
+      </TouchableOpacity>
+    );
+  };
+
+  const renderItem = ({ item }: { item: UserItem }) => {
+    const isActive = item.status === "active";
+
     return (
       <View style={styles.userCard}>
         <View style={styles.userTop}>
-          <Image source={{ uri: item.avatar }} style={styles.avatar} />
+          <Image source={{ uri: item.avatarUrl }} style={styles.avatar} />
           <View style={styles.userInfo}>
-            <Text style={styles.userName}>{item.name}</Text>
-            <Text style={styles.userEmail}>{item.email}</Text>
-          </View>
-          <View style={[styles.statusBadge, isLocked ? styles.badgeLocked : styles.badgeActive]}>
-            <Text style={[styles.statusText, isLocked ? styles.statusTextLocked : styles.statusTextActive]}>
-              {isLocked ? 'BỊ KHÓA' : 'HOẠT ĐỘNG'}
+            <View style={styles.nameRow}>
+              <Text style={styles.userName} numberOfLines={1}>
+                {item.fullName}
+              </Text>
+
+              <View
+                style={[
+                  styles.statusBadge,
+                  isActive ? styles.activeBadge : styles.lockedBadge,
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.statusBadgeText,
+                    isActive ? styles.activeBadgeText : styles.lockedBadgeText,
+                  ]}
+                >
+                  {isActive ? "Hoạt động" : "Bị khóa"}
+                </Text>
+              </View>
+            </View>
+
+            <Text style={styles.userEmail} numberOfLines={1}>
+              {item.email}
+            </Text>
+
+            <Text style={styles.userRole}>
+              Vai trò: {item.role === "admin" ? "Admin" : "User"}
             </Text>
           </View>
         </View>
 
         <View style={styles.userBottom}>
-          <View>
-            <Text style={styles.dateLabel}>Ngày tạo</Text>
-            <Text style={styles.dateValue}>{item.createdAt}</Text>
-          </View>
-          <View style={styles.actionButtons}>
-            <TouchableOpacity style={styles.actionBtn}>
-              <Text style={styles.actionIcon}>✏️</Text>
+          <Text style={styles.createdText}>
+            Ngày tạo: <Text style={styles.createdDate}>{item.createdAt}</Text>
+          </Text>
+
+          <View style={styles.actionRow}>
+            <TouchableOpacity
+              style={styles.actionBtn}
+              onPress={() => handleEditUser(item)}
+            >
+              <Ionicons name="create-outline" size={18} color="#0f766e" />
             </TouchableOpacity>
-            <TouchableOpacity style={[styles.actionBtn, isLocked && styles.actionBtnLocked]}>
-              <Text style={styles.actionIcon}>🔒</Text>
+
+            <TouchableOpacity
+              style={styles.actionBtn}
+              onPress={() => handleToggleLock(item)}
+            >
+              <Ionicons
+                name={isActive ? "lock-closed-outline" : "lock-open-outline"}
+                size={18}
+                color={isActive ? "#dc2626" : "#2563eb"}
+              />
             </TouchableOpacity>
           </View>
         </View>
@@ -103,299 +182,271 @@ export default function UserManagementScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#f0f4f0" />
+    <SafeAreaView style={styles.safeArea}>
+      <StatusBar barStyle="dark-content" backgroundColor="#f8fafc" />
 
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.menuBtn}>
-          <Text style={styles.menuIcon}>☰</Text>
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Quản lý người dùng</Text>
-        <TouchableOpacity style={styles.addBtn}>
-          <Text style={styles.addIcon}>👤+</Text>
-        </TouchableOpacity>
-      </View>
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>Quản lý người dùng</Text>
+          <Text style={styles.headerSubtitle}>Tìm kiếm, chỉnh sửa và khóa tài khoản</Text>
+        </View>
 
-      {/* Search */}
-      <View style={styles.searchContainer}>
-        <Text style={styles.searchIcon}>🔍</Text>
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Tìm kiếm..."
-          placeholderTextColor="#aaa"
-          value={searchText}
-          onChangeText={setSearchText}
-        />
-      </View>
-
-      {/* Filter Tabs */}
-      <View style={styles.tabsContainer}>
-        {TABS.map((tab) => (
-          <TouchableOpacity
-            key={tab.key}
-            style={[styles.tab, activeTab === tab.key && styles.tabActive]}
-            onPress={() => setActiveTab(tab.key)}
-          >
-            <Text style={[styles.tabText, activeTab === tab.key && styles.tabTextActive]}>
-              {tab.label}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-
-      {/* User List */}
-      <FlatList
-        data={filteredUsers}
-        keyExtractor={(item) => item.id}
-        renderItem={renderUser}
-        contentContainerStyle={styles.listContent}
-        showsVerticalScrollIndicator={false}
-        ListFooterComponent={
-          <View>
-            <TouchableOpacity style={styles.loadMoreBtn}>
-              <Text style={styles.loadMoreText}>Tải thêm người dùng</Text>
-            </TouchableOpacity>
-            <Text style={styles.totalText}>
-              Hiển thị {filteredUsers.length} trong số 128 người dùng
-            </Text>
+        <View style={styles.searchRow}>
+          <View style={styles.searchWrap}>
+            <Ionicons name="search-outline" size={18} color="#94a3b8" />
+            <TextInput
+              value={search}
+              onChangeText={setSearch}
+              placeholder="Tìm kiếm..."
+              placeholderTextColor="#94a3b8"
+              style={styles.searchInput}
+            />
           </View>
-        }
-      />
 
-      {/* Bottom Navigation */}
-      <View style={styles.bottomNav}>
-        {NAV_ITEMS.map((item) => (
-          <TouchableOpacity
-            key={item.key}
-            style={styles.navItem}
-            onPress={() => setActiveNav(item.key)}
-          >
-            <Text style={[styles.navIcon, activeNav === item.key && styles.navIconActive]}>
-              {item.icon}
-            </Text>
-            <Text style={[styles.navLabel, activeNav === item.key && styles.navLabelActive]}>
-              {item.label}
-            </Text>
+          <TouchableOpacity style={styles.addBtn} onPress={handleAddUser}>
+            <Ionicons name="person-add-outline" size={20} color="#fff" />
           </TouchableOpacity>
-        ))}
+        </View>
+
+        <View style={styles.filterWrap}>
+          {renderFilterButton("all", "Tất cả")}
+          {renderFilterButton("active", "Hoạt động")}
+          {renderFilterButton("locked", "Bị khóa")}
+        </View>
+
+        <FlatList
+          data={filteredUsers}
+          keyExtractor={(item) => item.id}
+          renderItem={renderItem}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.listContent}
+          ListFooterComponent={
+            <View style={styles.footerBlock}>
+              <TouchableOpacity
+                style={styles.loadMoreBtn}
+                onPress={() => Alert.alert("Thông báo", "Tải thêm người dùng")}
+              >
+                <Text style={styles.loadMoreText}>Tải thêm người dùng</Text>
+              </TouchableOpacity>
+
+              <Text style={styles.footerText}>
+                Hiển thị {filteredUsers.length} trong số 128 người dùng
+              </Text>
+            </View>
+          }
+        />
       </View>
     </SafeAreaView>
   );
 }
 
-const GREEN = '#2d7a3a';
-const GREEN_LIGHT = '#e8f5eb';
-
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: "#f8fafc",
+  },
   container: {
     flex: 1,
-    backgroundColor: '#f0f4f0',
-  },
-
-  // Header
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
     paddingHorizontal: 16,
-    paddingVertical: 14,
-    backgroundColor: '#f0f4f0',
-  },
-  menuBtn: { padding: 4 },
-  menuIcon: { fontSize: 22 },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#1a1a1a',
-  },
-  addBtn: {
-    backgroundColor: GREEN,
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-  },
-  addIcon: { fontSize: 16, color: '#fff' },
-
-  // Search
-  searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    marginHorizontal: 16,
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    marginBottom: 12,
-    shadowColor: '#000',
-    shadowOpacity: 0.04,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  searchIcon: { fontSize: 16, marginRight: 8, color: '#aaa' },
-  searchInput: {
-    flex: 1,
-    fontSize: 15,
-    color: '#333',
-  },
-
-  // Tabs
-  tabsContainer: {
-    flexDirection: 'row',
-    paddingHorizontal: 16,
-    marginBottom: 12,
-    gap: 8,
-  },
-  tab: {
-    paddingHorizontal: 18,
-    paddingVertical: 8,
-    borderRadius: 20,
-    backgroundColor: '#fff',
-    borderWidth: 1,
-    borderColor: '#dde8dd',
-  },
-  tabActive: {
-    backgroundColor: GREEN,
-    borderColor: GREEN,
-  },
-  tabText: {
-    fontSize: 14,
-    color: '#555',
-    fontWeight: '500',
-  },
-  tabTextActive: {
-    color: '#fff',
-    fontWeight: '600',
-  },
-
-  // List
-  listContent: {
-    paddingHorizontal: 16,
-    paddingBottom: 12,
-    gap: 12,
-  },
-
-  // User Card
-  userCard: {
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 14,
-    shadowColor: '#000',
-    shadowOpacity: 0.05,
-    shadowRadius: 6,
-    elevation: 2,
-    marginBottom: 10,
-  },
-  userTop: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  avatar: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    marginRight: 12,
-    backgroundColor: '#ddd',
-  },
-  userInfo: { flex: 1 },
-  userName: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: '#1a1a1a',
-    marginBottom: 2,
-  },
-  userEmail: {
-    fontSize: 13,
-    color: '#888',
-  },
-  statusBadge: {
-    borderRadius: 8,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-  },
-  badgeActive: { backgroundColor: GREEN_LIGHT },
-  badgeLocked: { backgroundColor: '#fde8e8' },
-  statusText: {
-    fontSize: 11,
-    fontWeight: '700',
-    letterSpacing: 0.5,
-  },
-  statusTextActive: { color: GREEN },
-  statusTextLocked: { color: '#d93025' },
-
-  userBottom: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    borderTopWidth: 1,
-    borderTopColor: '#f0f0f0',
     paddingTop: 10,
   },
-  dateLabel: { fontSize: 12, color: '#aaa', marginBottom: 2 },
-  dateValue: { fontSize: 13, color: '#444', fontWeight: '500' },
-  actionButtons: { flexDirection: 'row', gap: 8 },
+  header: {
+    marginBottom: 14,
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: "800",
+    color: "#0f172a",
+  },
+  headerSubtitle: {
+    marginTop: 4,
+    fontSize: 13,
+    color: "#64748b",
+  },
+  searchRow: {
+    flexDirection: "row",
+    gap: 10,
+    marginBottom: 14,
+  },
+  searchWrap: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#ffffff",
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
+    borderRadius: 14,
+    paddingHorizontal: 12,
+    height: 46,
+  },
+  searchInput: {
+    flex: 1,
+    marginLeft: 8,
+    fontSize: 14,
+    color: "#0f172a",
+  },
+  addBtn: {
+    width: 46,
+    height: 46,
+    borderRadius: 14,
+    backgroundColor: "#065f46",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  filterWrap: {
+    flexDirection: "row",
+    backgroundColor: "#f1f5f9",
+    borderRadius: 14,
+    padding: 4,
+    marginBottom: 14,
+  },
+  filterButton: {
+    flex: 1,
+    height: 40,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  filterButtonActive: {
+    backgroundColor: "#065f46",
+  },
+  filterButtonText: {
+    fontSize: 12,
+    fontWeight: "800",
+    color: "#64748b",
+  },
+  filterButtonTextActive: {
+    color: "#ffffff",
+  },
+  listContent: {
+    paddingBottom: 32,
+  },
+  userCard: {
+    backgroundColor: "#ffffff",
+    borderRadius: 16,
+    padding: 14,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: "#f1f5f9",
+    shadowColor: "#000",
+    shadowOpacity: 0.04,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
+  },
+  userTop: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 12,
+  },
+  avatar: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: "#e2e8f0",
+  },
+  userInfo: {
+    flex: 1,
+    minWidth: 0,
+  },
+  nameRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 8,
+  },
+  userName: {
+    flex: 1,
+    fontSize: 16,
+    fontWeight: "800",
+    color: "#0f172a",
+  },
+  statusBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 999,
+  },
+  activeBadge: {
+    backgroundColor: "#dcfce7",
+  },
+  lockedBadge: {
+    backgroundColor: "#fee2e2",
+  },
+  statusBadgeText: {
+    fontSize: 10,
+    fontWeight: "800",
+    textTransform: "uppercase",
+  },
+  activeBadgeText: {
+    color: "#15803d",
+  },
+  lockedBadgeText: {
+    color: "#b91c1c",
+  },
+  userEmail: {
+    marginTop: 6,
+    fontSize: 12,
+    color: "#64748b",
+  },
+  userRole: {
+    marginTop: 4,
+    fontSize: 12,
+    color: "#475569",
+    fontWeight: "600",
+  },
+  userBottom: {
+    marginTop: 14,
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: "#f1f5f9",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  createdText: {
+    fontSize: 11,
+    fontWeight: "800",
+    color: "#94a3b8",
+    textTransform: "uppercase",
+  },
+  createdDate: {
+    color: "#475569",
+  },
+  actionRow: {
+    flexDirection: "row",
+    gap: 8,
+  },
   actionBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#fafafa',
+    width: 38,
+    height: 38,
+    borderRadius: 10,
+    backgroundColor: "#f8fafc",
+    alignItems: "center",
+    justifyContent: "center",
   },
-  actionBtnLocked: {
-    borderColor: '#f5c6c6',
-    backgroundColor: '#fff0f0',
+  footerBlock: {
+    alignItems: "center",
+    paddingTop: 12,
+    paddingBottom: 24,
   },
-  actionIcon: { fontSize: 15 },
-
-  // Load More
   loadMoreBtn: {
+    paddingHorizontal: 18,
+    height: 46,
+    borderRadius: 14,
     borderWidth: 1,
-    borderColor: '#cce0cc',
-    borderRadius: 12,
-    paddingVertical: 14,
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    marginBottom: 8,
+    borderColor: "#e2e8f0",
+    backgroundColor: "#ffffff",
+    alignItems: "center",
+    justifyContent: "center",
   },
   loadMoreText: {
-    color: GREEN,
-    fontWeight: '600',
-    fontSize: 15,
+    color: "#065f46",
+    fontWeight: "800",
+    fontSize: 14,
   },
-  totalText: {
-    textAlign: 'center',
-    color: '#aaa',
-    fontSize: 13,
-    marginBottom: 8,
-  },
-
-  // Bottom Nav
-  bottomNav: {
-    flexDirection: 'row',
-    backgroundColor: '#fff',
-    borderTopWidth: 1,
-    borderTopColor: '#eee',
-    paddingVertical: 10,
-    paddingHorizontal: 8,
-  },
-  navItem: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  navIcon: { fontSize: 20, marginBottom: 2 },
-  navIconActive: {},
-  navLabel: {
-    fontSize: 11,
-    color: '#aaa',
-    fontWeight: '500',
-  },
-  navLabelActive: {
-    color: GREEN,
-    fontWeight: '700',
+  footerText: {
+    marginTop: 10,
+    fontSize: 12,
+    color: "#94a3b8",
   },
 });

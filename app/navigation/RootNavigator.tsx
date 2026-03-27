@@ -234,9 +234,9 @@ function AppNavigator() {
         ) : (
           <>
             <Stack.Screen
-              name="App"
-              component={isAdmin ? adminTabs : MainTabs}
-            />
+  name="App"
+  component={isAdmin ? AdminTabs : MainTabs}
+/>
             <Stack.Screen name="GoalList" component={GoalList} />
             <Stack.Screen name="GoalDetail" component={GoalDetail} />
             <Stack.Screen name="EditGoal" component={EditGoal} />

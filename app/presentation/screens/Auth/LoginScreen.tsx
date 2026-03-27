@@ -47,7 +47,7 @@ const LoginScreen: React.FC = () => {
         return;
       }
 
-      navigation.navigate('App');
+      
     } catch (error: any) {
       console.log(error);
 
