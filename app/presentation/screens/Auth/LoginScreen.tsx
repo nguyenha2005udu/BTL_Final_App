@@ -26,7 +26,7 @@ const LoginScreen: React.FC = () => {
   const [loading, setLoading] = useState(false);
 
   // ==========================================
-  // ✔ KẾT HỢP LOGIC ĐĂNG NHẬP CHUẨN TỪ MAIN
+  // Đăng nhập
   // ==========================================
   const handleSubmit = async () => {
     if (!email || !password) {

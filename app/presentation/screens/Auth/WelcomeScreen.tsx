@@ -19,7 +19,7 @@ type RootStackParamList = {
   App: undefined;
 };
 
-type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
+type NavigationProp = NativeStackNavigationProp<RootStackParamList>; 
 
 const WelcomeScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();

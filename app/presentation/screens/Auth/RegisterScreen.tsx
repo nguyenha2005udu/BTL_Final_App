@@ -14,8 +14,6 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { MaterialIcons } from '@expo/vector-icons';
 import styles from './Register.styles';
-
-// 👉 chỉnh path cho đúng với cây thư mục của bạn
 import { registerWithEmail } from '../../../services/auth.service';
 
 const Register: React.FC = () => {
