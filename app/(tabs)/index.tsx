@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import { StatusBar } from "react-native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
@@ -6,39 +6,40 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
-import { ThemeProvider, useTheme } from "../context/ThemeContext";
+import { ThemeProvider, useTheme } from "@context/ThemeContext";
 
 // Screens
-import Welcome from "../presentation/screens/Auth/WelcomeScreen";
-import Login from "../presentation/screens/Auth/LoginScreen";
-import Register from "../presentation/screens/Auth/RegisterScreen";
+import Welcome from "@presentation/screens/Auth/WelcomeScreen";
+import Login from "@presentation/screens/Auth/LoginScreen";
+import Register from "@presentation/screens/Auth/RegisterScreen";
 
-import Home from "../presentation/screens/Home/HomeScreen";
-import TransactionList from "../presentation/screens/Statistics/StatisticsScreen";
-import Report from "../presentation/screens/Report/ReportScreen";
-import Profile from "../presentation/screens/Profile/ProfileScreen";
+import Home from "@presentation/screens/Home/HomeScreen";
+import TransactionList from "@presentation/screens/Statistics/StatisticsScreen";
+import Report from "@presentation/screens/Report/ReportScreen";
+import Profile from "@presentation/screens/Profile/ProfileScreen";
 
-import GoalList from "../presentation/screens/Goals/SavingGoalsScreen";
-import GoalDetail from "../presentation/screens/Goals/GoalDetail";
-import AddGoal from "../presentation/screens/Goals/AddGoals";
-import EditGoal from "../presentation/screens/Goals/EditGoal";
+import GoalList from "@presentation/screens/Goals/SavingGoalsScreen";
+import GoalDetail from "@presentation/screens/Goals/GoalDetail";
+import AddGoal from "@presentation/screens/Goals/AddGoals";
+import EditGoal from "@presentation/screens/Goals/EditGoal";
 
-import AddTransaction from "../presentation/screens/Home/AddTransactionScreen";
-import UpdateTransactionScreen from "../presentation/screens/Home/UpdateTransactionScreen";
+import AddTransaction from "@presentation/screens/Home/AddTransactionScreen";
+import UpdateTransactionScreen from "@presentation/screens/Home/UpdateTransactionScreen";
 
-import AddCategory from "../presentation/screens/Report/AddCategory";
-import CategoryDetail from "../presentation/screens/Report/CategoryDetail";
+import AddCategory from "@presentation/screens/Report/AddCategory";
+import CategoryDetail from "@presentation/screens/Report/CategoryDetail";
 
-import UpdateProfile from "../presentation/screens/Profile/UpdateProfile";
-import NotificationScreen from "../presentation/screens/Notification/NotificationScreen";
-import ForgotPasswordScreen from "../presentation/screens/Auth/ForgotPasswordScreen";
-import ChangePasswordScreen from "../presentation/screens/Profile/ChangePasswordScreen";
-import SecurityPolicyScreen from "../presentation/screens/Profile/SecurityPolicyScreen";
-import HelpCenterScreen from "../presentation/screens/Profile/HelpCenterScreen";
-import ContactSupportScreen from "../presentation/screens/Profile/ContactSupportScreen";
-import RateAppScreen from "../presentation/screens/Profile/RateAppScreen";
+import UpdateProfile from "@presentation/screens/Profile/UpdateProfile";
+import NotificationScreen from "@presentation/screens/Notification/NotificationScreen";
+import ForgotPasswordScreen from "@presentation/screens/Auth/ForgotPasswordScreen";
+import ChangePasswordScreen from "@presentation/screens/Profile/ChangePasswordScreen";
+import SecurityPolicyScreen from "@presentation/screens/Profile/SecurityPolicyScreen";
+import HelpCenterScreen from "@presentation/screens/Profile/HelpCenterScreen";
+import ContactSupportScreen from "@presentation/screens/Profile/ContactSupportScreen";
+import RateAppScreen from "@presentation/screens/Profile/RateAppScreen";
+import UserManagementScreen from "@presentation/screens/Admin/UserManagementScreen";
 
-import { RootStackParamList } from "../RootNavigator";
+import { RootStackParamList } from "@/RootNavigator";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator();
@@ -103,6 +104,7 @@ function AppNavigator() {
         <Stack.Screen name="Register" component={Register} />
 
         <Stack.Screen name="App" component={MainTabs} />
+        <Stack.Screen name="AdminUserManagement" component={UserManagementScreen} />
 
         <Stack.Screen name="GoalList" component={GoalList} />
         <Stack.Screen name="GoalDetail" component={GoalDetail} />

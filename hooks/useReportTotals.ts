@@ -1,5 +1,5 @@
-import * as React from 'react';
-import type { Transaction } from '../app/services/transaction.service'; // chỉnh path nếu khác
+﻿import * as React from 'react';
+import type { Transaction } from '@services/transaction.service'; // chỉnh path nếu khác
 
 export type ReportPeriod = 'week' | 'month';
 

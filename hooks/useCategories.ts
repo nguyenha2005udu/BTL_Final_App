@@ -1,11 +1,11 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import {
   createCategory,
   deleteCategory as deleteCategoryService,
   listenCategories,
   updateCategory as updateCategoryService,
-} from '../app/services/category.service';
-import { Category } from '../app/type/types';
+} from '@services/category.service';
+import { Category } from '@type/types';
 
 export const useCategories = () => {
   const [categories, setCategories] = useState<Category[]>([]);

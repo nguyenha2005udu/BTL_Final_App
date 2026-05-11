@@ -9,7 +9,7 @@ import {
   getDoc,
 } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
-import { db } from "../../../app/services/firebase/firebaseConfig"; // ← chỉnh đường dẫn cho phù hợp
+import { db } from "../../../services/firebase/firebaseConfig";
 
 /* ───────────────────────── types ───────────────────────── */
 interface AppUser {

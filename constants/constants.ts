@@ -1,4 +1,4 @@
-import { Goal, Transaction } from '../app/type/types';
+﻿import { Goal, Transaction } from '@type/types';
 
 export const MOCK_TRANSACTIONS: Transaction[] = [
   {
