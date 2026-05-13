@@ -4,6 +4,9 @@ export type RootStackParamList = {
   Register: undefined;
   App: undefined;
   AdminUserManagement: undefined;
+  AdminCategories: undefined;
+  AdminStatistic: undefined;
+  AdminSetting: undefined;
 
   GoalList: undefined;
   GoalDetail: { id: string };   // 👈 goal detail có id

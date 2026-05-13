@@ -329,6 +329,7 @@ export default function UserManagementScreen() {
       {/* Bottom Navigation */}
       <View style={styles.footer}>
 
+        {/* Quản lý */}
         <TouchableOpacity
           style={[
             styles.footerTab,
@@ -337,7 +338,7 @@ export default function UserManagementScreen() {
         >
           <MaterialIcons
             name="admin-panel-settings"
-            size={24}
+            size={22}
             color="#FFFFFF"
           />
 
@@ -346,10 +347,30 @@ export default function UserManagementScreen() {
           </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.footerTab}>
+        {/* Quản lý danh mục */}
+        <TouchableOpacity
+          style={styles.footerTab}
+          onPress={() => navigation.navigate("AdminCategories")}
+        >
+          <MaterialIcons
+            name="dashboard"
+            size={22}
+            color="#94A3B8"
+          />
+
+          <Text style={styles.footerText}>
+            Danh mục
+          </Text>
+        </TouchableOpacity>
+
+        {/* Thống kê */}
+        <TouchableOpacity
+          style={styles.footerTab}
+          onPress={() => navigation.navigate("AdminStatistic")}
+        >
           <MaterialIcons
             name="bar-chart"
-            size={24}
+            size={22}
             color="#94A3B8"
           />
 
@@ -358,18 +379,24 @@ export default function UserManagementScreen() {
           </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.footerTab}>
+        {/* Cá nhân */}
+        <TouchableOpacity
+          style={styles.footerTab}
+          onPress={() => navigation.navigate("AdminSetting")}
+        >
           <MaterialIcons
             name="person"
-            size={24}
+            size={22}
             color="#94A3B8"
           />
 
           <Text style={styles.footerText}>
-            Cá nhân
+            Cài đặt
           </Text>
         </TouchableOpacity>
+
       </View>
+
     </SafeAreaView>
   );
 }
@@ -580,9 +607,10 @@ const styles = StyleSheet.create({
     borderRadius: 28,
 
     paddingVertical: 14,
+    paddingHorizontal: 10,
 
     flexDirection: "row",
-    justifyContent: "space-around",
+    justifyContent: "space-between",
     alignItems: "center",
 
     borderWidth: 1,
