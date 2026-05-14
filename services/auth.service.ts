@@ -1,5 +1,5 @@
 // services/auth.service.ts
-import { emailSignIn, emailSignUp, logout } from './firebase/authProviders';
+import { emailSignIn, emailSignUp, googleSignIn, logout } from './firebase/authProviders';
 import { auth, db } from './firebase/firebaseConfig';
 import {
   doc,
@@ -21,6 +21,12 @@ export interface RegisterPayload {
   photoUrl?: string; // 👈 thêm
 }
 
+export interface RegisterResult {
+  user: User;
+  profileSaved: boolean;
+  verificationEmailSent: boolean;
+}
+
 export interface UserProfile {
   id: string;
   email: string;
@@ -36,29 +42,47 @@ export interface UserProfile {
 // Đăng ký với email + password
 export const registerWithEmail = async (
   payload: RegisterPayload,
-): Promise<User> => {
-  const { email, password, fullName, photoUrl } = payload;
+): Promise<RegisterResult> => {
+  const { password, photoUrl } = payload;
+  const email = payload.email.trim().toLowerCase();
+  const fullName = payload.fullName?.trim() ?? '';
 
   // 1. Tạo user bằng email & password
   const cred = await emailSignUp(email, password);
   const user = cred.user;
 
   // 2. Lưu thông tin user vào Firestore
-  await setDoc(doc(db, 'users', user.uid), {
-    email,
-    fullName: fullName || '',
-    photoUrl: photoUrl || '',     // 👈 lưu kèm photoUrl (có thể rỗng)
-    createdAt: serverTimestamp(),
-    emailVerified: user.emailVerified ?? false,
-    amount: 0,
-    phone: '',
-    birthDate: null,
-  });
+  let profileSaved = true;
+  try {
+    await setDoc(doc(db, 'users', user.uid), {
+      email,
+      fullName,
+      photoUrl: photoUrl || '',     // 👈 lưu kèm photoUrl (có thể rỗng)
+      createdAt: serverTimestamp(),
+      emailVerified: user.emailVerified ?? false,
+      amount: 0,
+      phone: '',
+      birthDate: null,
+    });
+  } catch (error) {
+    profileSaved = false;
+    console.log('SAVE USER PROFILE ERROR >>>', error);
+  }
 
   // 3. Gửi email xác thực
-  await sendEmailVerification(user);
+  let verificationEmailSent = true;
+  try {
+    await sendEmailVerification(user);
+  } catch (error) {
+    verificationEmailSent = false;
+    console.log('SEND EMAIL VERIFICATION ERROR >>>', error);
+  }
 
-  return user;
+  return {
+    user,
+    profileSaved,
+    verificationEmailSent,
+  };
 };
 
 // Đăng nhập với email + password
@@ -67,6 +91,12 @@ export const loginWithEmail = async (
   password: string,
 ): Promise<User> => {
   const cred = await emailSignIn(email, password);
+  return cred.user;
+};
+
+export const loginWithGoogle = async (): Promise<User> => {
+  const cred = await googleSignIn();
+  await upsertUserProfileFromAuth(cred.user);
   return cred.user;
 };
 
@@ -154,4 +184,3 @@ const upsertUserProfileFromAuth = async (user: User): Promise<void> => {
     });
   }
 };
-

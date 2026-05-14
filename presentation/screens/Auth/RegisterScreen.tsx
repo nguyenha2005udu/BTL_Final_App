@@ -45,23 +45,54 @@ const Register: React.FC = () => {
 
     try {
       setLoading(true);
-      const user = await registerWithEmail({
-        fullName,
-        email: email.trim(),
+      const result = await registerWithEmail({
+        fullName: fullName.trim(),
+        email,
         password,
       });
 
-      console.log('Registered user: ', user.uid);
+      console.log('Registered user: ', result.user.uid);
+
+      const notes: string[] = [];
+      if (!result.profileSaved) {
+        notes.push('Hồ sơ người dùng chưa lưu được, vui lòng kiểm tra Firestore Rules.');
+      }
+      if (!result.verificationEmailSent) {
+        notes.push('Email xác thực chưa gửi được, bạn có thể thử đăng nhập lại hoặc gửi lại email xác thực sau.');
+      }
 
       Alert.alert(
         'Đăng ký thành công',
-        'Chúng tôi đã gửi email xác nhận. Vui lòng kiểm tra hộp thư và xác thực tài khoản trước khi đăng nhập.',
+        [
+          result.verificationEmailSent
+            ? 'Chúng tôi đã gửi email xác nhận. Vui lòng kiểm tra hộp thư và xác thực tài khoản trước khi đăng nhập.'
+            : 'Tài khoản đã được tạo.',
+          ...notes,
+        ].join('\n\n'),
       );
 
       navigation.goBack(); // quay về màn Login
     } catch (error: any) {
       console.log(error);
-      Alert.alert('Đăng ký thất bại', error?.message || 'Có lỗi xảy ra');
+
+      let message = 'Có lỗi xảy ra. Vui lòng thử lại.';
+      const code = error?.code;
+
+      if (code === 'auth/email-already-in-use') {
+        message = 'Email này đã được sử dụng.';
+      } else if (code === 'auth/invalid-email') {
+        message = 'Định dạng email không hợp lệ.';
+      } else if (code === 'auth/weak-password') {
+        message = 'Mật khẩu quá yếu. Vui lòng dùng mật khẩu mạnh hơn.';
+      } else if (code === 'auth/network-request-failed') {
+        message = 'Không thể kết nối Firebase. Vui lòng kiểm tra mạng và thử lại.';
+      } else if (code === 'auth/operation-not-allowed') {
+        message = 'Firebase chưa bật phương thức đăng ký Email/Password.';
+      } else if (code === 'auth/too-many-requests') {
+        message = 'Bạn thao tác quá nhiều lần. Vui lòng thử lại sau ít phút.';
+      }
+
+      Alert.alert('Đăng ký thất bại', message);
     } finally {
       setLoading(false);
     }

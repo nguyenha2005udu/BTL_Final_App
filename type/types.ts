@@ -16,6 +16,17 @@ export interface UITransaction {
   type: 'income' | 'expense';
 }
 
+export interface Transaction {
+  id: string;
+  title: string;
+  subtitle: string;
+  amount: number;
+  date: string;
+  icon: MaterialIconName;
+  colorClass: string;
+  type: 'income' | 'expense';
+}
+
 export interface Goal {
   id: string;
   title: string;

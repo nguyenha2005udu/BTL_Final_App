@@ -6,6 +6,7 @@
     "allowSyntheticDefaultImports": true,
     "jsx": "react-native",
     "skipLibCheck": true,
+    "baseUrl": ".",
     "types": ["react", "react-native"],
     "paths": {
       "@/*":            ["./*"],

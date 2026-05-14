@@ -384,7 +384,6 @@ const styles = StyleSheet.create({
   },
   starButton: {
     padding: 4,
-    transition: 'transform 0.2s',
   },
   ratingMessageBox: {
     paddingHorizontal: 20,

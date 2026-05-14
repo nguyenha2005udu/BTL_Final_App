@@ -5,7 +5,7 @@ import { MaterialIcons } from '@components/icon';
 import { useTheme } from '@context/ThemeContext';
 
 const HelpCenterScreen: React.FC = () => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
   const { theme, isDarkMode } = useTheme();
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
 

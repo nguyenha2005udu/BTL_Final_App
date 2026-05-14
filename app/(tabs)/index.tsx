@@ -1,4 +1,4 @@
-﻿import React from "react";
+import React from "react";
 import { StatusBar } from "react-native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
@@ -38,6 +38,9 @@ import HelpCenterScreen from "@presentation/screens/Profile/HelpCenterScreen";
 import ContactSupportScreen from "@presentation/screens/Profile/ContactSupportScreen";
 import RateAppScreen from "@presentation/screens/Profile/RateAppScreen";
 import UserManagementScreen from "@presentation/screens/Admin/UserManagementScreen";
+import AdminCategoriesScreen from "@presentation/screens/Admin/AdminCategoriesScreen";
+import AdminStatisticScreen from "@presentation/screens/Admin/AdminStatisticScreen";
+import AdminSettingScreen from "@presentation/screens/Admin/AdminSettingScreen";
 
 import { RootStackParamList } from "@/RootNavigator";
 
@@ -45,7 +48,7 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator();
 
 function MainTabs() {
-  const { theme, isDarkMode } = useTheme();
+  const { theme } = useTheme();
 
   return (
     <Tab.Navigator
@@ -105,6 +108,9 @@ function AppNavigator() {
 
         <Stack.Screen name="App" component={MainTabs} />
         <Stack.Screen name="AdminUserManagement" component={UserManagementScreen} />
+        <Stack.Screen name="AdminCategories" component={AdminCategoriesScreen} />
+        <Stack.Screen name="AdminStatistic" component={AdminStatisticScreen} />
+        <Stack.Screen name="AdminSetting" component={AdminSettingScreen} />
 
         <Stack.Screen name="GoalList" component={GoalList} />
         <Stack.Screen name="GoalDetail" component={GoalDetail} />

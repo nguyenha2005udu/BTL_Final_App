@@ -27,7 +27,7 @@ export const MOCK_TRANSACTIONS: Transaction[] = [
     subtitle: '28 Thg 5, 2024',
     amount: -1200000,
     date: '2024-05-28',
-    icon: 'shopping_bag',
+    icon: 'shopping-bag',
     colorClass: 'text-primary bg-primary/10',
     type: 'expense',
   },

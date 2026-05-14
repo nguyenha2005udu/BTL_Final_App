@@ -10,7 +10,9 @@ import {
   Text,
   TouchableOpacity,
   View,
+  useWindowDimensions,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { MaterialIcons } from "@expo/vector-icons";
 import { getAuth } from "firebase/auth";
 import {
@@ -25,6 +27,7 @@ import {
 import { db } from "@services/firebase/firebaseConfig";
 import { logoutUser } from "@services/auth.service";
 import { useNavigation } from "@react-navigation/native";
+import { FONT_SIZE, RADIUS, SPACING } from "@/utils/responsive";
 
 type Role = "admin" | "user";
 
@@ -38,12 +41,18 @@ interface AppUser {
 
 export default function UserManagementScreen() {
   const navigation = useNavigation<any>();
+  const { width } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
 
   const [users, setUsers] = useState<AppUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [accessDenied, setAccessDenied] = useState(false);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+
+  const isSmall = width < 360;
+  const avatarSize = isSmall ? 44 : 52;
+  const iconSize = isSmall ? 18 : 22;
 
   const checkAdminAndLoad = useCallback(async () => {
     try {
@@ -65,7 +74,6 @@ export default function UserManagementScreen() {
       setAccessDenied(false);
 
       const q = query(collection(db, "users"), orderBy("createdAt", "desc"));
-
       const docs = await getDocs(q);
 
       const mapped: AppUser[] = docs.docs.map((item) => ({
@@ -101,23 +109,11 @@ export default function UserManagementScreen() {
 
   const toggleRole = async (user: AppUser) => {
     const nextRole: Role = user.role === "admin" ? "user" : "admin";
-
     try {
-      setUpdatingId(`${user.id} -role`);
-
-      await updateDoc(doc(db, "users", user.id), {
-        role: nextRole,
-      });
-
+      setUpdatingId(`${user.id}-role`);
+      await updateDoc(doc(db, "users", user.id), { role: nextRole });
       setUsers((prev) =>
-        prev.map((u) =>
-          u.id === user.id
-            ? {
-              ...u,
-              role: nextRole,
-            }
-            : u
-        )
+        prev.map((u) => (u.id === user.id ? { ...u, role: nextRole } : u))
       );
     } catch {
       Alert.alert("Lỗi", "Không thể cập nhật quyền.");
@@ -128,20 +124,11 @@ export default function UserManagementScreen() {
 
   const toggleBan = async (user: AppUser) => {
     try {
-      setUpdatingId(`${user.id} -ban`);
-
-      await updateDoc(doc(db, "users", user.id), {
-        isBanned: !user.isBanned,
-      });
-
+      setUpdatingId(`${user.id}-ban`);
+      await updateDoc(doc(db, "users", user.id), { isBanned: !user.isBanned });
       setUsers((prev) =>
         prev.map((u) =>
-          u.id === user.id
-            ? {
-              ...u,
-              isBanned: !u.isBanned,
-            }
-            : u
+          u.id === user.id ? { ...u, isBanned: !u.isBanned } : u
         )
       );
     } catch {
@@ -153,17 +140,15 @@ export default function UserManagementScreen() {
 
   const handleLogout = async () => {
     await logoutUser();
-
-    navigation.reset({
-      index: 0,
-      routes: [{ name: "Welcome" }],
-    });
+    navigation.reset({ index: 0, routes: [{ name: "Welcome" }] });
   };
+
+  const bottomPad = insets.bottom + 60;
 
   if (loading) {
     return (
       <SafeAreaView style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#6366F1" />
+        <ActivityIndicator size="large" color="#3B82F6" />
         <Text style={styles.loadingText}>Đang tải dữ liệu...</Text>
       </SafeAreaView>
     );
@@ -172,19 +157,13 @@ export default function UserManagementScreen() {
   if (accessDenied) {
     return (
       <SafeAreaView style={styles.centerContainer}>
-        <MaterialIcons name="lock" size={70} color="#EF4444" />
-
-        <Text style={styles.title}>Truy cập bị từ chối</Text>
-
-        <Text style={styles.subtitle}>
+        <MaterialIcons name="lock" size={64} color="#EF4444" />
+        <Text style={styles.deniedTitle}>Truy cập bị từ chối</Text>
+        <Text style={styles.deniedSubtitle}>
           Chỉ tài khoản admin mới có thể truy cập màn hình này.
         </Text>
-
-        <TouchableOpacity
-          style={styles.logoutBtn}
-          onPress={handleLogout}
-        >
-          <Text style={styles.logoutBtnText}>Đăng xuất</Text>
+        <TouchableOpacity style={styles.logoutBtnSmall} onPress={handleLogout}>
+          <Text style={styles.logoutBtnSmallText}>Đăng xuất</Text>
         </TouchableOpacity>
       </SafeAreaView>
     );
@@ -192,30 +171,17 @@ export default function UserManagementScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-
       {/* Header */}
       <View style={styles.header}>
-        <View>
-          <Text style={styles.title}>Quản lý tài khoản người dùng</Text>
-
+        <View style={{ flex: 1, marginRight: SPACING.md }}>
+          <Text style={styles.title} numberOfLines={1}>Quản lý người dùng</Text>
           <Text style={styles.subtitle}>
             {users.length} users • {totalAdmins} admins
           </Text>
         </View>
-
-        <TouchableOpacity
-          style={styles.logoutBtn}
-          onPress={handleLogout}
-        >
-          <MaterialIcons
-            name="logout"
-            size={18}
-            color="#FFFFFF"
-          />
-
-          <Text style={styles.logoutBtnText}>
-            Logout
-          </Text>
+        <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
+          <MaterialIcons name="logout" size={16} color="#EF4444" />
+          <Text style={styles.logoutBtnText}>Đăng xuất</Text>
         </TouchableOpacity>
       </View>
 
@@ -227,97 +193,98 @@ export default function UserManagementScreen() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            tintColor="#6366F1"
+            tintColor="#3B82F6"
           />
         }
-        contentContainerStyle={styles.listContent}
+        contentContainerStyle={[
+          styles.listContent,
+          { paddingBottom: bottomPad + SPACING.lg },
+        ]}
         renderItem={({ item }) => {
-          const roleUpdating = updatingId === `${item.id} -role`;
-          const banUpdating = updatingId === `${item.id} -ban`;
+          const roleUpdating = updatingId === `${item.id}-role`;
+          const banUpdating = updatingId === `${item.id}-ban`;
 
           return (
             <View style={styles.card}>
-
-              {/* User Info */}
               <View style={styles.topRow}>
-
-                {/* Avatar */}
-                <View style={styles.avatar}>
-                  <Text style={styles.avatarText}>
+                <View
+                  style={[
+                    styles.avatar,
+                    { width: avatarSize, height: avatarSize, borderRadius: avatarSize / 2 },
+                  ]}
+                >
+                  <Text style={[styles.avatarText, { fontSize: isSmall ? 17 : 20 }]}>
                     {item.fullName.charAt(0).toUpperCase()}
                   </Text>
                 </View>
 
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.name}>
-                    {item.fullName}
-                  </Text>
-
-                  <Text style={styles.email}>
-                    {item.email}
-                  </Text>
+                  <Text style={styles.name} numberOfLines={1}>{item.fullName}</Text>
+                  <Text style={styles.email} numberOfLines={1}>{item.email}</Text>
 
                   <View style={styles.badgeRow}>
-
-                    <View
-                      style={
-                        item.role === "admin"
-                          ? styles.adminBadge
-                          : styles.userBadge
-                      }
-                    >
-                      <Text style={styles.badgeText}>
-                        {item.role === "admin"
-                          ? "ADMIN"
-                          : "USER"}
+                    <View style={item.role === "admin" ? styles.adminBadge : styles.userBadge}>
+                      <Text
+                        style={[
+                          styles.badgeText,
+                          { color: item.role === "admin" ? "#D97706" : "#2563EB" },
+                        ]}
+                      >
+                        {item.role === "admin" ? "ADMIN" : "USER"}
                       </Text>
                     </View>
-
-                    <View
-                      style={
-                        item.isBanned
-                          ? styles.bannedBadge
-                          : styles.activeBadge
-                      }
-                    >
-                      <Text style={styles.badgeText}>
-                        {item.isBanned
-                          ? "BANNED"
-                          : "ACTIVE"}
+                    <View style={item.isBanned ? styles.bannedBadge : styles.activeBadge}>
+                      <Text
+                        style={[
+                          styles.badgeText,
+                          { color: item.isBanned ? "#DC2626" : "#059669" },
+                        ]}
+                      >
+                        {item.isBanned ? "BANNED" : "ACTIVE"}
                       </Text>
                     </View>
                   </View>
                 </View>
               </View>
 
-              {/* Actions */}
-              <View style={styles.actions}>
+              <View style={styles.cardDivider} />
 
+              <View style={styles.actions}>
                 <TouchableOpacity
-                  style={styles.smallBtn}
+                  style={styles.actionBtn}
                   disabled={roleUpdating || banUpdating}
                   onPress={() => toggleRole(item)}
                 >
-                  <Text style={styles.smallBtnText}>
-                    {roleUpdating
-                      ? "..."
-                      : item.role === "admin"
-                        ? "Set User"
-                        : "Set Admin"}
+                  <MaterialIcons
+                    name={item.role === "admin" ? "person" : "admin-panel-settings"}
+                    size={15}
+                    color="#3B82F6"
+                  />
+                  <Text style={styles.actionBtnText}>
+                    {roleUpdating ? "..." : item.role === "admin" ? "Set User" : "Set Admin"}
                   </Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                  style={[styles.smallBtn, styles.warnBtn]}
+                  style={[
+                    styles.actionBtn,
+                    item.isBanned ? styles.unbanBtn : styles.banBtn,
+                  ]}
                   disabled={roleUpdating || banUpdating}
                   onPress={() => toggleBan(item)}
                 >
-                  <Text style={styles.smallBtnText}>
-                    {banUpdating
-                      ? "..."
-                      : item.isBanned
-                        ? "Unban"
-                        : "Ban"}
+                  <MaterialIcons
+                    name={item.isBanned ? "check-circle" : "block"}
+                    size={15}
+                    color={item.isBanned ? "#059669" : "#DC2626"}
+                  />
+                  <Text
+                    style={[
+                      styles.actionBtnText,
+                      { color: item.isBanned ? "#059669" : "#DC2626" },
+                    ]}
+                  >
+                    {banUpdating ? "..." : item.isBanned ? "Unban" : "Ban"}
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -327,76 +294,36 @@ export default function UserManagementScreen() {
       />
 
       {/* Bottom Navigation */}
-      <View style={styles.footer}>
+      <View style={[styles.footer, { paddingBottom: insets.bottom + SPACING.sm }]}>
+        <View style={[styles.footerTab, styles.activeFooterTab]}>
+          <MaterialIcons name="admin-panel-settings" size={iconSize} color="#3B82F6" />
+          <Text style={styles.activeFooterText}>Quản lý</Text>
+        </View>
 
-        {/* Quản lý */}
-        <TouchableOpacity
-          style={[
-            styles.footerTab,
-            styles.activeFooterTab,
-          ]}
-        >
-          <MaterialIcons
-            name="admin-panel-settings"
-            size={22}
-            color="#FFFFFF"
-          />
-
-          <Text style={styles.activeFooterText}>
-            Quản lý
-          </Text>
-        </TouchableOpacity>
-
-        {/* Quản lý danh mục */}
         <TouchableOpacity
           style={styles.footerTab}
           onPress={() => navigation.navigate("AdminCategories")}
         >
-          <MaterialIcons
-            name="dashboard"
-            size={22}
-            color="#94A3B8"
-          />
-
-          <Text style={styles.footerText}>
-            Danh mục
-          </Text>
+          <MaterialIcons name="dashboard" size={iconSize} color="#94A3B8" />
+          <Text style={styles.footerText}>Danh mục</Text>
         </TouchableOpacity>
 
-        {/* Thống kê */}
         <TouchableOpacity
           style={styles.footerTab}
           onPress={() => navigation.navigate("AdminStatistic")}
         >
-          <MaterialIcons
-            name="bar-chart"
-            size={22}
-            color="#94A3B8"
-          />
-
-          <Text style={styles.footerText}>
-            Thống kê
-          </Text>
+          <MaterialIcons name="bar-chart" size={iconSize} color="#94A3B8" />
+          <Text style={styles.footerText}>Thống kê</Text>
         </TouchableOpacity>
 
-        {/* Cá nhân */}
         <TouchableOpacity
           style={styles.footerTab}
           onPress={() => navigation.navigate("AdminSetting")}
         >
-          <MaterialIcons
-            name="person"
-            size={22}
-            color="#94A3B8"
-          />
-
-          <Text style={styles.footerText}>
-            Cài đặt
-          </Text>
+          <MaterialIcons name="person" size={iconSize} color="#94A3B8" />
+          <Text style={styles.footerText}>Cá nhân</Text>
         </TouchableOpacity>
-
       </View>
-
     </SafeAreaView>
   );
 }
@@ -404,242 +331,233 @@ export default function UserManagementScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#0B1120",
+    backgroundColor: "#F8FAFC",
   },
-
   centerContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    paddingHorizontal: 24,
-    backgroundColor: "#0B1120",
+    paddingHorizontal: SPACING.xxl,
+    backgroundColor: "#F8FAFC",
   },
-
+  loadingText: {
+    marginTop: SPACING.md,
+    color: "#64748B",
+    fontSize: FONT_SIZE.body,
+    fontWeight: "500",
+  },
+  deniedTitle: {
+    fontSize: FONT_SIZE.heading,
+    fontWeight: "800",
+    color: "#0F172A",
+    marginTop: SPACING.lg,
+    textAlign: "center",
+  },
+  deniedSubtitle: {
+    marginTop: SPACING.sm,
+    color: "#64748B",
+    fontSize: FONT_SIZE.body,
+    textAlign: "center",
+    lineHeight: FONT_SIZE.body * 1.6,
+  },
+  logoutBtnSmall: {
+    marginTop: SPACING.xxl,
+    backgroundColor: "#FEE2E2",
+    paddingHorizontal: SPACING.xxl,
+    paddingVertical: SPACING.md,
+    borderRadius: RADIUS.md,
+  },
+  logoutBtnSmallText: {
+    color: "#EF4444",
+    fontWeight: "700",
+    fontSize: FONT_SIZE.bodyLg,
+  },
   header: {
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 14,
-
+    paddingHorizontal: SPACING.xl,
+    paddingTop: SPACING.lg,
+    paddingBottom: SPACING.md,
+    backgroundColor: "#FFFFFF",
+    borderBottomWidth: 1,
+    borderBottomColor: "#F1F5F9",
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
   },
-
   title: {
-    fontSize: 28,
+    fontSize: FONT_SIZE.titleLg,
     fontWeight: "800",
-    color: "#FFFFFF",
+    color: "#0F172A",
   },
-
   subtitle: {
-    marginTop: 6,
-    color: "#94A3B8",
-    fontSize: 14,
+    marginTop: 3,
+    color: "#64748B",
+    fontSize: FONT_SIZE.small,
+    fontWeight: "500",
   },
-
-  loadingText: {
-    marginTop: 12,
-    color: "#CBD5E1",
-    fontSize: 15,
+  logoutBtn: {
+    backgroundColor: "#FEE2E2",
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+    borderRadius: RADIUS.md,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: SPACING.xs,
+    flexShrink: 0,
   },
-
+  logoutBtnText: {
+    color: "#EF4444",
+    fontWeight: "700",
+    fontSize: FONT_SIZE.small,
+  },
   listContent: {
-    paddingHorizontal: 18,
-    paddingTop: 10,
-    paddingBottom: 120,
-    gap: 16,
+    paddingHorizontal: SPACING.lg,
+    paddingTop: SPACING.md,
+    gap: SPACING.md,
   },
-
   card: {
-    backgroundColor: "#111827",
-
-    borderRadius: 26,
-
-    padding: 18,
-
+    backgroundColor: "#FFFFFF",
+    borderRadius: RADIUS.xl,
+    padding: SPACING.lg,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.05)",
-
-    marginBottom: 16,
-
+    borderColor: "#F1F5F9",
     shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 8,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 12,
-
-    elevation: 6,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 3,
   },
-
   topRow: {
     flexDirection: "row",
-    gap: 14,
+    gap: SPACING.md,
+    alignItems: "flex-start",
   },
-
   avatar: {
-    width: 58,
-    height: 58,
-
-    borderRadius: 29,
-
     justifyContent: "center",
     alignItems: "center",
-
-    backgroundColor: "#4F46E5",
+    backgroundColor: "#EFF6FF",
+    borderWidth: 2,
+    borderColor: "#BFDBFE",
   },
-
   avatarText: {
-    color: "#FFFFFF",
-    fontSize: 22,
+    color: "#3B82F6",
     fontWeight: "800",
   },
-
   name: {
-    fontSize: 18,
-    fontWeight: "800",
-    color: "#FFFFFF",
+    fontSize: FONT_SIZE.subtitle,
+    fontWeight: "700",
+    color: "#0F172A",
   },
-
   email: {
-    color: "#CBD5E1",
-    marginTop: 4,
-    fontSize: 14,
+    color: "#64748B",
+    marginTop: 3,
+    fontSize: FONT_SIZE.small,
+    fontWeight: "500",
   },
-
   badgeRow: {
     flexDirection: "row",
-    gap: 8,
-    marginTop: 10,
+    gap: SPACING.sm,
+    marginTop: SPACING.sm,
+    flexWrap: "wrap",
   },
-
   adminBadge: {
-    backgroundColor: "rgba(245,158,11,0.18)",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 999,
+    backgroundColor: "#FEF3C7",
+    paddingHorizontal: SPACING.sm + 2,
+    paddingVertical: 3,
+    borderRadius: RADIUS.pill,
+    borderWidth: 1,
+    borderColor: "#FDE68A",
   },
-
   userBadge: {
-    backgroundColor: "rgba(59,130,246,0.18)",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 999,
+    backgroundColor: "#EFF6FF",
+    paddingHorizontal: SPACING.sm + 2,
+    paddingVertical: 3,
+    borderRadius: RADIUS.pill,
+    borderWidth: 1,
+    borderColor: "#BFDBFE",
   },
-
   activeBadge: {
-    backgroundColor: "rgba(16,185,129,0.18)",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 999,
+    backgroundColor: "#DCFCE7",
+    paddingHorizontal: SPACING.sm + 2,
+    paddingVertical: 3,
+    borderRadius: RADIUS.pill,
+    borderWidth: 1,
+    borderColor: "#BBF7D0",
   },
-
   bannedBadge: {
-    backgroundColor: "rgba(239,68,68,0.18)",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 999,
+    backgroundColor: "#FEE2E2",
+    paddingHorizontal: SPACING.sm + 2,
+    paddingVertical: 3,
+    borderRadius: RADIUS.pill,
+    borderWidth: 1,
+    borderColor: "#FECACA",
   },
-
   badgeText: {
-    color: "#FFFFFF",
-    fontSize: 11,
+    fontSize: FONT_SIZE.caption,
     fontWeight: "700",
   },
-
+  cardDivider: {
+    height: 1,
+    backgroundColor: "#F1F5F9",
+    marginVertical: SPACING.md,
+  },
   actions: {
     flexDirection: "row",
-    gap: 12,
-    marginTop: 18,
+    gap: SPACING.sm,
   },
-
-  smallBtn: {
+  actionBtn: {
     flex: 1,
-
-    backgroundColor: "#4F46E5",
-
-    paddingVertical: 14,
-
-    borderRadius: 16,
-
+    backgroundColor: "#EFF6FF",
+    paddingVertical: SPACING.md - 1,
+    borderRadius: RADIUS.md,
     justifyContent: "center",
     alignItems: "center",
-  },
-
-  warnBtn: {
-    backgroundColor: "#DC2626",
-  },
-
-  smallBtnText: {
-    color: "#FFFFFF",
-    fontWeight: "700",
-    fontSize: 14,
-  },
-
-  logoutBtn: {
-    backgroundColor: "#1E293B",
-
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-
-    borderRadius: 16,
-
     flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
+    gap: SPACING.xs,
+    borderWidth: 1,
+    borderColor: "#BFDBFE",
   },
-
-  logoutBtnText: {
-    color: "#FFFFFF",
+  banBtn: {
+    backgroundColor: "#FEE2E2",
+    borderColor: "#FECACA",
+  },
+  unbanBtn: {
+    backgroundColor: "#DCFCE7",
+    borderColor: "#BBF7D0",
+  },
+  actionBtnText: {
+    color: "#3B82F6",
     fontWeight: "700",
+    fontSize: FONT_SIZE.small,
   },
-
   footer: {
-    position: "absolute",
-
-    left: 18,
-    right: 18,
-    bottom: 18,
-
-    backgroundColor: "#111827",
-
-    borderRadius: 28,
-
-    paddingVertical: 14,
-    paddingHorizontal: 10,
-
+    backgroundColor: "#FFFFFF",
+    borderTopWidth: 1,
+    borderTopColor: "#F1F5F9",
+    paddingTop: SPACING.sm,
+    paddingHorizontal: SPACING.sm,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.05)",
   },
-
   footerTab: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    gap: 4,
-
-    paddingVertical: 10,
-    borderRadius: 18,
+    gap: 3,
+    paddingVertical: SPACING.sm,
+    borderRadius: RADIUS.md,
   },
-
   activeFooterTab: {
-    backgroundColor: "#4F46E5",
+    backgroundColor: "#EFF6FF",
   },
-
   footerText: {
     color: "#94A3B8",
-    fontSize: 12,
+    fontSize: FONT_SIZE.caption,
     fontWeight: "600",
   },
-
   activeFooterText: {
-    color: "#FFFFFF",
-    fontSize: 12,
+    color: "#3B82F6",
+    fontSize: FONT_SIZE.caption,
     fontWeight: "700",
   },
 });

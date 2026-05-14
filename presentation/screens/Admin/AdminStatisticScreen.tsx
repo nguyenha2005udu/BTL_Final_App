@@ -1,20 +1,22 @@
+
 import React, { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
+  useWindowDimensions,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { MaterialIcons } from "@expo/vector-icons";
-import {
-  collection,
-  getDocs,
-} from "firebase/firestore";
+import { collection, getDocs } from "firebase/firestore";
 import { db } from "@services/firebase/firebaseConfig";
 import { useNavigation } from "@react-navigation/native";
+import { FONT_SIZE, RADIUS, SPACING } from "@/utils/responsive";
 
 interface PlatformStats {
   totalUsers: number;
@@ -29,8 +31,15 @@ interface PlatformStats {
 
 export default function AdminStatisticScreen() {
   const navigation = useNavigation<any>();
+  const { width } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
   const [stats, setStats] = useState<PlatformStats | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const isSmall = width < 360;
+  const tabIconSize = isSmall ? 18 : 22;
+  const statIconSize = isSmall ? 36 : 42;
+  const avatarSize = isSmall ? 36 : 42;
 
   const loadStats = useCallback(async () => {
     try {
@@ -56,7 +65,6 @@ export default function AdminStatisticScreen() {
           createdAt: userData?.createdAt,
         });
 
-        // Categories
         try {
           const catsSnap = await getDocs(
             collection(db, "users", userDoc.id, "categories")
@@ -64,7 +72,6 @@ export default function AdminStatisticScreen() {
           totalCategories += catsSnap.size;
         } catch {}
 
-        // Transactions
         try {
           const txSnap = await getDocs(
             collection(db, "users", userDoc.id, "transactions")
@@ -73,8 +80,7 @@ export default function AdminStatisticScreen() {
 
           txSnap.docs.forEach((txDoc) => {
             const txData = txDoc.data();
-            const amount =
-              typeof txData.amount === "number" ? txData.amount : 0;
+            const amount = typeof txData.amount === "number" ? txData.amount : 0;
             if (txData.type === "income") {
               totalIncome += amount;
             } else {
@@ -84,7 +90,6 @@ export default function AdminStatisticScreen() {
         } catch {}
       }
 
-      // Sort recent users by createdAt desc
       recentUsers.sort((a, b) => {
         const getTime = (v: any) => {
           if (!v) return 0;
@@ -119,17 +124,18 @@ export default function AdminStatisticScreen() {
 
   if (loading || !stats) {
     return (
-      <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#6366F1" />
+      <SafeAreaView style={styles.centerContainer}>
+        <ActivityIndicator size="large" color="#3B82F6" />
         <Text style={styles.loadingText}>Đang tải thống kê...</Text>
-      </View>
+      </SafeAreaView>
     );
   }
 
   const balance = stats.totalIncome - stats.totalExpense;
+  const bottomPad = insets.bottom + 60;
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Thống kê hệ thống</Text>
@@ -137,42 +143,65 @@ export default function AdminStatisticScreen() {
       </View>
 
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: bottomPad + SPACING.lg }]}
         showsVerticalScrollIndicator={false}
       >
         {/* Summary Cards */}
         <View style={styles.statsGrid}>
-          <View style={[styles.statCard, { borderLeftColor: "#6366F1" }]}>
-            <View style={[styles.statIconBox, { backgroundColor: "rgba(99,102,241,0.15)" }]}>
-              <MaterialIcons name="people" size={24} color="#6366F1" />
+          {[
+            {
+              icon: "people",
+              iconColor: "#3B82F6",
+              iconBg: "#EFF6FF",
+              value: stats.totalUsers,
+              label: "Người dùng",
+              accent: "#3B82F6",
+            },
+            {
+              icon: "admin-panel-settings",
+              iconColor: "#F59E0B",
+              iconBg: "#FEF3C7",
+              value: stats.totalAdmins,
+              label: "Quản trị viên",
+              accent: "#F59E0B",
+            },
+            {
+              icon: "block",
+              iconColor: "#EF4444",
+              iconBg: "#FEE2E2",
+              value: stats.totalBanned,
+              label: "Bị cấm",
+              accent: "#EF4444",
+            },
+            {
+              icon: "category",
+              iconColor: "#10B981",
+              iconBg: "#DCFCE7",
+              value: stats.totalCategories,
+              label: "Danh mục",
+              accent: "#10B981",
+            },
+          ].map((item, idx) => (
+            <View
+              key={idx}
+              style={[styles.statCard, { borderLeftColor: item.accent }]}
+            >
+              <View
+                style={[
+                  styles.statIconBox,
+                  { backgroundColor: item.iconBg, width: statIconSize, height: statIconSize },
+                ]}
+              >
+                <MaterialIcons
+                  name={item.icon as any}
+                  size={isSmall ? 18 : 22}
+                  color={item.iconColor}
+                />
+              </View>
+              <Text style={styles.statValue} numberOfLines={1}>{item.value}</Text>
+              <Text style={styles.statLabel} numberOfLines={1}>{item.label}</Text>
             </View>
-            <Text style={styles.statValue}>{stats.totalUsers}</Text>
-            <Text style={styles.statLabel}>Người dùng</Text>
-          </View>
-
-          <View style={[styles.statCard, { borderLeftColor: "#F59E0B" }]}>
-            <View style={[styles.statIconBox, { backgroundColor: "rgba(245,158,11,0.15)" }]}>
-              <MaterialIcons name="admin-panel-settings" size={24} color="#F59E0B" />
-            </View>
-            <Text style={styles.statValue}>{stats.totalAdmins}</Text>
-            <Text style={styles.statLabel}>Quản trị viên</Text>
-          </View>
-
-          <View style={[styles.statCard, { borderLeftColor: "#EF4444" }]}>
-            <View style={[styles.statIconBox, { backgroundColor: "rgba(239,68,68,0.15)" }]}>
-              <MaterialIcons name="block" size={24} color="#EF4444" />
-            </View>
-            <Text style={styles.statValue}>{stats.totalBanned}</Text>
-            <Text style={styles.statLabel}>Bị cấm</Text>
-          </View>
-
-          <View style={[styles.statCard, { borderLeftColor: "#10B981" }]}>
-            <View style={[styles.statIconBox, { backgroundColor: "rgba(16,185,129,0.15)" }]}>
-              <MaterialIcons name="category" size={24} color="#10B981" />
-            </View>
-            <Text style={styles.statValue}>{stats.totalCategories}</Text>
-            <Text style={styles.statLabel}>Danh mục</Text>
-          </View>
+          ))}
         </View>
 
         {/* Financial Overview */}
@@ -183,10 +212,10 @@ export default function AdminStatisticScreen() {
             <View style={styles.financeRow}>
               <View style={styles.financeItem}>
                 <View style={styles.financeIconRow}>
-                  <MaterialIcons name="trending-up" size={20} color="#10B981" />
+                  <MaterialIcons name="trending-up" size={isSmall ? 16 : 20} color="#10B981" />
                   <Text style={styles.financeLabel}>Tổng thu nhập</Text>
                 </View>
-                <Text style={[styles.financeValue, { color: "#10B981" }]}>
+                <Text style={[styles.financeValue, { color: "#10B981" }]} numberOfLines={1}>
                   +{stats.totalIncome.toLocaleString("vi-VN")}₫
                 </Text>
               </View>
@@ -195,10 +224,10 @@ export default function AdminStatisticScreen() {
 
               <View style={styles.financeItem}>
                 <View style={styles.financeIconRow}>
-                  <MaterialIcons name="trending-down" size={20} color="#EF4444" />
+                  <MaterialIcons name="trending-down" size={isSmall ? 16 : 20} color="#EF4444" />
                   <Text style={styles.financeLabel}>Tổng chi tiêu</Text>
                 </View>
-                <Text style={[styles.financeValue, { color: "#EF4444" }]}>
+                <Text style={[styles.financeValue, { color: "#EF4444" }]} numberOfLines={1}>
                   -{stats.totalExpense.toLocaleString("vi-VN")}₫
                 </Text>
               </View>
@@ -213,6 +242,7 @@ export default function AdminStatisticScreen() {
                   styles.balanceValue,
                   { color: balance >= 0 ? "#10B981" : "#EF4444" },
                 ]}
+                numberOfLines={1}
               >
                 {balance >= 0 ? "+" : ""}
                 {balance.toLocaleString("vi-VN")}₫
@@ -227,8 +257,13 @@ export default function AdminStatisticScreen() {
 
           <View style={styles.txStatsCard}>
             <View style={styles.txStatRow}>
-              <View style={[styles.txStatIcon, { backgroundColor: "rgba(59,130,246,0.15)" }]}>
-                <MaterialIcons name="receipt-long" size={22} color="#3B82F6" />
+              <View
+                style={[
+                  styles.txStatIcon,
+                  { backgroundColor: "#EFF6FF", width: statIconSize, height: statIconSize },
+                ]}
+              >
+                <MaterialIcons name="receipt-long" size={isSmall ? 18 : 22} color="#3B82F6" />
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={styles.txStatLabel}>Tổng giao dịch</Text>
@@ -237,11 +272,16 @@ export default function AdminStatisticScreen() {
               <Text style={styles.txStatValue}>{stats.totalTransactions}</Text>
             </View>
 
-            <View style={styles.txDivider} />
+            <View style={[styles.txDivider, { marginLeft: statIconSize + SPACING.md }]} />
 
             <View style={styles.txStatRow}>
-              <View style={[styles.txStatIcon, { backgroundColor: "rgba(99,102,241,0.15)" }]}>
-                <MaterialIcons name="person" size={22} color="#6366F1" />
+              <View
+                style={[
+                  styles.txStatIcon,
+                  { backgroundColor: "#EFF6FF", width: statIconSize, height: statIconSize },
+                ]}
+              >
+                <MaterialIcons name="person" size={isSmall ? 18 : 22} color="#3B82F6" />
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={styles.txStatLabel}>Trung bình / người dùng</Text>
@@ -264,356 +304,323 @@ export default function AdminStatisticScreen() {
             {stats.recentUsers.map((user, index) => (
               <View key={index}>
                 <View style={styles.recentUserRow}>
-                  <View style={styles.recentUserAvatar}>
-                    <Text style={styles.recentUserAvatarText}>
+                  <View
+                    style={[
+                      styles.recentUserAvatar,
+                      { width: avatarSize, height: avatarSize, borderRadius: avatarSize / 2 },
+                    ]}
+                  >
+                    <Text style={[styles.recentUserAvatarText, { fontSize: isSmall ? 14 : 16 }]}>
                       {user.name.charAt(0).toUpperCase()}
                     </Text>
                   </View>
                   <View style={{ flex: 1 }}>
-                    <Text style={styles.recentUserName}>{user.name}</Text>
-                    <Text style={styles.recentUserEmail}>{user.email}</Text>
+                    <Text style={styles.recentUserName} numberOfLines={1}>{user.name}</Text>
+                    <Text style={styles.recentUserEmail} numberOfLines={1}>{user.email}</Text>
                   </View>
                 </View>
                 {index < stats.recentUsers.length - 1 && (
-                  <View style={styles.recentUserDivider} />
+                  <View style={[styles.recentUserDivider, { marginLeft: avatarSize + SPACING.md }]} />
                 )}
               </View>
             ))}
           </View>
         </View>
-
-        <View style={{ height: 100 }} />
       </ScrollView>
 
       {/* Bottom Navigation */}
-      <View style={styles.footer}>
-        {/* Quản lý */}
+      <View style={[styles.footer, { paddingBottom: insets.bottom + SPACING.sm }]}>
         <TouchableOpacity
           style={styles.footerTab}
           onPress={() => navigation.navigate("AdminUserManagement")}
         >
-          <MaterialIcons name="admin-panel-settings" size={22} color="#94A3B8" />
+          <MaterialIcons name="admin-panel-settings" size={tabIconSize} color="#94A3B8" />
           <Text style={styles.footerText}>Quản lý</Text>
         </TouchableOpacity>
 
-        {/* Danh mục */}
         <TouchableOpacity
           style={styles.footerTab}
           onPress={() => navigation.navigate("AdminCategories")}
         >
-          <MaterialIcons name="dashboard" size={22} color="#94A3B8" />
+          <MaterialIcons name="dashboard" size={tabIconSize} color="#94A3B8" />
           <Text style={styles.footerText}>Danh mục</Text>
         </TouchableOpacity>
 
-        {/* Thống kê - Active */}
-        <TouchableOpacity style={[styles.footerTab, styles.activeFooterTab]}>
-          <MaterialIcons name="bar-chart" size={22} color="#FFFFFF" />
+        <View style={[styles.footerTab, styles.activeFooterTab]}>
+          <MaterialIcons name="bar-chart" size={tabIconSize} color="#3B82F6" />
           <Text style={styles.activeFooterText}>Thống kê</Text>
-        </TouchableOpacity>
+        </View>
 
-        {/* Cá nhân */}
         <TouchableOpacity
           style={styles.footerTab}
           onPress={() => navigation.navigate("AdminSetting")}
         >
-          <MaterialIcons name="person" size={22} color="#94A3B8" />
+          <MaterialIcons name="person" size={tabIconSize} color="#94A3B8" />
           <Text style={styles.footerText}>Cá nhân</Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#0B1120",
+    backgroundColor: "#F8FAFC",
   },
-
   centerContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    paddingHorizontal: 24,
-    backgroundColor: "#0B1120",
+    paddingHorizontal: SPACING.xxl,
+    backgroundColor: "#F8FAFC",
   },
-
   loadingText: {
-    marginTop: 12,
-    color: "#CBD5E1",
-    fontSize: 15,
+    marginTop: SPACING.md,
+    color: "#64748B",
+    fontSize: FONT_SIZE.body,
+    fontWeight: "500",
   },
-
   header: {
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 14,
+    paddingHorizontal: SPACING.xl,
+    paddingTop: SPACING.lg,
+    paddingBottom: SPACING.md,
+    backgroundColor: "#FFFFFF",
+    borderBottomWidth: 1,
+    borderBottomColor: "#F1F5F9",
   },
-
   headerTitle: {
-    fontSize: 28,
+    fontSize: FONT_SIZE.titleLg,
     fontWeight: "800",
-    color: "#FFFFFF",
+    color: "#0F172A",
   },
-
   headerSubtitle: {
-    marginTop: 6,
-    color: "#94A3B8",
-    fontSize: 14,
+    marginTop: 4,
+    color: "#64748B",
+    fontSize: FONT_SIZE.small,
+    fontWeight: "500",
   },
-
   scrollContent: {
-    padding: 20,
-    paddingTop: 8,
+    padding: SPACING.lg,
   },
-
   statsGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 12,
-    marginBottom: 24,
+    gap: SPACING.md,
+    marginBottom: SPACING.xl,
   },
-
   statCard: {
     width: "47%",
-    backgroundColor: "#111827",
-    borderRadius: 18,
-    padding: 18,
+    backgroundColor: "#FFFFFF",
+    borderRadius: RADIUS.lg,
+    padding: SPACING.md,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.05)",
+    borderColor: "#F1F5F9",
     borderLeftWidth: 4,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
   },
-
   statIconBox: {
-    width: 44,
-    height: 44,
-    borderRadius: 14,
+    borderRadius: RADIUS.md,
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 12,
+    marginBottom: SPACING.sm,
   },
-
   statValue: {
-    fontSize: 28,
+    fontSize: FONT_SIZE.headingLg,
     fontWeight: "800",
-    color: "#FFFFFF",
-    marginBottom: 4,
+    color: "#0F172A",
+    marginBottom: 2,
   },
-
   statLabel: {
-    fontSize: 13,
+    fontSize: FONT_SIZE.small,
     fontWeight: "600",
-    color: "#94A3B8",
+    color: "#64748B",
   },
-
   section: {
-    marginBottom: 24,
+    marginBottom: SPACING.xl,
   },
-
   sectionTitle: {
-    fontSize: 20,
+    fontSize: FONT_SIZE.title,
     fontWeight: "700",
-    color: "#FFFFFF",
-    marginBottom: 14,
+    color: "#0F172A",
+    marginBottom: SPACING.md,
   },
-
   financeCard: {
-    backgroundColor: "#111827",
-    borderRadius: 20,
-    padding: 20,
+    backgroundColor: "#FFFFFF",
+    borderRadius: RADIUS.xl,
+    padding: SPACING.xl,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.05)",
+    borderColor: "#F1F5F9",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
   },
-
   financeRow: {
     flexDirection: "row",
   },
-
   financeItem: {
     flex: 1,
-    gap: 8,
+    gap: SPACING.sm,
   },
-
   financeIconRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
   },
-
   financeLabel: {
-    fontSize: 13,
+    fontSize: FONT_SIZE.small,
     fontWeight: "600",
-    color: "#94A3B8",
+    color: "#64748B",
   },
-
   financeValue: {
-    fontSize: 18,
+    fontSize: FONT_SIZE.subtitle,
     fontWeight: "800",
   },
-
   financeDivider: {
     width: 1,
-    backgroundColor: "rgba(255,255,255,0.06)",
-    marginHorizontal: 16,
+    backgroundColor: "#F1F5F9",
+    marginHorizontal: SPACING.lg,
   },
-
   balanceDivider: {
     height: 1,
-    backgroundColor: "rgba(255,255,255,0.06)",
-    marginVertical: 16,
+    backgroundColor: "#F1F5F9",
+    marginVertical: SPACING.lg,
   },
-
   balanceRow: {
-    gap: 6,
+    gap: 4,
   },
-
   balanceLabel: {
-    fontSize: 14,
+    fontSize: FONT_SIZE.small,
     fontWeight: "600",
-    color: "#94A3B8",
+    color: "#64748B",
   },
-
   balanceValue: {
-    fontSize: 24,
+    fontSize: FONT_SIZE.heading,
     fontWeight: "800",
   },
-
   txStatsCard: {
-    backgroundColor: "#111827",
-    borderRadius: 20,
-    padding: 18,
+    backgroundColor: "#FFFFFF",
+    borderRadius: RADIUS.xl,
+    padding: SPACING.lg,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.05)",
+    borderColor: "#F1F5F9",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
   },
-
   txStatRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 14,
-    paddingVertical: 6,
+    gap: SPACING.md,
+    paddingVertical: SPACING.xs,
   },
-
   txStatIcon: {
-    width: 46,
-    height: 46,
-    borderRadius: 14,
+    borderRadius: RADIUS.md,
     alignItems: "center",
     justifyContent: "center",
   },
-
   txStatLabel: {
-    fontSize: 15,
+    fontSize: FONT_SIZE.bodyLg,
     fontWeight: "700",
-    color: "#FFFFFF",
+    color: "#0F172A",
     marginBottom: 2,
   },
-
   txStatSub: {
-    fontSize: 12,
+    fontSize: FONT_SIZE.small,
     fontWeight: "500",
-    color: "#94A3B8",
+    color: "#64748B",
   },
-
   txStatValue: {
-    fontSize: 22,
+    fontSize: FONT_SIZE.heading,
     fontWeight: "800",
-    color: "#FFFFFF",
+    color: "#0F172A",
   },
-
   txDivider: {
     height: 1,
-    backgroundColor: "rgba(255,255,255,0.06)",
-    marginVertical: 12,
-    marginLeft: 60,
+    backgroundColor: "#F1F5F9",
+    marginVertical: SPACING.md,
   },
-
   recentUsersCard: {
-    backgroundColor: "#111827",
-    borderRadius: 20,
-    padding: 18,
+    backgroundColor: "#FFFFFF",
+    borderRadius: RADIUS.xl,
+    padding: SPACING.lg,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.05)",
+    borderColor: "#F1F5F9",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
   },
-
   recentUserRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 14,
-    paddingVertical: 8,
+    gap: SPACING.md,
+    paddingVertical: SPACING.sm,
   },
-
   recentUserAvatar: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: "#4F46E5",
+    backgroundColor: "#EFF6FF",
     alignItems: "center",
     justifyContent: "center",
+    borderWidth: 2,
+    borderColor: "#BFDBFE",
   },
-
   recentUserAvatarText: {
-    color: "#FFFFFF",
-    fontSize: 18,
+    color: "#3B82F6",
     fontWeight: "800",
   },
-
   recentUserName: {
-    fontSize: 15,
+    fontSize: FONT_SIZE.bodyMd,
     fontWeight: "700",
-    color: "#FFFFFF",
+    color: "#0F172A",
     marginBottom: 2,
   },
-
   recentUserEmail: {
-    fontSize: 13,
+    fontSize: FONT_SIZE.small,
     fontWeight: "500",
-    color: "#94A3B8",
+    color: "#64748B",
   },
-
   recentUserDivider: {
     height: 1,
-    backgroundColor: "rgba(255,255,255,0.06)",
-    marginLeft: 58,
+    backgroundColor: "#F1F5F9",
   },
-
   footer: {
-    position: "absolute",
-    left: 18,
-    right: 18,
-    bottom: 18,
-    backgroundColor: "#111827",
-    borderRadius: 28,
-    paddingVertical: 14,
-    paddingHorizontal: 10,
+    backgroundColor: "#FFFFFF",
+    borderTopWidth: 1,
+    borderTopColor: "#F1F5F9",
+    paddingTop: SPACING.sm,
+    paddingHorizontal: SPACING.sm,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.05)",
   },
-
   footerTab: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    gap: 4,
-    paddingVertical: 10,
-    borderRadius: 18,
+    gap: 3,
+    paddingVertical: SPACING.sm,
+    borderRadius: RADIUS.md,
   },
-
   activeFooterTab: {
-    backgroundColor: "#4F46E5",
+    backgroundColor: "#EFF6FF",
   },
-
   footerText: {
     color: "#94A3B8",
-    fontSize: 12,
+    fontSize: FONT_SIZE.caption,
     fontWeight: "600",
   },
-
   activeFooterText: {
-    color: "#FFFFFF",
-    fontSize: 12,
+    color: "#3B82F6",
+    fontSize: FONT_SIZE.caption,
     fontWeight: "700",
   },
 });
