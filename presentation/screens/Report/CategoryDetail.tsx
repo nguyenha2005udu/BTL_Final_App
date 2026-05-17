@@ -1,4 +1,4 @@
-﻿// CategoryDetail.tsx
+// CategoryDetail.tsx
 import { MaterialIcons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
@@ -10,6 +10,9 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  SafeAreaView,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { COLORS, ICONS } from '@constants/constants';
 import { useCategories } from '@hooks/useCategories';
@@ -92,7 +95,7 @@ const CategoryDetail: React.FC = () => {
   };
 
   const renderIconSelection = () => (
-    <View style={[styles.container, { backgroundColor: isDarkMode ? theme.background : '#FFFFFF' }]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: isDarkMode ? theme.background : '#FFFFFF' }]}>
       <View style={[styles.header, { backgroundColor: isDarkMode ? theme.headerBackground : '#FFFFFF' }]}>
         <TouchableOpacity 
           onPress={() => setStep('form')} 
@@ -160,11 +163,11 @@ const CategoryDetail: React.FC = () => {
           <Text style={styles.primaryButtonText}>Xác nhận</Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </SafeAreaView>
   );
 
   const renderColorSelection = () => (
-    <View style={[styles.container, { backgroundColor: isDarkMode ? theme.background : '#FFFFFF' }]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: isDarkMode ? theme.background : '#FFFFFF' }]}>
       <View style={[styles.header, { backgroundColor: isDarkMode ? theme.headerBackground : '#FFFFFF' }]}>
         <TouchableOpacity 
           onPress={() => setStep('form')} 
@@ -209,14 +212,15 @@ const CategoryDetail: React.FC = () => {
           <Text style={styles.primaryButtonText}>Xác nhận</Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </SafeAreaView>
   );
 
   if (step === 'icon') return renderIconSelection();
   if (step === 'color') return renderColorSelection();
 
   return (
-    <View style={[styles.container, { backgroundColor: isDarkMode ? theme.background : '#FFFFFF' }]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: isDarkMode ? theme.background : '#FFFFFF' }]}>
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <View style={[styles.header, { backgroundColor: isDarkMode ? theme.headerBackground : '#FFFFFF' }]}>
         <TouchableOpacity 
           onPress={() => navigation.goBack()} 
@@ -382,7 +386,8 @@ const CategoryDetail: React.FC = () => {
           </TouchableOpacity>
         </View>
       </ScrollView>
-    </View>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 };
 

@@ -1,4 +1,4 @@
-﻿import React, { useState } from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -8,6 +8,8 @@ import {
   ScrollView,
   Alert,
   Platform,
+  SafeAreaView,
+  KeyboardAvoidingView,
 } from "react-native";
 import { createSavingGoal } from "@services/savingGoals.service";
 import { auth } from "@services/firebase/firebaseConfig";
@@ -52,7 +54,8 @@ export default function AddGoals({ navigation }: { navigation: any }) {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: isDarkMode ? theme.background : '#FFFFFF' }]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: isDarkMode ? theme.background : '#FFFFFF' }]}>
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       {/* HEADER */}
       <View style={[
         styles.header,
@@ -229,7 +232,8 @@ export default function AddGoals({ navigation }: { navigation: any }) {
           </Text>
         </TouchableOpacity>
       </View>
-    </View>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 
@@ -354,7 +358,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     padding: 20,
-    paddingBottom: Platform.OS === 'ios' ? 34 : 20,
+    paddingBottom: 20,
     backgroundColor: '#FFFFFF',
     borderTopWidth: 1,
     borderTopColor: '#F1F5F9',

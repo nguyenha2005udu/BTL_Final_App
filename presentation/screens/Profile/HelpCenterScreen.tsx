@@ -1,5 +1,5 @@
-﻿import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Animated } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Animated, SafeAreaView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialIcons } from '@components/icon';
 import { useTheme } from '@context/ThemeContext';
@@ -59,7 +59,7 @@ const HelpCenterScreen: React.FC = () => {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: isDarkMode ? theme.background : '#FFFFFF' }]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: isDarkMode ? theme.background : '#FFFFFF' }]}>
       <View style={[styles.header, { 
         backgroundColor: isDarkMode ? theme.headerBackground : '#FFFFFF',
         borderBottomColor: isDarkMode ? theme.border : '#F1F5F9'
@@ -247,7 +247,7 @@ const HelpCenterScreen: React.FC = () => {
 
         <View style={{ height: 20 }} />
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 };
 

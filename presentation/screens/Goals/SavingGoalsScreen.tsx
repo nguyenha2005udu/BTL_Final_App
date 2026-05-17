@@ -1,10 +1,11 @@
-﻿import React, { useState, useCallback } from "react";
+import React, { useState, useCallback } from "react";
 import {
   View,
   Text,
   TouchableOpacity,
   ScrollView,
   StyleSheet,
+  SafeAreaView,
 } from "react-native";
 import { getSavingGoalsByUser } from "@services/savingGoals.service";
 import { auth } from "@services/firebase/firebaseConfig";
@@ -43,7 +44,7 @@ export default function SavingGoalsScreen({
   );
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity
@@ -214,7 +215,7 @@ export default function SavingGoalsScreen({
           <MaterialIcons name="add" size={28} color="#fff" />
         </TouchableOpacity>
       )}
-    </View>
+    </SafeAreaView>
   );
 }
 

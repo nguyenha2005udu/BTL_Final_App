@@ -34,7 +34,7 @@ export const styles = StyleSheet.create({
     color: '#111827',
   },
   main: {
-    flex: 1,
+    flexGrow: 1,
     paddingHorizontal: 24,
     paddingTop: 40,
     justifyContent: 'flex-start',
@@ -134,6 +134,7 @@ export const styles = StyleSheet.create({
   footer: {
     paddingHorizontal: 16,
     paddingVertical: 24,
+    marginTop: 'auto',
     alignItems: 'center',
   },
   footerText: {

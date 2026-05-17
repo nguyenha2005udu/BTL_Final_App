@@ -1,5 +1,5 @@
-﻿import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Alert, Linking } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Alert, Linking, SafeAreaView, KeyboardAvoidingView, Platform } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialIcons } from '@components/icon';
 import { useTheme } from '@context/ThemeContext';
@@ -34,7 +34,8 @@ const ContactSupportScreen: React.FC = () => {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: isDarkMode ? theme.background : '#FFFFFF' }]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: isDarkMode ? theme.background : '#FFFFFF' }]}>
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <View style={[styles.header, { 
         backgroundColor: isDarkMode ? theme.headerBackground : '#FFFFFF',
         borderBottomColor: isDarkMode ? theme.border : '#F1F5F9'
@@ -289,7 +290,8 @@ const ContactSupportScreen: React.FC = () => {
 
         <View style={{ height: 20 }} />
       </ScrollView>
-    </View>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 };
 

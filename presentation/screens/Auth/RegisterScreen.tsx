@@ -1,4 +1,4 @@
-﻿// app/presentation/Auth/RegisterScreen.tsx
+// app/presentation/Auth/RegisterScreen.tsx
 import React, { useState } from 'react';
 import {
   View,
@@ -10,6 +10,7 @@ import {
   ActivityIndicator,
   Alert,
   Platform,
+  SafeAreaView,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -99,10 +100,11 @@ const Register: React.FC = () => {
   };
 
   return (
-    <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-    >
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#FFFFFF' }}>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
       <View style={styles.container}>
         {/* Header */}
         <View style={styles.header}>
@@ -118,6 +120,7 @@ const Register: React.FC = () => {
 
         {/* Scrollable Content */}
         <ScrollView
+          style={{ flex: 1 }}
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
@@ -243,32 +246,33 @@ const Register: React.FC = () => {
               </View>
             </View>
           </View>
-        </ScrollView>
 
-        {/* Footer */}
-        <View style={styles.footer}>
-          <Text style={styles.termsText}>
-            Bằng cách đăng ký, bạn đồng ý với{' '}
-            <Text style={styles.linkText}>
-              Điều khoản & Chính sách bảo mật
+          {/* Footer */}
+          <View style={styles.footer}>
+            <Text style={styles.termsText}>
+              Bằng cách đăng ký, bạn đồng ý với{' '}
+              <Text style={styles.linkText}>
+                Điều khoản & Chính sách bảo mật
+              </Text>
+              .
             </Text>
-            .
-          </Text>
 
-          <TouchableOpacity
-            style={styles.submitButton}
-            onPress={handleRegister}
-            disabled={loading}
-          >
-            {loading ? (
-              <ActivityIndicator color="#fff" />
-            ) : (
-              <Text style={styles.submitButtonText}>Đăng ký</Text>
-            )}
-          </TouchableOpacity>
-        </View>
+            <TouchableOpacity
+              style={styles.submitButton}
+              onPress={handleRegister}
+              disabled={loading}
+            >
+              {loading ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text style={styles.submitButtonText}>Đăng ký</Text>
+              )}
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
       </View>
-    </KeyboardAvoidingView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 };
 

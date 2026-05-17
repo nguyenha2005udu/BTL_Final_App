@@ -1,7 +1,7 @@
-﻿import { MaterialIcons } from '@expo/vector-icons';
+import { MaterialIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
-import { Image, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
+import { Image, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View, SafeAreaView } from 'react-native';
 import { useTheme } from '@context/ThemeContext';
 import { getCurrentUserProfile } from '@services/auth.service';
 import { auth } from '@services/firebase/firebaseConfig';
@@ -46,7 +46,7 @@ const ProfileScreen: React.FC = () => {
   }, []);
 
   return (
-    <View style={[styles.container, { backgroundColor: isDarkMode ? theme.background : '#FFFFFF' }]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: isDarkMode ? theme.background : '#FFFFFF' }]}>
       <View style={[styles.header, { 
         backgroundColor: isDarkMode ? theme.headerBackground : '#FFFFFF',
         borderBottomColor: isDarkMode ? theme.border : '#F1F5F9'
@@ -226,7 +226,7 @@ const ProfileScreen: React.FC = () => {
 
         <View style={{ height: 20 }} />
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 };
 

@@ -1,4 +1,4 @@
-﻿import { MaterialIcons } from "@expo/vector-icons";
+import { MaterialIcons } from "@expo/vector-icons";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import React, { useCallback, useEffect, useState } from "react";
 
@@ -9,6 +9,7 @@ import {
   Text,
   TouchableOpacity,
   View,
+  SafeAreaView,
 } from "react-native";
 
 import { useTheme } from "@context/ThemeContext";
@@ -208,7 +209,7 @@ setRecentTransactions(mapped);
   }, [transactions, categories]);
 
   return (
-<View style={[styles.container, { backgroundColor: isDarkMode ? theme.background : '#FFFFFF' }]}>
+<SafeAreaView style={[styles.container, { backgroundColor: isDarkMode ? theme.background : '#FFFFFF' }]}>
       <ScrollView 
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
@@ -454,7 +455,7 @@ setRecentTransactions(mapped);
       >
         <MaterialIcons name="add" size={32} color="white" />
       </TouchableOpacity>
-    </View>
+    </SafeAreaView>
   );
 };
 

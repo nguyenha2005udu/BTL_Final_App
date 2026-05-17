@@ -1,4 +1,4 @@
-﻿import { MaterialIcons } from "@expo/vector-icons";
+import { MaterialIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import React from "react";
 import {
@@ -7,6 +7,7 @@ import {
   Text,
   TouchableOpacity,
   View,
+  SafeAreaView,
 } from "react-native";
 import { useTheme } from "@context/ThemeContext";
 import {
@@ -100,7 +101,7 @@ const NotificationsScreen: React.FC = () => {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: isDarkMode ? theme.background : '#FFFFFF' }]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: isDarkMode ? theme.background : '#FFFFFF' }]}>
       <View style={[styles.header, { backgroundColor: isDarkMode ? theme.headerBackground : '#FFFFFF', borderBottomColor: isDarkMode ? theme.border : '#F1F5F9' }]}>
         <View style={styles.headerTop}>
           <TouchableOpacity
@@ -271,7 +272,7 @@ const NotificationsScreen: React.FC = () => {
           ))
         )}
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 };
 

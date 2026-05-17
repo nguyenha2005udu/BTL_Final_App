@@ -107,10 +107,10 @@ const styles = StyleSheet.create({
   },
 
   footer: {
-    padding: 24,
-    paddingTop: 16,
+    paddingVertical: 24,
     gap: 16,
     backgroundColor: '#FFFFFF',
+    marginTop: 20,
     borderTopWidth: 1,
     borderTopColor: '#F3F4F6',
   },
@@ -140,7 +140,8 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 24,
     paddingTop: 20,
-    paddingBottom: 160, // 🔥 QUAN TRỌNG: tránh footer che input
+    paddingBottom: 40,
+    flexGrow: 1,
   },
 
 

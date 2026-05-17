@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   View,
   Text,
@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   ScrollView,
   StyleSheet,
+  SafeAreaView,
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useTheme } from "@context/ThemeContext";
@@ -134,7 +135,7 @@ const StatisticsScreen: React.FC = () => {
   /* ================= UI ================= */
 
   return (
-    <View style={[styles.container, { backgroundColor: isDarkMode ? theme.background : '#FFFFFF' }]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: isDarkMode ? theme.background : '#FFFFFF' }]}>
       {/* HEADER */}
       <View style={[styles.header, { backgroundColor: isDarkMode ? theme.headerBackground : '#FFFFFF' }]}>
         <Text style={[styles.headerTitle, { color: theme.textPrimary }]}>
@@ -326,7 +327,7 @@ const StatisticsScreen: React.FC = () => {
           })
         )}
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 };
 

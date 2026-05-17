@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -9,6 +9,8 @@ import {
   Modal,
   Alert,
   Platform,
+  SafeAreaView,
+  KeyboardAvoidingView,
 } from 'react-native';
 
 import { useNavigation } from '@react-navigation/native';
@@ -102,7 +104,8 @@ const AddTransactionScreen: React.FC = () => {
   const hasCategoryForType = filteredCategories.length > 0;
 
   return (
-    <View style={[styles.container, { backgroundColor: isDarkMode ? theme.background : '#FFFFFF' }]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: isDarkMode ? theme.background : '#FFFFFF' }]}>
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
       {/* HEADER */}
       <View style={[styles.header, { 
         backgroundColor: isDarkMode ? theme.headerBackground : '#FFFFFF',
@@ -390,6 +393,7 @@ const AddTransactionScreen: React.FC = () => {
           <Text style={[styles.cancelButtonText, { color: theme.textPrimary }]}>Hủy</Text>
         </TouchableOpacity>
       </View>
+      </KeyboardAvoidingView>
 
       {/* MODAL CHỌN DANH MỤC */}
       <Modal
@@ -467,7 +471,7 @@ const AddTransactionScreen: React.FC = () => {
           </View>
         </View>
       </Modal>
-    </View>
+    </SafeAreaView>
   );
 };
 
@@ -619,7 +623,7 @@ const styles = StyleSheet.create({
   },
   footer: {
     padding: 20,
-    paddingBottom: Platform.OS === 'ios' ? 34 : 20,
+    paddingBottom: 20,
     backgroundColor: '#FFFFFF',
     borderTopWidth: 1,
     borderTopColor: '#F1F5F9',

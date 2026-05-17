@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -9,6 +9,8 @@ import {
   StyleSheet,
   Alert,
   Platform,
+  SafeAreaView,
+  KeyboardAvoidingView,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { MaterialIcons } from "@components/icon";
@@ -142,7 +144,8 @@ const UpdateProfile: React.FC = () => {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: isDarkMode ? theme.background : '#FFFFFF' }]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: isDarkMode ? theme.background : '#FFFFFF' }]}>
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <View style={[styles.header, { 
         backgroundColor: isDarkMode ? theme.headerBackground : '#FFFFFF',
         borderBottomColor: isDarkMode ? theme.border : '#F1F5F9'
@@ -299,7 +302,8 @@ const UpdateProfile: React.FC = () => {
           <Text style={[styles.cancelButtonText, { color: theme.textSecondary }]}>Hủy</Text>
         </TouchableOpacity>
       </View>
-    </View>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 };
 

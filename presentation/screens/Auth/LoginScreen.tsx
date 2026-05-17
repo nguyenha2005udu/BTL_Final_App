@@ -1,4 +1,4 @@
-﻿// app/presentation/Auth/LoginScreen.tsx
+// app/presentation/Auth/LoginScreen.tsx
 import React, { useState } from 'react';
 import {
   SafeAreaView,
@@ -10,6 +10,7 @@ import {
   Platform,
   ActivityIndicator,
   Alert,
+  ScrollView,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -109,7 +110,7 @@ const LoginScreen: React.FC = () => {
         </View>
 
         {/* Main content */}
-        <View style={styles.main}>
+        <ScrollView contentContainerStyle={styles.main} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
           <View style={styles.titleBlock}>
             <Text style={styles.title}>Đăng nhập bằng Email</Text>
             <Text style={styles.subtitle}>
@@ -210,6 +211,7 @@ const LoginScreen: React.FC = () => {
             </Text>
           </Text>
         </View>
+        </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );

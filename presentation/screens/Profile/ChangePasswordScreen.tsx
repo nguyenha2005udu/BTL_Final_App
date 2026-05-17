@@ -1,5 +1,5 @@
-﻿import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Alert } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Alert, SafeAreaView, KeyboardAvoidingView, Platform } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialIcons } from '@components/icon';
 import { useTheme } from '@context/ThemeContext';
@@ -152,7 +152,8 @@ const ChangePasswordScreen: React.FC = () => {
   const passwordChecks = getPasswordStrength(newPassword);
 
   return (
-    <View style={[styles.container, { backgroundColor: isDarkMode ? theme.background : '#FFFFFF' }]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: isDarkMode ? theme.background : '#FFFFFF' }]}>
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <View style={[styles.header, { 
         backgroundColor: isDarkMode ? theme.headerBackground : '#FFFFFF',
         borderBottomColor: isDarkMode ? theme.border : '#F1F5F9'
@@ -381,7 +382,8 @@ const ChangePasswordScreen: React.FC = () => {
           <Text style={[styles.cancelButtonText, { color: theme.textSecondary }]}>Hủy</Text>
         </TouchableOpacity>
       </View>
-    </View>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 };
 

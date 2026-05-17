@@ -255,7 +255,7 @@ export default function AdminSettingScreen() {
       </ScrollView>
 
       {/* Bottom Navigation */}
-      <View style={[styles.footer, { paddingBottom: insets.bottom + SPACING.sm }]}>
+      <View style={[styles.footer, { paddingBottom: SPACING.sm }]}>
         <TouchableOpacity
           style={styles.footerTab}
           onPress={() => navigation.navigate("AdminUserManagement")}

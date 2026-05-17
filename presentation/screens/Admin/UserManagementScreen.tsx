@@ -294,7 +294,7 @@ export default function UserManagementScreen() {
       />
 
       {/* Bottom Navigation */}
-      <View style={[styles.footer, { paddingBottom: insets.bottom + SPACING.sm }]}>
+      <View style={[styles.footer, { paddingBottom: SPACING.sm }]}>
         <View style={[styles.footerTab, styles.activeFooterTab]}>
           <MaterialIcons name="admin-panel-settings" size={iconSize} color="#3B82F6" />
           <Text style={styles.activeFooterText}>Quản lý</Text>
