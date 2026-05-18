@@ -3,6 +3,7 @@ export type RootStackParamList = {
   Login: undefined;
   Register: undefined;
   App: undefined;
+  AdminApp: undefined;
   AdminUserManagement: undefined;
   AdminCategories: undefined;
   AdminStatistic: undefined;
@@ -27,4 +28,3 @@ export type RootStackParamList = {
   RateApp: undefined;
   UpdateTransaction: { id: string };
 };
-

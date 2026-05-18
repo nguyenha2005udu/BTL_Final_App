@@ -56,7 +56,7 @@ const LoginScreen: React.FC = () => {
       if (role === 'admin') {
         navigation.reset({
           index: 0,
-          routes: [{ name: 'AdminUserManagement' }],
+          routes: [{ name: 'AdminApp' }],
         });
         return;
       }
@@ -197,7 +197,7 @@ const LoginScreen: React.FC = () => {
               )}
             </TouchableOpacity>
           </View>
-        </View>
+        </ScrollView>
 
         {/* Footer */}
         <View style={styles.footer}>
@@ -211,7 +211,6 @@ const LoginScreen: React.FC = () => {
             </Text>
           </Text>
         </View>
-        </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );

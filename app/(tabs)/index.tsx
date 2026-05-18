@@ -3,7 +3,7 @@ import { StatusBar } from "react-native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { MaterialIcons } from "@expo/vector-icons";
-import { SafeAreaProvider } from "react-native-safe-area-context";
+import { SafeAreaProvider, useSafeAreaInsets } from "react-native-safe-area-context";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 import { ThemeProvider, useTheme } from "@context/ThemeContext";
@@ -49,6 +49,7 @@ const Tab = createBottomTabNavigator();
 
 function MainTabs() {
   const { theme } = useTheme();
+  const insets = useSafeAreaInsets();
 
   return (
     <Tab.Navigator
@@ -66,8 +67,8 @@ function MainTabs() {
         tabBarActiveTintColor: "#3c83f6",
         tabBarInactiveTintColor: theme.textSecondary,
         tabBarStyle: {
-          height: 65,
-          paddingBottom: 10,
+          height: 65 + insets.bottom,
+          paddingBottom: insets.bottom > 0 ? insets.bottom : 10,
           paddingTop: 10,
           backgroundColor: theme.cardBackground,
           borderTopWidth: 1,
@@ -91,6 +92,48 @@ function MainTabs() {
   );
 }
 
+function AdminTabs() {
+  const { theme } = useTheme();
+  const insets = useSafeAreaInsets();
+
+  return (
+    <Tab.Navigator
+      screenOptions={({ route }) => ({
+        headerShown: false,
+        tabBarIcon: ({ color }) => {
+          let iconName: string = "admin-panel-settings";
+          if (route.name === "Quản lý") iconName = "admin-panel-settings";
+          else if (route.name === "Danh mục") iconName = "dashboard";
+          else if (route.name === "Thống kê") iconName = "bar-chart";
+          else if (route.name === "Cá nhân") iconName = "person";
+
+          return <MaterialIcons name={iconName as any} size={24} color={color} />;
+        },
+        tabBarActiveTintColor: "#3B82F6",
+        tabBarInactiveTintColor: theme.textSecondary,
+        tabBarStyle: {
+          height: 68 + insets.bottom,
+          paddingBottom: insets.bottom > 0 ? insets.bottom : 10,
+          paddingTop: 10,
+          backgroundColor: "#FFFFFF",
+          borderTopWidth: 1,
+          borderTopColor: "#E2E8F0",
+        },
+        tabBarLabelStyle: {
+          fontSize: 12,
+          fontWeight: "600",
+          marginTop: 2,
+        },
+      })}
+    >
+      <Tab.Screen name="Quản lý" component={UserManagementScreen} />
+      <Tab.Screen name="Danh mục" component={AdminCategoriesScreen} />
+      <Tab.Screen name="Thống kê" component={AdminStatisticScreen} />
+      <Tab.Screen name="Cá nhân" component={AdminSettingScreen} />
+    </Tab.Navigator>
+  );
+}
+
 function AppNavigator() {
   const { theme, isDarkMode } = useTheme();
 
@@ -107,6 +150,7 @@ function AppNavigator() {
         <Stack.Screen name="Register" component={Register} />
 
         <Stack.Screen name="App" component={MainTabs} />
+        <Stack.Screen name="AdminApp" component={AdminTabs} />
         <Stack.Screen name="AdminUserManagement" component={UserManagementScreen} />
         <Stack.Screen name="AdminCategories" component={AdminCategoriesScreen} />
         <Stack.Screen name="AdminStatistic" component={AdminStatisticScreen} />

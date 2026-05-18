@@ -1,9 +1,7 @@
-
 import React, { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
@@ -11,11 +9,10 @@ import {
   View,
   useWindowDimensions,
 } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { MaterialIcons } from "@expo/vector-icons";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "@services/firebase/firebaseConfig";
-import { useNavigation } from "@react-navigation/native";
 import { FONT_SIZE, RADIUS, SPACING } from "@/utils/responsive";
 
 interface PlatformStats {
@@ -30,14 +27,12 @@ interface PlatformStats {
 }
 
 export default function AdminStatisticScreen() {
-  const navigation = useNavigation<any>();
   const { width } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const [stats, setStats] = useState<PlatformStats | null>(null);
   const [loading, setLoading] = useState(true);
 
   const isSmall = width < 360;
-  const tabIconSize = isSmall ? 18 : 22;
   const statIconSize = isSmall ? 36 : 42;
   const avatarSize = isSmall ? 36 : 42;
 
@@ -132,10 +127,10 @@ export default function AdminStatisticScreen() {
   }
 
   const balance = stats.totalIncome - stats.totalExpense;
-  const bottomPad = insets.bottom + 60;
+  const bottomPad = insets.bottom + SPACING.xl;
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView edges={['top', 'left', 'right']} style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Thống kê hệ thống</Text>
@@ -328,37 +323,6 @@ export default function AdminStatisticScreen() {
         </View>
       </ScrollView>
 
-      {/* Bottom Navigation */}
-      <View style={[styles.footer, { paddingBottom: SPACING.sm }]}>
-        <TouchableOpacity
-          style={styles.footerTab}
-          onPress={() => navigation.navigate("AdminUserManagement")}
-        >
-          <MaterialIcons name="admin-panel-settings" size={tabIconSize} color="#94A3B8" />
-          <Text style={styles.footerText}>Quản lý</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.footerTab}
-          onPress={() => navigation.navigate("AdminCategories")}
-        >
-          <MaterialIcons name="dashboard" size={tabIconSize} color="#94A3B8" />
-          <Text style={styles.footerText}>Danh mục</Text>
-        </TouchableOpacity>
-
-        <View style={[styles.footerTab, styles.activeFooterTab]}>
-          <MaterialIcons name="bar-chart" size={tabIconSize} color="#3B82F6" />
-          <Text style={styles.activeFooterText}>Thống kê</Text>
-        </View>
-
-        <TouchableOpacity
-          style={styles.footerTab}
-          onPress={() => navigation.navigate("AdminSetting")}
-        >
-          <MaterialIcons name="person" size={tabIconSize} color="#94A3B8" />
-          <Text style={styles.footerText}>Cá nhân</Text>
-        </TouchableOpacity>
-      </View>
     </SafeAreaView>
   );
 }
@@ -591,36 +555,5 @@ const styles = StyleSheet.create({
   recentUserDivider: {
     height: 1,
     backgroundColor: "#F1F5F9",
-  },
-  footer: {
-    backgroundColor: "#FFFFFF",
-    borderTopWidth: 1,
-    borderTopColor: "#F1F5F9",
-    paddingTop: SPACING.sm,
-    paddingHorizontal: SPACING.sm,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  footerTab: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    gap: 3,
-    paddingVertical: SPACING.sm,
-    borderRadius: RADIUS.md,
-  },
-  activeFooterTab: {
-    backgroundColor: "#EFF6FF",
-  },
-  footerText: {
-    color: "#94A3B8",
-    fontSize: FONT_SIZE.caption,
-    fontWeight: "600",
-  },
-  activeFooterText: {
-    color: "#3B82F6",
-    fontSize: FONT_SIZE.caption,
-    fontWeight: "700",
   },
 });

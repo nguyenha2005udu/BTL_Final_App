@@ -12,11 +12,14 @@ import {
   View,
 } from 'react-native';
 import { loginWithGoogle } from '@services/auth.service';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '@services/firebase/firebaseConfig';
 
 type RootStackParamList = {
   Welcome: undefined;
   Login: undefined;
   App: undefined;
+  AdminApp: undefined;
 };
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>; 
@@ -29,8 +32,10 @@ const WelcomeScreen: React.FC = () => {
   };
 
   const handleLoginWithGoogle = async () => {
-    await loginWithGoogle();
-    navigation.replace('App');
+    const user = await loginWithGoogle();
+    const userDoc = await getDoc(doc(db, 'users', user.uid));
+    const role = userDoc.exists() ? userDoc.data()?.role : undefined;
+    navigation.replace(role === 'admin' ? 'AdminApp' : 'App');
   };
 
   const handleLoginWithFacebook = () => {

@@ -8,8 +8,8 @@ import {
   Text,
   TouchableOpacity,
   View,
-  SafeAreaView,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { ReportCategoryList } from '@components/report/ReportCategoryList';
 import { ReportCategoryPieCard } from '@components/report/ReportCategoryPieCard';
 import { ReportPeriodSelector } from '@components/report/ReportPeriodSelector';
@@ -71,6 +71,7 @@ const ReportScreen: React.FC = () => {
   if (loading || txLoading) {
     return (
       <SafeAreaView
+        edges={['top', 'left', 'right']}
         style={[
           styles.container,
           { 
@@ -92,7 +93,7 @@ const ReportScreen: React.FC = () => {
     .map(i => ({ id: i.id, name: i.name, value: i.value, color: i.color }));
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: isDarkMode ? theme.background : '#FFFFFF' }]}>
+    <SafeAreaView edges={['top', 'left', 'right']} style={[styles.container, { backgroundColor: isDarkMode ? theme.background : '#FFFFFF' }]}>
       <View
         style={[
           styles.header,

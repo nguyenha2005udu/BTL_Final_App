@@ -5,14 +5,13 @@ import {
   Alert,
   FlatList,
   RefreshControl,
-  SafeAreaView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
   useWindowDimensions,
 } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { MaterialIcons } from "@expo/vector-icons";
 import { getAuth } from "firebase/auth";
 import {
@@ -52,7 +51,6 @@ export default function UserManagementScreen() {
 
   const isSmall = width < 360;
   const avatarSize = isSmall ? 44 : 52;
-  const iconSize = isSmall ? 18 : 22;
 
   const checkAdminAndLoad = useCallback(async () => {
     try {
@@ -143,11 +141,11 @@ export default function UserManagementScreen() {
     navigation.reset({ index: 0, routes: [{ name: "Welcome" }] });
   };
 
-  const bottomPad = insets.bottom + 60;
+  const bottomPad = insets.bottom + SPACING.xl;
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.centerContainer}>
+      <SafeAreaView edges={['top', 'left', 'right']} style={styles.centerContainer}>
         <ActivityIndicator size="large" color="#3B82F6" />
         <Text style={styles.loadingText}>Đang tải dữ liệu...</Text>
       </SafeAreaView>
@@ -156,7 +154,7 @@ export default function UserManagementScreen() {
 
   if (accessDenied) {
     return (
-      <SafeAreaView style={styles.centerContainer}>
+      <SafeAreaView edges={['top', 'left', 'right']} style={styles.centerContainer}>
         <MaterialIcons name="lock" size={64} color="#EF4444" />
         <Text style={styles.deniedTitle}>Truy cập bị từ chối</Text>
         <Text style={styles.deniedSubtitle}>
@@ -170,7 +168,7 @@ export default function UserManagementScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView edges={['top', 'left', 'right']} style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
         <View style={{ flex: 1, marginRight: SPACING.md }}>
@@ -292,38 +290,6 @@ export default function UserManagementScreen() {
           );
         }}
       />
-
-      {/* Bottom Navigation */}
-      <View style={[styles.footer, { paddingBottom: SPACING.sm }]}>
-        <View style={[styles.footerTab, styles.activeFooterTab]}>
-          <MaterialIcons name="admin-panel-settings" size={iconSize} color="#3B82F6" />
-          <Text style={styles.activeFooterText}>Quản lý</Text>
-        </View>
-
-        <TouchableOpacity
-          style={styles.footerTab}
-          onPress={() => navigation.navigate("AdminCategories")}
-        >
-          <MaterialIcons name="dashboard" size={iconSize} color="#94A3B8" />
-          <Text style={styles.footerText}>Danh mục</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.footerTab}
-          onPress={() => navigation.navigate("AdminStatistic")}
-        >
-          <MaterialIcons name="bar-chart" size={iconSize} color="#94A3B8" />
-          <Text style={styles.footerText}>Thống kê</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.footerTab}
-          onPress={() => navigation.navigate("AdminSetting")}
-        >
-          <MaterialIcons name="person" size={iconSize} color="#94A3B8" />
-          <Text style={styles.footerText}>Cá nhân</Text>
-        </TouchableOpacity>
-      </View>
     </SafeAreaView>
   );
 }
@@ -528,36 +494,5 @@ const styles = StyleSheet.create({
     color: "#3B82F6",
     fontWeight: "700",
     fontSize: FONT_SIZE.small,
-  },
-  footer: {
-    backgroundColor: "#FFFFFF",
-    borderTopWidth: 1,
-    borderTopColor: "#F1F5F9",
-    paddingTop: SPACING.sm,
-    paddingHorizontal: SPACING.sm,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  footerTab: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    gap: 3,
-    paddingVertical: SPACING.sm,
-    borderRadius: RADIUS.md,
-  },
-  activeFooterTab: {
-    backgroundColor: "#EFF6FF",
-  },
-  footerText: {
-    color: "#94A3B8",
-    fontSize: FONT_SIZE.caption,
-    fontWeight: "600",
-  },
-  activeFooterText: {
-    color: "#3B82F6",
-    fontSize: FONT_SIZE.caption,
-    fontWeight: "700",
   },
 });

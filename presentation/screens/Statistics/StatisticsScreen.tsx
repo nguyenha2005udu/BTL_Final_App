@@ -6,8 +6,8 @@ import {
   TouchableOpacity,
   ScrollView,
   StyleSheet,
-  SafeAreaView,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useTheme } from "@context/ThemeContext";
 import {
@@ -135,7 +135,7 @@ const StatisticsScreen: React.FC = () => {
   /* ================= UI ================= */
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: isDarkMode ? theme.background : '#FFFFFF' }]}>
+    <SafeAreaView edges={['top', 'left', 'right']} style={[styles.container, { backgroundColor: isDarkMode ? theme.background : '#FFFFFF' }]}>
       {/* HEADER */}
       <View style={[styles.header, { backgroundColor: isDarkMode ? theme.headerBackground : '#FFFFFF' }]}>
         <Text style={[styles.headerTitle, { color: theme.textPrimary }]}>

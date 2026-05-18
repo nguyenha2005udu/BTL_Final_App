@@ -9,8 +9,8 @@ import {
   Text,
   TouchableOpacity,
   View,
-  SafeAreaView,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useTheme } from "@context/ThemeContext";
 import { getCurrentUserProfile } from "@services/auth.service";
@@ -209,7 +209,7 @@ setRecentTransactions(mapped);
   }, [transactions, categories]);
 
   return (
-<SafeAreaView style={[styles.container, { backgroundColor: isDarkMode ? theme.background : '#FFFFFF' }]}>
+<SafeAreaView edges={['top', 'left', 'right']} style={[styles.container, { backgroundColor: isDarkMode ? theme.background : '#FFFFFF' }]}>
       <ScrollView 
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}

@@ -3,7 +3,6 @@ import React, { useEffect, useState } from "react";
 import {
   Alert,
   Image,
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
@@ -11,7 +10,7 @@ import {
   View,
   useWindowDimensions,
 } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { getCurrentUserProfile, logoutUser } from "@services/auth.service";
@@ -32,7 +31,6 @@ export default function AdminSettingScreen() {
 
   const isSmall = width < 360;
   const avatarSize = isSmall ? 64 : 72;
-  const tabIconSize = isSmall ? 18 : 22;
   const menuIconSize = isSmall ? 20 : 22;
   const menuBoxSize = isSmall ? 40 : 44;
 
@@ -146,30 +144,30 @@ export default function AdminSettingScreen() {
           iconColor: "#8B5CF6",
           iconBg: "#F5F3FF",
           label: "Quản lý người dùng",
-          onPress: () => navigation.navigate("AdminUserManagement"),
+          onPress: () => navigation.navigate("Quản lý"),
         },
         {
           icon: "dashboard" as const,
           iconColor: "#EC4899",
           iconBg: "#FDF2F8",
           label: "Quản lý danh mục",
-          onPress: () => navigation.navigate("AdminCategories"),
+          onPress: () => navigation.navigate("Danh mục"),
         },
         {
           icon: "bar-chart" as const,
           iconColor: "#14B8A6",
           iconBg: "#F0FDFA",
           label: "Thống kê hệ thống",
-          onPress: () => navigation.navigate("AdminStatistic"),
+          onPress: () => navigation.navigate("Thống kê"),
         },
       ],
     },
   ];
 
-  const bottomPad = insets.bottom + 60;
+  const bottomPad = insets.bottom + SPACING.xl;
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView edges={['top', 'left', 'right']} style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Cá nhân</Text>
@@ -253,38 +251,6 @@ export default function AdminSettingScreen() {
           <Text style={styles.logoutText}>Đăng xuất</Text>
         </TouchableOpacity>
       </ScrollView>
-
-      {/* Bottom Navigation */}
-      <View style={[styles.footer, { paddingBottom: SPACING.sm }]}>
-        <TouchableOpacity
-          style={styles.footerTab}
-          onPress={() => navigation.navigate("AdminUserManagement")}
-        >
-          <MaterialIcons name="admin-panel-settings" size={tabIconSize} color="#94A3B8" />
-          <Text style={styles.footerText}>Quản lý</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.footerTab}
-          onPress={() => navigation.navigate("AdminCategories")}
-        >
-          <MaterialIcons name="dashboard" size={tabIconSize} color="#94A3B8" />
-          <Text style={styles.footerText}>Danh mục</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.footerTab}
-          onPress={() => navigation.navigate("AdminStatistic")}
-        >
-          <MaterialIcons name="bar-chart" size={tabIconSize} color="#94A3B8" />
-          <Text style={styles.footerText}>Thống kê</Text>
-        </TouchableOpacity>
-
-        <View style={[styles.footerTab, styles.activeFooterTab]}>
-          <MaterialIcons name="person" size={tabIconSize} color="#3B82F6" />
-          <Text style={styles.activeFooterText}>Cá nhân</Text>
-        </View>
-      </View>
     </SafeAreaView>
   );
 }
@@ -443,36 +409,5 @@ const styles = StyleSheet.create({
     fontSize: FONT_SIZE.subtitle,
     fontWeight: "700",
     color: "#EF4444",
-  },
-  footer: {
-    backgroundColor: "#FFFFFF",
-    borderTopWidth: 1,
-    borderTopColor: "#F1F5F9",
-    paddingTop: SPACING.sm,
-    paddingHorizontal: SPACING.sm,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  footerTab: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    gap: 3,
-    paddingVertical: SPACING.sm,
-    borderRadius: RADIUS.md,
-  },
-  activeFooterTab: {
-    backgroundColor: "#EFF6FF",
-  },
-  footerText: {
-    color: "#94A3B8",
-    fontSize: FONT_SIZE.caption,
-    fontWeight: "600",
-  },
-  activeFooterText: {
-    color: "#3B82F6",
-    fontSize: FONT_SIZE.caption,
-    fontWeight: "700",
   },
 });
